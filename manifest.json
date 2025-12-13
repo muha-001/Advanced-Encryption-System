@@ -1,0 +1,22 @@
+{
+  "name": "مشفِّر النصوص الآمن",
+  "short_name": "مشفِّر",
+  "description": "تطبيق آمن لتشفير وفك تشفير النصوص باستخدام كلمة مرور سرية — يعمل محليًا دون إنترنت.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f0f4f8",
+  "theme_color": "#3182ce",
+  "icons": [
+    {
+      "src": "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjNDI5OWUxIiBkPSJNMTIgMkExMCAxMCAwIDAgMSAyMiAxMkExMCAxMCAwIDAgMSAxMiAyMkExMCAxMCAwIDAgMSAyIDEyQTEwIDEwIDAgMCAxIDEyIDJ6bTAgMmE4IDggMCAxIDAgOCA4YTggOCAwIDAgMC04LTh6bTQgMTNsLTRtLTQgM3YtNWg4bTAgMHoiLz48L3N2Zz4=",
+      "sizes": "48x48",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IiM0Mjk5ZTEiIGQ9Ik0xMiAyQTEwIDEwIDAgMCAxIDIyIDEyQTEwIDEwIDAgMCAxIDEyIDIyQTEwIDEwIDAgMCAxIDIgMTJBMTAgMTAgMCAwIDEgMTIgMnptMCAyYTggOCAwIDEgMCA4IDhhOCA4IDAgMCAwIDAtMTZBIDggOCAwIDEgMCAxMiA0em00IDE0bC00LTNsLTQgM3YtNWg4bTAgMHoiLz48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ],
+  "lang": "ar"
+}
