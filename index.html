@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔐 مشفِّر النصوص الآمن</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IiM0Mjk5ZTEiIGQ9Ik0xMiAyQTEwIDEwIDAgMCAxIDIyIDEyQTEwIDEwIDAgMCAxIDEyIDIyQTEwIDEwIDAgMCAxIDIgMTJBMTAgMTAgMCAwIDEgMTIgMnptMCAyYTggOCAwIDEgMCA4IDhhOCA4IDAgMCAwIDAtMTZBIDggOCAwIDEgMCAxMiA0em00IDE0bC00LTNsLTQgM3YtNWg4bTAgMHoiLz48L3N2Zz4=" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Noto Sans Arabic', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e6eef5 100%);
+      color: #2d3748;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px 0;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a365d;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #4a5568;
+      font-size: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      padding: 28px;
+      margin-bottom: 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #2b6cb0;
+    }
+    .card-title::before {
+      content: "🔑";
+      font-size: 22px;
+    }
+    #unlockSection .card-title::before {
+      content: "🔓";
+    }
+    label {
+      display: block;
+      margin: 16px 0 6px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e0;
+      border-radius: 10px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    input[type="password"] {
+      direction: ltr;
+      text-align: left;
+    }
+    .btn {
+      background: #3182ce;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.25s;
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      background: #2c5282;
+    }
+    #unlockBtn {
+      background: #38a169;
+    }
+    #unlockBtn:hover {
+      background: #2f855a;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border-right: 4px solid #4299e1;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      display: none;
+    }
+    .result.error {
+      border-right-color: #e53e3e;
+      background: #fef2f2;
+      color: #c53030;
+    }
+    .info-note {
+      background: #ebf8ff;
+      border-right: 4px solid #4299e1;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 14px;
+      color: #2c5282;
+    }
+    @media (max-width: 600px) {
+      .card {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔐 مشفِّر النصوص الآمن</h1>
+      <p class="subtitle">كل شيء يتم في جهازك — لا تُرسَل بياناتك إلى أي مكان</p>
+    </header>
+
+    <div class="card">
+      <div class="card-title">تشفير نص جديد</div>
+      
+      <label for="password">الرمز السري (سيُستخدم لتشفير النص):</label>
+      <input type="password" id="password" placeholder="اكتب رمزًا سريًا قويًا" autocomplete="off" />
+
+      <label for="plaintext">النص الذي تريد تشفيره:</label>
+      <textarea id="plaintext" placeholder="مثل: معلومات سرية، كلمات مرور، ملاحظات خاصة..."></textarea>
+
+      <button class="btn" onclick="encryptText()">
+        🔒 تشفير النص
+      </button>
+
+      <div id="encryptedResult" class="result"></div>
+      <div class="info-note">
+        💡 بعد التشفير، انسخ الكود المشفر واحفظه في مكان آمن. ستحتاجه + الرمز السري لاسترجاع النص لاحقًا.
+      </div>
+    </div>
+
+    <div class="card" id="unlockSection">
+      <div class="card-title">فك الحذاء</div>
+      
+      <label for="unlockPassword">أعد إدخال الرمز السري:</label>
+      <input type="password" id="unlockPassword" placeholder="الرمز الذي استخدمته عند التشفير" autocomplete="off" />
+
+      <label for="unlockCiphertext">الصق الكود المشفر هنا:</label>
+      <textarea id="unlockCiphertext" placeholder="مثل: aGVsbG8gd29ybGQh..."></textarea>
+
+      <button id="unlockBtn" class="btn" onclick="unlockText()">
+        🔓 فك الحذاء
+      </button>
+
+      <div id="unlockedResult" class="result"></div>
+      <div class="info-note">
+        ⚠️ لا يمكن فك التشفير بدون الرمز السري الصحيح. لا يتم تخزينه في الموقع أبدًا.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('تم تسجيل Service Worker'))
+          .catch(err => console.log('فشل تسجيل Service Worker:', err));
+      });
+    }
+
+    function encodeUtf8(str) {
+      return new TextEncoder().encode(str);
+    }
+
+    function decodeUtf8(buffer) {
+      return new TextDecoder().decode(buffer);
+    }
+
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    function base64ToArrayBuffer(base64) {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+
+    async function deriveKey(password, salt) {
+      const enc = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        "raw",
+        enc.encode(password),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+      );
+      return await window.crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: salt,
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    async function encryptText() {
+      const password = document.getElementById("password").value;
+      const plaintext = document.getElementById("plaintext").value.trim();
+      const resultBox = document.getElementById("encryptedResult");
+
+      if (!password || !plaintext) {
+        showResult(resultBox, "⚠️ الرجاء إدخال الرمز السري والنص المراد تشفيره.", true);
+        return;
+      }
+
+      try {
+        const salt = window.crypto.getRandomValues(new Uint8Array(16));
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveKey(password, salt);
+        const encoded = encodeUtf8(plaintext);
+        const ciphertext = await window.crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          encoded
+        );
+
+        const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+        combined.set(salt, 0);
+        combined.set(iv, salt.length);
+        combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
+
+        const encryptedB64 = arrayBufferToBase64(combined.buffer);
+        showResult(resultBox, encryptedB64, false);
+        document.getElementById("password").value = "";
+
+      } catch (e) {
+        showResult(resultBox, "❌ فشل التشفير: " + (e.message || "خطأ غير معروف"), true);
+      }
+    }
+
+    async function unlockText() {
+      const password = document.getElementById("unlockPassword").value;
+      const ciphertextB64 = document.getElementById("unlockCiphertext").value.trim();
+      const resultBox = document.getElementById("unlockedResult");
+
+      if (!password || !ciphertextB64) {
+        showResult(resultBox, "⚠️ يجب إدخال الرمز السري والكود المشفر لفك الحذاء.", true);
+        return;
+      }
+
+      try {
+        const combined = base64ToArrayBuffer(ciphertextB64);
+        const combinedUint8 = new Uint8Array(combined);
+        if (combinedUint8.length < 29) throw new Error("كود مشفر غير صالح");
+
+        const salt = combinedUint8.slice(0, 16);
+        const iv = combinedUint8.slice(16, 28);
+        const ciphertext = combinedUint8.slice(28).buffer;
+
+        const key = await deriveKey(password, salt);
+        const decrypted = await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          ciphertext
+        );
+
+        const originalText = decodeUtf8(decrypted);
+        showResult(resultBox, originalText, false);
+
+      } catch (e) {
+        showResult(resultBox, "❌ فك الحذاء فشل! تأكد من:\n• صحة الرمز السري\n• صحة الكود المشفر", true);
+      }
+    }
+
+    function showResult(box, text, isError) {
+      box.textContent = text;
+      box.style.display = "block";
+      box.className = "result" + (isError ? " error" : "");
+    }
+  </script>
+</body>
+</html>
