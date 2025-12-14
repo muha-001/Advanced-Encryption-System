@@ -182,7 +182,7 @@
     </div>
 
     <div class="card" id="unlockSection">
-      <div class="card-title">فك الحذاء</div>
+      <div class="card-title">فك التشفير</div>
       
       <label for="unlockPassword">أعد إدخال الرمز السري:</label>
       <input type="password" id="unlockPassword" placeholder="الرمز الذي استخدمته عند التشفير" autocomplete="off" />
@@ -191,7 +191,7 @@
       <textarea id="unlockCiphertext" placeholder="مثل: aGVsbG8gd29ybGQh..."></textarea>
 
       <button id="unlockBtn" class="btn" onclick="unlockText()">
-        🔓 فك الحذاء
+        🔓 فك التشفير
       </button>
 
       <div id="unlockedResult" class="result"></div>
@@ -300,7 +300,7 @@
       const resultBox = document.getElementById("unlockedResult");
 
       if (!password || !ciphertextB64) {
-        showResult(resultBox, "⚠️ يجب إدخال الرمز السري والكود المشفر لفك الحذاء.", true);
+        showResult(resultBox, "⚠️ يجب إدخال الرمز السري والكود المشفر لفك التشفير.", true);
         return;
       }
 
@@ -324,7 +324,7 @@
         showResult(resultBox, originalText, false);
 
       } catch (e) {
-        showResult(resultBox, "❌ فك الحذاء فشل! تأكد من:\n• صحة الرمز السري\n• صحة الكود المشفر", true);
+        showResult(resultBox, "❌ فك التشفير فشل! تأكد من:\n• صحة الرمز السري\n• صحة الكود المشفر", true);
       }
     }
 
