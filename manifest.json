@@ -1,22 +1,55 @@
 {
-  "name": "مشفِّر النصوص الآمن",
-  "short_name": "مشفِّر",
-  "description": "تطبيق آمن لتشفير وفك تشفير النصوص باستخدام كلمة مرور سرية — يعمل محليًا دون إنترنت.",
-  "start_url": "/index.html",
+  "name": "نظام التشفير المتقدم",
+  "short_name": "التشفير المتقدم",
+  "description": "نظام تشفير من المستوى العسكري باستخدام خوارزميات متقدمة غير قابلة للكسر",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f0f4f8",
-  "theme_color": "#3182ce",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjNDI5OWUxIiBkPSJNMTIgMkExMCAxMCAwIDAgMSAyMiAxMkExMCAxMCAwIDAgMSAxMiAyMkExMCAxMCAwIDAgMSAyIDEyQTEwIDEwIDAgMCAxIDEyIDJ6bTAgMmE4IDggMCAxIDAgOCA4YTggOCAwIDAgMC04LTh6bTQgMTNsLTRtLTQgM3YtNWg4bTAgMHoiLz48L3N2Zz4=",
-      "sizes": "48x48",
-      "type": "image/svg+xml"
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
     },
     {
-      "src": "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IiM0Mjk5ZTEiIGQ9Ik0xMiAyQTEwIDEwIDAgMCAxIDIyIDEyQTEwIDEwIDAgMCAxIDEyIDIyQTEwIDEwIDAgMCAxIDIgMTJBMTAgMTAgMCAwIDEgMTIgMnptMCAyYTggOCAwIDEgMCA4IDhhOCA4IDAgMCAwIDAtMTZBIDggOCAwIDEgMCAxMiA0em00IDE0bC00LTNsLTQgM3YtNWg4bTAgMHoiLz48L3N2Zz4=",
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
-  "lang": "ar"
+  "categories": ["security", "productivity", "utilities"]
 }
