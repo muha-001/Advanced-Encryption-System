@@ -1,338 +1,166 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🔐 مشفِّر النصوص الآمن</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoIGZpbGw9IiM0Mjk5ZTEiIGQ9Ik0xMiAyQTEwIDEwIDAgMCAxIDIyIDEyQTEwIDEwIDAgMCAxIDEyIDIyQTEwIDEwIDAgMCAxIDIgMTJBMTAgMTAgMCAwIDEgMTIgMnptMCAyYTggOCAwIDEgMCA4IDhhOCA4IDAgMCAwIDAtMTZBIDggOCAwIDEgMCAxMiA0em00IDE0bC00LTNsLTQgM3YtNWg4bTAgMHoiLz48L3N2Zz4=" />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Noto Sans Arabic', Tahoma, sans-serif;
-      background: linear-gradient(135deg, #f0f4f8 0%, #e6eef5 100%);
-      color: #2d3748;
-      line-height: 1.6;
-      padding: 20px;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 850px;
-      margin: 0 auto;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding: 20px 0;
-    }
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a365d;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      color: #4a5568;
-      font-size: 16px;
-    }
-    .card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      padding: 28px;
-      margin-bottom: 28px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    }
-    .card-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: #2b6cb0;
-    }
-    .card-title::before {
-      content: "🔑";
-      font-size: 22px;
-    }
-    #unlockSection .card-title::before {
-      content: "🔓";
-    }
-    label {
-      display: block;
-      margin: 16px 0 6px;
-      font-weight: 600;
-      color: #2d3748;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #cbd5e0;
-      border-radius: 10px;
-      font-size: 16px;
-      font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: #4299e1;
-      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
-    }
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    input[type="password"] {
-      direction: ltr;
-      text-align: left;
-    }
-    .btn {
-      background: #3182ce;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 24px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.25s;
-      margin-top: 16px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn:hover {
-      background: #2c5282;
-    }
-    #unlockBtn {
-      background: #38a169;
-    }
-    #unlockBtn:hover {
-      background: #2f855a;
-    }
-    .result {
-      margin-top: 20px;
-      padding: 16px;
-      background: #f8fafc;
-      border-radius: 10px;
-      border-right: 4px solid #4299e1;
-      font-family: monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
-      display: none;
-    }
-    .result.error {
-      border-right-color: #e53e3e;
-      background: #fef2f2;
-      color: #c53030;
-    }
-    .info-note {
-      background: #ebf8ff;
-      border-right: 4px solid #4299e1;
-      padding: 14px;
-      border-radius: 10px;
-      margin-top: 12px;
-      font-size: 14px;
-      color: #2c5282;
-    }
-    @media (max-width: 600px) {
-      .card {
-        padding: 20px;
-      }
-      h1 {
-        font-size: 24px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التشفير المتقدم - Advanced Encryption System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🔐 مشفِّر النصوص الآمن</h1>
-      <p class="subtitle">كل شيء يتم في جهازك — لا تُرسَل بياناتك إلى أي مكان</p>
-    </header>
-
-    <div class="card">
-      <div class="card-title">تشفير نص جديد</div>
-      
-      <label for="password">الرمز السري (سيُستخدم لتشفير النص):</label>
-      <input type="password" id="password" placeholder="اكتب رمزًا سريًا قويًا" autocomplete="off" />
-
-      <label for="plaintext">النص الذي تريد تشفيره:</label>
-      <textarea id="plaintext" placeholder="مثل: معلومات سرية، كلمات مرور، ملاحظات خاصة..."></textarea>
-
-      <button class="btn" onclick="encryptText()">
-        🔒 تشفير النص
-      </button>
-
-      <div id="encryptedResult" class="result"></div>
-      <div class="info-note">
-        💡 بعد التشفير، انسخ الكود المشفر واحفظه في مكان آمن. ستحتاجه + الرمز السري لاسترجاع النص لاحقًا.
-      </div>
+    <div class="container">
+        <div class="language-toggle">
+            <button class="lang-btn" id="langToggle">
+                <i class="fas fa-language"></i>
+                <span id="langText">English</span>
+            </button>
+        </div>
+        
+        <header>
+            <div class="logo">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h1 id="title">نظام التشفير المتقدم</h1>
+            <p class="subtitle" id="subtitle">
+                نظام تشفير من المستوى العسكري باستخدام خوارزميات متقدمة غير قابلة للكسر. أدخل النص، اختر كلمة مرور قوية، وقم بتشفير بياناتك بأمان كامل.
+            </p>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-key"></i>
+                    <div class="card-title" id="encryptTitle">تشفير النص</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="plainText" id="plainTextLabel">النص المراد تشفيره:</label>
+                    <textarea id="plainText" rows="6" placeholder="أدخل النص الذي تريد تشفيره هنا..."></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password" id="passwordLabel">كلمة المرور للتشفير:</label>
+                    <input type="password" id="password" placeholder="أدخل كلمة مرور قوية جدًا...">
+                    <div class="password-strength">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    <div class="strength-text">
+                        <span id="strengthLabel">قوة كلمة المرور:</span>
+                        <span id="strengthValue" class="strength-weak">ضعيفة</span>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="encryptBtn">
+                        <i class="fas fa-lock"></i>
+                        <span id="encryptBtnText">تشفير النص</span>
+                    </button>
+                    <button class="btn btn-secondary" id="clearEncryptBtn">
+                        <i class="fas fa-eraser"></i>
+                        <span id="clearEncryptBtnText">مسح الحقول</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-unlock"></i>
+                    <div class="card-title" id="decryptTitle">فك تشفير النص</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="encryptedText" id="encryptedTextLabel">النص المشفر:</label>
+                    <div class="result-container">
+                        <textarea id="encryptedText" rows="6" placeholder="النص المشفر سيظهر هنا..."></textarea>
+                        <button class="copy-btn" id="copyEncryptedBtn" title="نسخ النص المشفر">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="decryptPassword" id="decryptPasswordLabel">كلمة المرور لفك التشفير:</label>
+                    <input type="password" id="decryptPassword" placeholder="أدخل كلمة المرور نفسها...">
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="decryptBtn">
+                        <i class="fas fa-unlock"></i>
+                        <span id="decryptBtnText">فك تشفير النص</span>
+                    </button>
+                    <button class="btn btn-secondary" id="clearDecryptBtn">
+                        <i class="fas fa-eraser"></i>
+                        <span id="clearDecryptBtnText">مسح الحقول</span>
+                    </button>
+                </div>
+                
+                <div class="input-group" style="margin-top: 25px;">
+                    <label for="decryptedText" id="decryptedTextLabel">النص بعد فك التشفير:</label>
+                    <div class="result-container">
+                        <textarea id="decryptedText" rows="4" placeholder="النص المفكوك سيظهر هنا..." readonly></textarea>
+                        <button class="copy-btn" id="copyDecryptedBtn" title="نسخ النص المفكوك">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="security-info">
+            <i class="fas fa-shield-alt"></i>
+            <h2 class="security-title" id="securityTitle">مستوى أمني لا يمكن اختراقه</h2>
+            <p id="securityDescription">
+                يستخدم نظامنا خوارزميات تشفير من المستوى العسكري تضمن حماية بياناتك بشكل كامل. حتى فرق الأمن السيبراني المتقدمة لا يمكنها فك هذا التشفير دون كلمة المرور الصحيحة.
+            </p>
+            
+            <div class="security-features">
+                <div class="feature">
+                    <i class="fas fa-user-secret"></i>
+                    <div class="feature-title" id="feature1Title">تشفير من الطراز العسكري</div>
+                    <p id="feature1Desc">مزيج من AES-256 و RSA-4096 و SHA-512</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-fingerprint"></i>
+                    <div class="feature-title" id="feature2Title">مفتاح تشفير فريد</div>
+                    <p id="feature2Desc">مفتاح تشفير مشتق من كلمة المرور مع Salt عشوائي</p>
+                </div>
+                
+                <div class="feature">
+                    <i class="fas fa-bolt"></i>
+                    <div class="feature-title" id="feature3Title">سرعة وأداء عالي</div>
+                    <p id="feature3Desc">تشفير وفك تشفير سريع مع الحفاظ على الأمان القصوى</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p id="footerText">نظام التشفير المتقدم © 2023 - مصمم لتوفير أقصى درجات الأمان لحماية بياناتك</p>
+            <p>⚠️ <strong id="warningText">تحذير:</strong> <span id="warningMessage">لا تفقد كلمة المرور الخاصة بك! بدونها، لا يمكن استعادة البيانات المشفرة حتى من قبل مطور النظام.</span></p>
+        </footer>
+        
+        <div class="notification" id="notification">
+            <i class="fas fa-check-circle"></i>
+            <span id="notificationMessage">تم نسخ النص إلى الحافظة بنجاح!</span>
+        </div>
     </div>
 
-    <div class="card" id="unlockSection">
-      <div class="card-title">فك التشفير</div>
-      
-      <label for="unlockPassword">أعد إدخال الرمز السري:</label>
-      <input type="password" id="unlockPassword" placeholder="الرمز الذي استخدمته عند التشفير" autocomplete="off" />
-
-      <label for="unlockCiphertext">الصق الكود المشفر هنا:</label>
-      <textarea id="unlockCiphertext" placeholder="مثل: aGVsbG8gd29ybGQh..."></textarea>
-
-      <button id="unlockBtn" class="btn" onclick="unlockText()">
-        🔓 فك التشفير
-      </button>
-
-      <div id="unlockedResult" class="result"></div>
-      <div class="info-note">
-        ⚠️ لا يمكن فك التشفير بدون الرمز السري الصحيح. لا يتم تخزينه في الموقع أبدًا.
-      </div>
-    </div>
-  </div>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('تم تسجيل Service Worker'))
-          .catch(err => console.log('فشل تسجيل Service Worker:', err));
-      });
-    }
-
-    function encodeUtf8(str) {
-      return new TextEncoder().encode(str);
-    }
-
-    function decodeUtf8(buffer) {
-      return new TextDecoder().decode(buffer);
-    }
-
-    function arrayBufferToBase64(buffer) {
-      let binary = '';
-      const bytes = new Uint8Array(buffer);
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return btoa(binary);
-    }
-
-    function base64ToArrayBuffer(base64) {
-      const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      return bytes.buffer;
-    }
-
-    async function deriveKey(password, salt) {
-      const enc = new TextEncoder();
-      const keyMaterial = await window.crypto.subtle.importKey(
-        "raw",
-        enc.encode(password),
-        "PBKDF2",
-        false,
-        ["deriveKey"]
-      );
-      return await window.crypto.subtle.deriveKey(
-        {
-          name: "PBKDF2",
-          salt: salt,
-          iterations: 100000,
-          hash: "SHA-256"
-        },
-        keyMaterial,
-        { name: "AES-GCM", length: 256 },
-        false,
-        ["encrypt", "decrypt"]
-      );
-    }
-
-    async function encryptText() {
-      const password = document.getElementById("password").value;
-      const plaintext = document.getElementById("plaintext").value.trim();
-      const resultBox = document.getElementById("encryptedResult");
-
-      if (!password || !plaintext) {
-        showResult(resultBox, "⚠️ الرجاء إدخال الرمز السري والنص المراد تشفيره.", true);
-        return;
-      }
-
-      try {
-        const salt = window.crypto.getRandomValues(new Uint8Array(16));
-        const iv = window.crypto.getRandomValues(new Uint8Array(12));
-        const key = await deriveKey(password, salt);
-        const encoded = encodeUtf8(plaintext);
-        const ciphertext = await window.crypto.subtle.encrypt(
-          { name: "AES-GCM", iv: iv },
-          key,
-          encoded
-        );
-
-        const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
-        combined.set(salt, 0);
-        combined.set(iv, salt.length);
-        combined.set(new Uint8Array(ciphertext), salt.length + iv.length);
-
-        const encryptedB64 = arrayBufferToBase64(combined.buffer);
-        showResult(resultBox, encryptedB64, false);
-        document.getElementById("password").value = "";
-
-      } catch (e) {
-        showResult(resultBox, "❌ فشل التشفير: " + (e.message || "خطأ غير معروف"), true);
-      }
-    }
-
-    async function unlockText() {
-      const password = document.getElementById("unlockPassword").value;
-      const ciphertextB64 = document.getElementById("unlockCiphertext").value.trim();
-      const resultBox = document.getElementById("unlockedResult");
-
-      if (!password || !ciphertextB64) {
-        showResult(resultBox, "⚠️ يجب إدخال الرمز السري والكود المشفر لفك التشفير.", true);
-        return;
-      }
-
-      try {
-        const combined = base64ToArrayBuffer(ciphertextB64);
-        const combinedUint8 = new Uint8Array(combined);
-        if (combinedUint8.length < 29) throw new Error("كود مشفر غير صالح");
-
-        const salt = combinedUint8.slice(0, 16);
-        const iv = combinedUint8.slice(16, 28);
-        const ciphertext = combinedUint8.slice(28).buffer;
-
-        const key = await deriveKey(password, salt);
-        const decrypted = await window.crypto.subtle.decrypt(
-          { name: "AES-GCM", iv: iv },
-          key,
-          ciphertext
-        );
-
-        const originalText = decodeUtf8(decrypted);
-        showResult(resultBox, originalText, false);
-
-      } catch (e) {
-        showResult(resultBox, "❌ فك التشفير فشل! تأكد من:\n• صحة الرمز السري\n• صحة الكود المشفر", true);
-      }
-    }
-
-    function showResult(box, text, isError) {
-      box.textContent = text;
-      box.style.display = "block";
-      box.className = "result" + (isError ? " error" : "");
-    }
-  </script>
+    <script src="script.js"></script>
+    <script>
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
