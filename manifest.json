@@ -1,7 +1,7 @@
 {
   "name": "نظام التشفير المتقدم",
   "short_name": "التشفير المتقدم",
-  "description": "نظام تشفير من المستوى العسكري باستخدام خوارزميات متقدمة غير قابلة للكسر",
+  "description": "نظام تشفير عسكري باستخدام AES-256-GCM وPBKDF2 مع 310,000 تكرار. تشفير محلي 100%.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -11,45 +11,96 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icons/icon-72x72.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-96x96.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-128x128.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-144x144.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "144x144",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-152x152.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "152x152",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-192x192.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-384x384.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "384x384",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512x512.png",
+      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["security", "productivity", "utilities"]
+  "categories": ["security", "productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "https://via.placeholder.com/1280x720/0f172a/2563eb?text=Advanced+Encryption+System",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "https://via.placeholder.com/750x1334/0f172a/2563eb?text=Advanced+Encryption+System",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "تشفير نص جديد",
+      "short_name": "تشفير",
+      "description": "تشفير نص باستخدام كلمة مرور قوية",
+      "url": "./index.html?action=encrypt",
+      "icons": [
+        {
+          "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock-plus.svg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "فك تشفير نص",
+      "short_name": "فك",
+      "description": "فك تشفير نص مشفر",
+      "url": "./index.html?action=decrypt",
+      "icons": [
+        {
+          "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock-open.svg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "permissions": ["clipboard-write", "clipboard-read"],
+  "prefer_related_applications": false,
+  "related_applications": []
 }
