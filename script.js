@@ -1,425 +1,265 @@
 // ============================================
-// نظام التشفير المتقدم - GitHub Pages Edition
+// نظام التشفير - التكامل مع الواجهة الجديدة
 // ============================================
 
-// تعريف الثوابت الأمنية
-const SECURITY_CONFIG = {
-    PBKDF2_ITERATIONS: 310000, // معيار OWASP 2023
-    SALT_LENGTH: 16, // 128-bit salt
-    IV_LENGTH: 12, // 96-bit IV for AES-GCM
-    KEY_LENGTH: 256, // AES-256
-    ALGORITHM: 'AES-GCM',
-    HASH: 'SHA-256',
-    IS_GITHUB_PAGES: window.location.hostname.includes('github.io')
-};
-
-// إدارة حالة التطبيق
-const AppState = {
-    language: 'ar',
-    totalEncryptions: 0,
-    failedAttempts: 0,
-    decryptAttempts: 0,
-    sessionStart: null,
-    securityChecks: {
-        https: false,
-        crypto: false,
-        storage: false,
-        browser: false,
-        githubPages: false
-    },
-    passwordAttempts: new Map(),
-    maxAttempts: 10,
-    lockoutTime: 15 * 60 * 1000 // 15 دقيقة
-};
-
-// ترجمة النصوص
-const translations = {
-    ar: {
-        title: "نظام التشفير المتقدم",
-        subtitle: "نظام تشفير من المستوى العسكري على GitHub Pages. يستخدم Web Crypto API مع AES-256-GCM وPBKDF2 مع 310,000 تكرار. تشفير محلي 100% - لا توجد بيانات ترسل إلى أي خادم.",
-        encryptTitle: "تشفير النص الآمن",
-        plainTextLabel: "النص المراد تشفيره:",
-        passwordLabel: "كلمة المرور للتشفير:",
-        strengthLabel: "قوة كلمة المرور:",
-        encryptBtnText: "تشفير النص",
-        clearEncryptBtnText: "مسح الحقول",
-        decryptTitle: "فك تشفير النص",
-        encryptedTextLabel: "النص المشفر:",
-        decryptPasswordLabel: "كلمة المرور لفك التشفير:",
-        decryptBtnText: "فك تشفير النص",
-        clearDecryptBtnText: "مسح الحقول",
-        decryptedTextLabel: "النص بعد فك التشفير:",
-        weakPassword: "ضعيفة",
-        mediumPassword: "متوسطة",
-        strongPassword: "قوية",
-        veryStrongPassword: "قوية جداً",
-        encryptSuccess: "✅ تم تشفير النص بنجاح!",
-        encryptError: "❌ يرجى إدخال نص وكلمة مرور للتشفير",
-        decryptSuccess: "✅ تم فك تشفير النص بنجاح!",
-        decryptError: "❌ فشل فك التشفير. تأكد من صحة النص المشفر وكلمة المرور.",
-        copySuccess: "✅ تم نسخ النص إلى الحافظة!",
-        clearConfirm: "هل تريد مسح جميع الحقول؟",
-        sessionExpired: "⏳ انتهت الجلسة الأمنية. يرجى إعادة التحميل.",
-        maxAttemptsExceeded: "🚫 تجاوزت الحد الأقصى للمحاولات. تم تأمين النظام.",
-        securityCheckFailed: "⚠️ فشل التحقق من البيئة الآمنة. لا يمكن استخدام النظام.",
-        generatingPassword: "🔄 جاري توليد كلمة مرور آمنة...",
-        passwordGenerated: "✅ تم توليد كلمة مرور آمنة",
-        secureWipeComplete: "🧹 تم المسح الآمن للبيانات الحساسة",
-        dataIntegrityValid: "✅ صحة البيانات: سليمة",
-        dataIntegrityInvalid: "❌ صحة البيانات: تالفة",
-        githubPagesActive: "🚀 يعمل على GitHub Pages - تشفير محلي 100%"
-    },
-    en: {
-        title: "Advanced Encryption System",
-        subtitle: "Military-grade encryption system on GitHub Pages. Uses Web Crypto API with AES-256-GCM and PBKDF2 with 310,000 iterations. 100% local encryption - no data sent to any server.",
-        encryptTitle: "Secure Text Encryption",
-        plainTextLabel: "Text to encrypt:",
-        passwordLabel: "Encryption password:",
-        strengthLabel: "Password strength:",
-        encryptBtnText: "Encrypt Text",
-        clearEncryptBtnText: "Clear Fields",
-        decryptTitle: "Decrypt Text",
-        encryptedTextLabel: "Encrypted text:",
-        decryptPasswordLabel: "Password for decryption:",
-        decryptBtnText: "Decrypt Text",
-        clearDecryptBtnText: "Clear Fields",
-        decryptedTextLabel: "Decrypted text:",
-        weakPassword: "Weak",
-        mediumPassword: "Medium",
-        strongPassword: "Strong",
-        veryStrongPassword: "Very Strong",
-        encryptSuccess: "✅ Text encrypted successfully!",
-        encryptError: "❌ Please enter text and password for encryption",
-        decryptSuccess: "✅ Text decrypted successfully!",
-        decryptError: "❌ Decryption failed. Make sure the encrypted text and password are correct.",
-        copySuccess: "✅ Text copied to clipboard!",
-        clearConfirm: "Do you want to clear all fields?",
-        sessionExpired: "⏳ Security session expired. Please reload.",
-        maxAttemptsExceeded: "🚫 Maximum attempts exceeded. System locked.",
-        securityCheckFailed: "⚠️ Security environment check failed. Cannot use the system.",
-        generatingPassword: "🔄 Generating secure password...",
-        passwordGenerated: "✅ Secure password generated",
-        secureWipeComplete: "🧹 Secure wipe completed",
-        dataIntegrityValid: "✅ Data integrity: Valid",
-        dataIntegrityInvalid: "❌ Data integrity: Invalid",
-        githubPagesActive: "🚀 Running on GitHub Pages - 100% local encryption"
-    }
-};
-
-// ============================================
-// فئة النظام الأمني الرئيسية لـ GitHub Pages
-// ============================================
-
-class GitHubPagesEncryptionSystem {
+class EncryptionSystem {
     constructor() {
+        this.config = {
+            PBKDF2_ITERATIONS: 310000,
+            SALT_LENGTH: 16,
+            IV_LENGTH: 12,
+            KEY_LENGTH: 256,
+            ALGORITHM: 'AES-GCM',
+            HASH: 'SHA-256',
+            IS_GITHUB_PAGES: window.location.hostname.includes('github.io')
+        };
+        
         this.crypto = window.crypto.subtle;
-        this.state = AppState;
-        this.sessionTimer = null;
-        this.isGitHubPages = SECURITY_CONFIG.IS_GITHUB_PAGES;
+        this.state = {
+            totalEncryptions: 0,
+            failedAttempts: 0,
+            sessionStart: null,
+            passwordAttempts: new Map(),
+            maxAttempts: 10
+        };
+        
         this.initialize();
     }
 
     async initialize() {
-        try {
-            // التحقق من أننا على GitHub Pages
-            if (this.isGitHubPages) {
-                console.log('🚀 GitHub Pages Encryption System Initialized');
-                this.updateSecurityStatus('githubPages', 'نشط ✓');
-                this.state.securityChecks.githubPages = true;
-            }
-            
-            // بدء التحقق من الأمان
-            await this.performSecurityChecks();
-            
-            // تهيئة واجهة المستخدم
-            this.initUI();
-            
-            // بدء جلسة آمنة
-            this.startSecureSession();
-            
-            // تسجيل الأحداث
-            this.setupEventListeners();
-            
-        } catch (error) {
-            console.error('System initialization failed:', error);
-            this.showNotification(this.t('securityCheckFailed'), 'error');
+        console.log('🔧 تهيئة نظام التشفير...');
+        
+        // الانتظار حتى يتم تحميل DOM
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => {
+                document.addEventListener('DOMContentLoaded', resolve);
+            });
         }
+        
+        // تهيئة واجهة المستخدم
+        this.initUI();
+        
+        // إعداد مستمعي الأحداث
+        this.setupEventListeners();
+        
+        console.log('✅ نظام التشفير جاهز');
     }
 
-    async performSecurityChecks() {
-        return new Promise(async (resolve, reject) => {
-            try {
-                // 1. التحقق من HTTPS (GitHub Pages دائماً HTTPS)
-                this.updateSecurityStatus('https', 'جارٍ التحقق...');
-                const isHTTPS = window.location.protocol === 'https:' || this.isGitHubPages;
-                await this.delay(500);
-                this.updateSecurityStatus('https', isHTTPS ? 'آمن ✓' : 'غير آمن ✗');
-                this.state.securityChecks.https = isHTTPS;
+    initUI() {
+        // تحديث النصوص المترجمة
+        this.updateUITexts();
+        
+        // إعداد مؤشر التحميل
+        this.setupLoadingAnimation();
+        
+        // إعداد التحقق من الأمان
+        this.setupSecurityCheck();
+    }
 
-                // 2. التحقق من Web Crypto API
-                this.updateSecurityStatus('crypto', 'جارٍ التحقق...');
-                const hasCrypto = !!window.crypto && !!window.crypto.subtle;
-                await this.delay(500);
-                this.updateSecurityStatus('crypto', hasCrypto ? 'متاح ✓' : 'غير متاح ✗');
-                this.state.securityChecks.crypto = hasCrypto;
-
-                // 3. التحقق من التخزين الآمن
-                this.updateSecurityStatus('storage', 'جارٍ التحقق...');
-                const hasStorage = typeof localStorage !== 'undefined';
-                await this.delay(500);
-                this.updateSecurityStatus('storage', hasStorage ? 'متاح ✓' : 'غير متاح ✗');
-                this.state.securityChecks.storage = hasStorage;
-
-                // 4. التحقق من المتصفح الآمن
-                this.updateSecurityStatus('browser', 'جارٍ التحقق...');
-                const isModernBrowser = this.checkModernBrowser();
-                await this.delay(500);
-                this.updateSecurityStatus('browser', isModernBrowser ? 'حديث ✓' : 'قديم ✗');
-                this.state.securityChecks.browser = isModernBrowser;
-
-                // التحقق النهائي
-                await this.delay(1000);
-                
-                const allChecksPassed = Object.values(this.state.securityChecks).every(check => check);
-                
-                if (allChecksPassed) {
-                    document.getElementById('continueBtn').disabled = false;
-                    this.showNotification(this.t('githubPagesActive'), 'success');
-                    resolve();
-                } else {
-                    reject(new Error('Security checks failed'));
-                }
-
-            } catch (error) {
-                reject(error);
+    updateUITexts() {
+        // هذه النصوص موجودة في app.js، نستخدمها فقط كدعم إضافي
+        const elements = {
+            'title': 'نظام التشفير المتقدم',
+            'subtitle': 'نظام تشفير من المستوى العسكري على GitHub Pages',
+            'encryptionPassword': 'كلمة المرور للتشفير',
+            'decryptionPassword': 'كلمة المرور لفك التشفير'
+        };
+        
+        Object.entries(elements).forEach(([id, text]) => {
+            const element = document.getElementById(id);
+            if (element && !element.textContent) {
+                element.textContent = text;
             }
         });
     }
 
-    // ============================================
-    // التشفير الأساسي (نفس النظام السابق)
-    // ============================================
-
-    async encryptText(text, password, options = {}) {
-        try {
-            // التحقق من المدخلات
-            if (!text || !password) {
-                throw new Error('Missing text or password');
+    setupLoadingAnimation() {
+        const progressBar = document.getElementById('loadingProgress');
+        const statusText = document.getElementById('loadingStatus');
+        
+        if (!progressBar || !statusText) return;
+        
+        const steps = [
+            'جاري تحميل الوحدات الأساسية',
+            'جاري تهيئة نظام التشفير',
+            'جاري التحقق من الأمان',
+            'جاري التشغيل النهائي'
+        ];
+        
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step >= steps.length) {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                this.completeLoading();
+                return;
             }
-
-            // التحقق من تجاوز الحد الأقصى للمحاولات
-            if (this.isRateLimited(password)) {
-                throw new Error('Rate limited');
-            }
-
-            const startTime = performance.now();
-
-            // 1. توليد الملح (Salt) عشوائي
-            const salt = window.crypto.getRandomValues(new Uint8Array(SECURITY_CONFIG.SALT_LENGTH));
-
-            // 2. اشتقاق المفتاح باستخدام PBKDF2
-            const keyMaterial = await this.crypto.importKey(
-                'raw',
-                new TextEncoder().encode(password),
-                'PBKDF2',
-                false,
-                ['deriveKey']
-            );
-
-            const key = await this.crypto.deriveKey(
-                {
-                    name: 'PBKDF2',
-                    salt: salt,
-                    iterations: SECURITY_CONFIG.PBKDF2_ITERATIONS,
-                    hash: SECURITY_CONFIG.HASH
-                },
-                keyMaterial,
-                {
-                    name: SECURITY_CONFIG.ALGORITHM,
-                    length: SECURITY_CONFIG.KEY_LENGTH
-                },
-                false,
-                ['encrypt', 'decrypt']
-            );
-
-            // 3. توليد IV عشوائي
-            const iv = window.crypto.getRandomValues(new Uint8Array(SECURITY_CONFIG.IV_LENGTH));
-
-            // 4. التشفير باستخدام AES-GCM
-            const encrypted = await this.crypto.encrypt(
-                {
-                    name: SECURITY_CONFIG.ALGORITHM,
-                    iv: iv
-                },
-                key,
-                new TextEncoder().encode(text)
-            );
-
-            // 5. إنشاء بنية البيانات المشفرة
-            const encryptedData = {
-                v: '3.0', // الإصدار 3.0 لـ GitHub Pages
-                a: SECURITY_CONFIG.ALGORITHM,
-                i: Array.from(iv),
-                s: Array.from(salt),
-                d: Array.from(new Uint8Array(encrypted)),
-                t: options.timestamp ? Date.now() : null,
-                h: options.compression ? 'gzip' : null,
-                c: SECURITY_CONFIG.PBKDF2_ITERATIONS,
-                p: this.isGitHubPages ? 'gh-pages' : 'standard'
-            };
-
-            // 6. تحويل إلى Base64 (آمن لـ GitHub Pages)
-            const jsonString = JSON.stringify(encryptedData);
-            const base64String = btoa(unescape(encodeURIComponent(jsonString)));
-
-            const endTime = performance.now();
-            const encryptionTime = Math.round(endTime - startTime);
-
-            // تحديث الإحصائيات
-            this.state.totalEncryptions++;
-            this.updateStatistics();
-
-            return {
-                encrypted: base64String,
-                time: encryptionTime,
-                algorithm: SECURITY_CONFIG.ALGORITHM,
-                keyLength: SECURITY_CONFIG.KEY_LENGTH,
-                iterations: SECURITY_CONFIG.PBKDF2_ITERATIONS,
-                environment: this.isGitHubPages ? 'GitHub Pages' : 'Local'
-            };
-
-        } catch (error) {
-            console.error('Encryption error:', error);
-            this.state.failedAttempts++;
-            throw error;
-        }
-    }
-
-    async decryptText(encryptedData, password) {
-        try {
-            // التحقق من المدخلات
-            if (!encryptedData || !password) {
-                throw new Error('Missing encrypted data or password');
-            }
-
-            // التحقق من تجاوز الحد الأقصى للمحاولات
-            if (this.isRateLimited(password)) {
-                throw new Error('Rate limited');
-            }
-
-            const startTime = performance.now();
-
-            // 1. فك Base64 وتحليل JSON
-            const jsonString = decodeURIComponent(escape(atob(encryptedData)));
-            const data = JSON.parse(jsonString);
-
-            // التحقق من الإصدار
-            if (data.v !== '3.0') {
-                throw new Error('Unsupported version. Please re-encrypt with the latest version.');
-            }
-
-            // 2. تحويل البيانات إلى Uint8Array
-            const salt = new Uint8Array(data.s);
-            const iv = new Uint8Array(data.i);
-            const encrypted = new Uint8Array(data.d);
-
-            // 3. اشتقاق المفتاح باستخدام PBKDF2
-            const keyMaterial = await this.crypto.importKey(
-                'raw',
-                new TextEncoder().encode(password),
-                'PBKDF2',
-                false,
-                ['deriveKey']
-            );
-
-            const key = await this.crypto.deriveKey(
-                {
-                    name: 'PBKDF2',
-                    salt: salt,
-                    iterations: data.c || SECURITY_CONFIG.PBKDF2_ITERATIONS,
-                    hash: SECURITY_CONFIG.HASH
-                },
-                keyMaterial,
-                {
-                    name: data.a,
-                    length: SECURITY_CONFIG.KEY_LENGTH
-                },
-                false,
-                ['decrypt']
-            );
-
-            // 4. فك التشفير باستخدام AES-GCM
-            const decrypted = await this.crypto.decrypt(
-                {
-                    name: data.a,
-                    iv: iv
-                },
-                key,
-                encrypted
-            );
-
-            // 5. تحويل إلى نص
-            const text = new TextDecoder().decode(decrypted);
-
-            const endTime = performance.now();
-            const decryptionTime = Math.round(endTime - startTime);
-
-            // تحديث محاولات فك التشفير الناجحة
-            this.state.decryptAttempts++;
-            this.updateStatistics();
-
-            return {
-                text: text,
-                time: decryptionTime,
-                metadata: {
-                    algorithm: data.a,
-                    timestamp: data.t,
-                    compression: data.h,
-                    iterations: data.c,
-                    environment: data.p || 'standard'
-                },
-                integrity: true
-            };
-
-        } catch (error) {
-            console.error('Decryption error:', error);
-            this.state.decryptAttempts++;
-            this.state.failedAttempts++;
             
-            // تسجيل محاولة فاشلة
-            this.recordFailedAttempt(password);
+            statusText.textContent = steps[step];
+            progressBar.style.width = `${((step + 1) / steps.length) * 100}%`;
+            step++;
+        }, 800);
+    }
+
+    setupSecurityCheck() {
+        const checks = [
+            { id: 'httpsStatus', check: () => this.checkHTTPS() },
+            { id: 'cryptoStatus', check: () => this.checkCryptoAPI() },
+            { id: 'storageStatus', check: () => this.checkStorage() },
+            { id: 'githubStatus', check: () => this.checkGitHubPages() }
+        ];
+        
+        let completed = 0;
+        
+        checks.forEach(({ id, check }, index) => {
+            setTimeout(async () => {
+                try {
+                    const result = await check();
+                    this.updateCheckStatus(id, result.status, result.message);
+                    
+                    completed++;
+                    if (completed === checks.length) {
+                        this.enableContinueButton();
+                    }
+                } catch (error) {
+                    this.updateCheckStatus(id, 'error', 'فشل التحقق');
+                }
+            }, index * 600);
+        });
+    }
+
+    async checkHTTPS() {
+        await this.delay(300);
+        const isSecure = window.location.protocol === 'https:' || 
+                        this.config.IS_GITHUB_PAGES;
+        return {
+            status: isSecure ? 'success' : 'error',
+            message: isSecure ? 'آمن ✓' : 'غير آمن ✗'
+        };
+    }
+
+    async checkCryptoAPI() {
+        await this.delay(300);
+        const hasCrypto = !!window.crypto && !!window.crypto.subtle;
+        return {
+            status: hasCrypto ? 'success' : 'error',
+            message: hasCrypto ? 'متاح ✓' : 'غير متاح ✗'
+        };
+    }
+
+    async checkStorage() {
+        await this.delay(300);
+        const hasStorage = typeof localStorage !== 'undefined' && 
+                          typeof sessionStorage !== 'undefined';
+        return {
+            status: hasStorage ? 'success' : 'error',
+            message: hasStorage ? 'متاح ✓' : 'غير متاح ✗'
+        };
+    }
+
+    async checkGitHubPages() {
+        await this.delay(300);
+        const isGitHubPages = this.config.IS_GITHUB_PAGES;
+        return {
+            status: isGitHubPages ? 'success' : 'info',
+            message: isGitHubPages ? 'نشط ✓' : 'غير نشط'
+        };
+    }
+
+    updateCheckStatus(elementId, status, message) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const statusText = element.querySelector('span:last-child');
+        if (statusText) {
+            statusText.textContent = message;
+        }
+        
+        const dot = element.querySelector('.status-dot');
+        if (dot) {
+            dot.className = 'status-dot';
+            dot.classList.add(status);
+        }
+        
+        // تحديث عداد الأمان
+        this.updateSecurityMeter();
+    }
+
+    updateSecurityMeter() {
+        const meter = document.getElementById('securityMeter');
+        if (!meter) return;
+        
+        const checks = [
+            document.getElementById('httpsStatus'),
+            document.getElementById('cryptoStatus'),
+            document.getElementById('storageStatus'),
+            document.getElementById('githubStatus')
+        ];
+        
+        let passed = 0;
+        checks.forEach(check => {
+            if (check && check.textContent.includes('✓')) {
+                passed++;
+            }
+        });
+        
+        const level = (passed / checks.length) * 100;
+        meter.style.width = `${level}%`;
+        
+        // تحديث اللون
+        if (level >= 75) {
+            meter.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+        } else if (level >= 50) {
+            meter.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+        } else {
+            meter.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        }
+    }
+
+    enableContinueButton() {
+        const continueBtn = document.getElementById('continueBtn');
+        if (continueBtn) {
+            continueBtn.disabled = false;
+            continueBtn.addEventListener('click', () => {
+                this.showMainApp();
+            });
+        }
+    }
+
+    completeLoading() {
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const securityCheck = document.getElementById('securityCheck');
             
-            throw error;
-        }
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    if (securityCheck) {
+                        securityCheck.classList.remove('hidden');
+                    }
+                }, 500);
+            }
+        }, 500);
     }
 
-    // ============================================
-    // وظائف المساعدة (نفس النظام السابق)
-    // ============================================
-
-    updateSecurityStatus(type, status) {
-        const element = document.getElementById(`${type}Status`);
-        if (element) {
-            element.textContent = status;
-            element.className = status.includes('✓') ? 'status-good' : 'status-bad';
+    showMainApp() {
+        const securityCheck = document.getElementById('securityCheck');
+        const mainApp = document.getElementById('mainApp');
+        
+        if (securityCheck) {
+            securityCheck.style.opacity = '0';
+            setTimeout(() => {
+                securityCheck.style.display = 'none';
+                if (mainApp) {
+                    mainApp.classList.remove('hidden');
+                    mainApp.style.animation = 'fadeIn 0.8s ease-out';
+                    this.startSecureSession();
+                }
+            }, 500);
         }
-    }
-
-    checkModernBrowser() {
-        try {
-            const features = [
-                'Promise',
-                'fetch',
-                'crypto',
-                'crypto.subtle',
-                'TextEncoder',
-                'TextDecoder',
-                'Uint8Array'
-            ];
-            return features.every(feature => feature in window);
-        } catch {
-            return false;
-        }
+        
+        this.showNotification('🚀 نظام التشفير جاهز للاستخدام', 'success');
     }
 
     startSecureSession() {
@@ -428,7 +268,15 @@ class GitHubPagesEncryptionSystem {
         
         this.sessionTimer = setInterval(() => {
             this.updateSessionTimer();
+            this.checkSessionTimeout();
         }, 1000);
+        
+        // تحديث وقت بدء الجلسة
+        const sessionStartEl = document.getElementById('sessionStart');
+        if (sessionStartEl) {
+            const now = new Date();
+            sessionStartEl.textContent = now.toLocaleTimeString('ar-SA');
+        }
     }
 
     updateSessionTimer() {
@@ -438,63 +286,494 @@ class GitHubPagesEncryptionSystem {
         const minutes = Math.floor(remaining / 60000);
         const seconds = Math.floor((remaining % 60000) / 1000);
         
+        // تحديث العداد
         const timerElement = document.getElementById('sessionTimer');
         if (timerElement) {
             timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
             if (remaining < 60000) {
-                timerElement.style.color = 'var(--danger)';
-                timerElement.style.animation = 'pulse 1s infinite';
+                timerElement.style.color = '#ef4444';
             }
         }
         
-        if (remaining === 0) {
+        // تحديث الوقت المتبقي
+        const remainingElement = document.getElementById('sessionRemaining');
+        if (remainingElement) {
+            remainingElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+
+    checkSessionTimeout() {
+        const idleTime = Date.now() - this.state.sessionStart;
+        
+        if (idleTime > 15 * 60 * 1000) {
             this.endSession();
         }
     }
 
     endSession() {
-        clearInterval(this.sessionTimer);
-        this.showNotification(this.t('sessionExpired'), 'warning');
-        this.clearAllSensitiveData();
+        if (this.sessionTimer) {
+            clearInterval(this.sessionTimer);
+        }
+        
+        this.showNotification('⏳ انتهت الجلسة الأمنية. يتم إعادة التحميل...', 'warning');
         
         setTimeout(() => {
             window.location.reload();
-        }, 5000);
+        }, 3000);
     }
 
-    showMainApp() {
-        document.getElementById('loadingScreen').style.display = 'none';
-        document.getElementById('securityCheck').style.display = 'none';
-        document.getElementById('mainApp').classList.remove('hidden');
-        this.startSecureSession();
+    setupEventListeners() {
+        // مستمعي الأحداث الأساسية
+        this.setupPasswordStrength();
+        this.setupTextCounters();
+        this.setupActionButtons();
     }
 
-    // بقية الدوال (نفس النظام السابق)...
-    // [جميع الدوال الأخرى تبقى كما هي]
+    setupPasswordStrength() {
+        const passwordInput = document.getElementById('encryptionPassword');
+        const decryptInput = document.getElementById('decryptionPassword');
+        
+        if (passwordInput) {
+            passwordInput.addEventListener('input', (e) => {
+                this.checkPasswordStrength(e.target.value);
+            });
+        }
+        
+        if (decryptInput) {
+            decryptInput.addEventListener('input', (e) => {
+                this.updateDecryptionStatus(e.target.value);
+            });
+        }
+    }
+
+    checkPasswordStrength(password) {
+        if (!password) {
+            this.updatePasswordStrengthUI(0, 'غير مقاسة');
+            return;
+        }
+        
+        let score = 0;
+        
+        // طول كلمة المرور
+        if (password.length >= 16) score += 30;
+        else if (password.length >= 12) score += 20;
+        else if (password.length >= 8) score += 10;
+        
+        // أحرف كبيرة
+        if (/[A-Z]/.test(password)) score += 20;
+        
+        // أحرف صغيرة
+        if (/[a-z]/.test(password)) score += 20;
+        
+        // أرقام
+        if (/[0-9]/.test(password)) score += 15;
+        
+        // رموز خاصة
+        if (/[^A-Za-z0-9]/.test(password)) score += 15;
+        
+        // تحديث الواجهة
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthText = document.getElementById('passwordStrengthText');
+        
+        if (strengthBar) {
+            strengthBar.style.width = `${Math.min(score, 100)}%`;
+            
+            if (score >= 80) {
+                strengthBar.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+            } else if (score >= 60) {
+                strengthBar.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+            } else if (score >= 30) {
+                strengthBar.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+            } else {
+                strengthBar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+            }
+        }
+        
+        if (strengthText) {
+            let level = 'ضعيفة';
+            if (score >= 80) level = 'قوية جداً';
+            else if (score >= 60) level = 'قوية';
+            else if (score >= 30) level = 'متوسطة';
+            
+            strengthText.textContent = level;
+        }
+    }
+
+    updatePasswordStrengthUI(score, level) {
+        // تحديث الواجهة (دعم إضافي)
+        console.log(`قوة كلمة المرور: ${level} (${score}%)`);
+    }
+
+    updateDecryptionStatus(password) {
+        // تحديث حالة فك التشفير
+        if (!password) return;
+        
+        const attempts = this.state.passwordAttempts.get(password) || 0;
+        const failedAttemptsEl = document.getElementById('failedAttempts');
+        
+        if (failedAttemptsEl) {
+            failedAttemptsEl.textContent = attempts;
+            failedAttemptsEl.style.color = attempts >= 5 ? '#ef4444' : '#f59e0b';
+        }
+    }
+
+    setupTextCounters() {
+        const plainText = document.getElementById('plainText');
+        if (plainText) {
+            plainText.addEventListener('input', () => {
+                const text = plainText.value;
+                document.getElementById('charCount').textContent = `${text.length} حرف`;
+                document.getElementById('lineCount').textContent = `${text.split('\n').length} سطر`;
+                document.getElementById('wordCount').textContent = `${text.trim() ? text.trim().split(/\s+/).length : 0} كلمة`;
+            });
+        }
+    }
+
+    setupActionButtons() {
+        // أزرار التشفير
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        
+        if (encryptBtn) {
+            encryptBtn.addEventListener('click', () => this.handleEncryption());
+        }
+        
+        if (decryptBtn) {
+            decryptBtn.addEventListener('click', () => this.handleDecryption());
+        }
+        
+        // أزرار المساعدة
+        const helpBtns = document.querySelectorAll('.btn-info');
+        helpBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showHelp();
+            });
+        });
+    }
+
+    async handleEncryption() {
+        const plainText = document.getElementById('plainText');
+        const password = document.getElementById('encryptionPassword');
+        
+        if (!plainText || !password || !plainText.value || !password.value) {
+            this.showNotification('❌ الرجاء إدخال النص وكلمة المرور', 'error');
+            return;
+        }
+        
+        try {
+            this.showNotification('🔒 جاري تشفير النص...', 'info');
+            
+            const result = await this.encryptText(plainText.value, password.value);
+            
+            // عرض النتيجة
+            const encryptedText = document.getElementById('encryptedText');
+            const resultContainer = document.getElementById('encryptionResult');
+            
+            if (encryptedText) {
+                encryptedText.value = JSON.stringify(result, null, 2);
+            }
+            
+            if (resultContainer) {
+                resultContainer.classList.remove('hidden');
+            }
+            
+            this.state.totalEncryptions++;
+            this.updateStatistics();
+            
+            this.showNotification('✅ تم تشفير النص بنجاح', 'success');
+            
+        } catch (error) {
+            console.error('❌ فشل التشفير:', error);
+            this.state.failedAttempts++;
+            this.updateStatistics();
+            this.showNotification('❌ فشل التشفير: ' + error.message, 'error');
+        }
+    }
+
+    async handleDecryption() {
+        const encryptedInput = document.getElementById('encryptedInput');
+        const password = document.getElementById('decryptionPassword');
+        
+        if (!encryptedInput || !password || !encryptedInput.value || !password.value) {
+            this.showNotification('❌ الرجاء إدخال النص المشفر وكلمة المرور', 'error');
+            return;
+        }
+        
+        try {
+            this.showNotification('🔓 جاري فك تشفير النص...', 'info');
+            
+            let encryptedData;
+            try {
+                encryptedData = JSON.parse(encryptedInput.value);
+            } catch {
+                encryptedData = encryptedInput.value;
+            }
+            
+            const result = await this.decryptText(encryptedData, password.value);
+            
+            // عرض النتيجة
+            const decryptedText = document.getElementById('decryptedText');
+            const resultContainer = document.getElementById('decryptionResult');
+            
+            if (decryptedText) {
+                decryptedText.value = result.text;
+            }
+            
+            if (resultContainer) {
+                resultContainer.classList.remove('hidden');
+            }
+            
+            this.showNotification('✅ تم فك التشفير بنجاح', 'success');
+            
+        } catch (error) {
+            console.error('❌ فشل فك التشفير:', error);
+            this.state.failedAttempts++;
+            this.updateStatistics();
+            
+            // تسجيل المحاولة الفاشلة
+            if (password.value) {
+                const attempts = this.state.passwordAttempts.get(password.value) || 0;
+                this.state.passwordAttempts.set(password.value, attempts + 1);
+            }
+            
+            this.showNotification('❌ فشل فك التشفير: تأكد من صحة البيانات', 'error');
+        }
+    }
+
+    async encryptText(text, password) {
+        try {
+            if (!text || !password) {
+                throw new Error('النص أو كلمة المرور فارغة');
+            }
+            
+            const salt = window.crypto.getRandomValues(new Uint8Array(this.config.SALT_LENGTH));
+            
+            const keyMaterial = await this.crypto.importKey(
+                'raw',
+                new TextEncoder().encode(password),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+            
+            const key = await this.crypto.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: this.config.PBKDF2_ITERATIONS,
+                    hash: this.config.HASH
+                },
+                keyMaterial,
+                {
+                    name: this.config.ALGORITHM,
+                    length: this.config.KEY_LENGTH
+                },
+                false,
+                ['encrypt', 'decrypt']
+            );
+            
+            const iv = window.crypto.getRandomValues(new Uint8Array(this.config.IV_LENGTH));
+            
+            const encrypted = await this.crypto.encrypt(
+                {
+                    name: this.config.ALGORITHM,
+                    iv: iv
+                },
+                key,
+                new TextEncoder().encode(text)
+            );
+            
+            const encryptedData = {
+                v: '3.0',
+                a: this.config.ALGORITHM,
+                i: Array.from(iv),
+                s: Array.from(salt),
+                d: Array.from(new Uint8Array(encrypted)),
+                c: this.config.PBKDF2_ITERATIONS
+            };
+            
+            return {
+                data: encryptedData,
+                base64: btoa(JSON.stringify(encryptedData))
+            };
+            
+        } catch (error) {
+            throw new Error(`فشل التشفير: ${error.message}`);
+        }
+    }
+
+    async decryptText(encryptedData, password) {
+        try {
+            if (!encryptedData || !password) {
+                throw new Error('البيانات المشفرة أو كلمة المرور فارغة');
+            }
+            
+            let data;
+            if (typeof encryptedData === 'string') {
+                try {
+                    data = JSON.parse(encryptedData);
+                } catch {
+                    data = JSON.parse(atob(encryptedData));
+                }
+            } else {
+                data = encryptedData;
+            }
+            
+            if (data.v !== '3.0') {
+                throw new Error('إصدار التشفير غير مدعوم');
+            }
+            
+            const salt = new Uint8Array(data.s);
+            const iv = new Uint8Array(data.i);
+            const encrypted = new Uint8Array(data.d);
+            
+            const keyMaterial = await this.crypto.importKey(
+                'raw',
+                new TextEncoder().encode(password),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+            
+            const key = await this.crypto.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: data.c || this.config.PBKDF2_ITERATIONS,
+                    hash: this.config.HASH
+                },
+                keyMaterial,
+                {
+                    name: data.a,
+                    length: this.config.KEY_LENGTH
+                },
+                false,
+                ['decrypt']
+            );
+            
+            const decrypted = await this.crypto.decrypt(
+                {
+                    name: data.a,
+                    iv: iv
+                },
+                key,
+                encrypted
+            );
+            
+            return {
+                text: new TextDecoder().decode(decrypted),
+                integrity: true
+            };
+            
+        } catch (error) {
+            throw new Error(`فشل فك التشفير: ${error.message}`);
+        }
+    }
+
+    updateStatistics() {
+        const totalEncryptionsEl = document.getElementById('totalEncryptions');
+        const encryptionCountEl = document.getElementById('encryptionCount');
+        const totalFailedAttemptsEl = document.getElementById('totalFailedAttempts');
+        
+        if (totalEncryptionsEl) {
+            totalEncryptionsEl.textContent = this.state.totalEncryptions;
+        }
+        
+        if (encryptionCountEl) {
+            encryptionCountEl.textContent = this.state.totalEncryptions;
+        }
+        
+        if (totalFailedAttemptsEl) {
+            totalFailedAttemptsEl.textContent = this.state.failedAttempts;
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        // دعم الإشعارات المدمجة
+        if (window.app && typeof window.app.showNotification === 'function') {
+            window.app.showNotification(message, type);
+            return;
+        }
+        
+        // دعم بدائي
+        const colors = {
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            info: '#3b82f6'
+        };
+        
+        console.log(`%c${type}: ${message}`, `color: ${colors[type] || '#000'}`);
+        
+        // عرض تنبيه بسيط
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${colors[type] || '#3b82f6'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            font-family: inherit;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: fadeIn 0.3s ease-out;
+        `;
+        
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+
+    showHelp() {
+        this.showNotification('💡 استخدم كلمات مرور قوية بطول 16+ حرفاً تحتوي على أحرف كبيرة وصغيرة وأرقام ورموز خاصة', 'info');
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 }
 
 // ============================================
 // تهيئة النظام
 // ============================================
 
+// إضافة أنماط للتنبيهات
+if (!document.querySelector('#notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// بدء النظام بعد تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    // التحقق من دعم Web Crypto API
     if (!window.crypto || !window.crypto.subtle) {
         alert('⚠️ هذا المتصفح لا يدعم Web Crypto API. يرجى استخدام متصفح حديث.');
         return;
     }
     
-    // بدء النظام
-    window.encryptionSystem = new GitHubPagesEncryptionSystem();
+    // إنشاء نسخة احتياطية من النظام
+    window.backupEncryptionSystem = new EncryptionSystem();
     
-    // إضافة حدث للمتابعة
-    document.getElementById('continueBtn').addEventListener('click', () => {
-        window.encryptionSystem.showMainApp();
-    });
+    console.log('🔧 نظام التشفير الاحتياطي جاهز');
 });
-
-// دالة تأخير
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
