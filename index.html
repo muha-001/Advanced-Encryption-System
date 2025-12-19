@@ -3,52 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام التشفير المتقدم - Advanced Encryption System</title>
-    <link rel="stylesheet" href="style.css">
+    <title>نظام التشفير المتقدم - مستوى أمني عسكري</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="نظام تشفير عسكري باستخدام AES-256-GCM وPBKDF2 مع 310,000 تكرار. تشفير من مستوى المؤسسات غير قابل للكسر.">
 </head>
 <body>
-    <div class="container">
-        <div class="language-toggle">
-            <button class="lang-btn" id="langToggle">
-                <i class="fas fa-language"></i>
-                <span id="langText">English</span>
+    <!-- شاشة التحميل -->
+    <div id="loadingScreen">
+        <div class="loading-content">
+            <i class="fas fa-shield-alt fa-spin"></i>
+            <h2>جاري تهيئة نظام التشفير الآمن...</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p class="loading-text">جاري تحميل الوحدات الأمنية</p>
+        </div>
+    </div>
+
+    <!-- التحقق من البيئة الآمنة -->
+    <div id="securityCheck" class="hidden">
+        <div class="check-content">
+            <i class="fas fa-user-shield"></i>
+            <h2>التحقق من بيئة التشفير الآمنة</h2>
+            <div class="check-list">
+                <div class="check-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>HTTPS آمن: <span id="httpsStatus">جارٍ التحقق...</span></span>
+                </div>
+                <div class="check-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Web Crypto API: <span id="cryptoStatus">جارٍ التحقق...</span></span>
+                </div>
+                <div class="check-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>التخزين الآمن: <span id="storageStatus">جارٍ التحقق...</span></span>
+                </div>
+                <div class="check-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>المتصفح الآمن: <span id="browserStatus">جارٍ التحقق...</span></span>
+                </div>
+            </div>
+            <button id="continueBtn" class="btn btn-primary" disabled>
+                <i class="fas fa-lock"></i>
+                <span>المتابعة إلى نظام التشفير</span>
             </button>
         </div>
-        
+    </div>
+
+    <!-- الواجهة الرئيسية -->
+    <div class="container hidden" id="mainApp">
+        <!-- شريط الحالة الأمنية -->
+        <div class="security-status-bar">
+            <div class="status-indicators">
+                <div class="status-item secure">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>نظام التشفير نشط</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-user-secret"></i>
+                    <span>التشفير المحلي</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-history"></i>
+                    <span>جلسة آمنة: <span id="sessionTimer">15:00</span></span>
+                </div>
+            </div>
+            <div class="security-level">
+                <span class="level-badge level-high">
+                    <i class="fas fa-star"></i>
+                    مستوى أمان عالي
+                </span>
+            </div>
+        </div>
+
+        <!-- رأس الصفحة -->
         <header>
             <div class="logo">
                 <i class="fas fa-lock"></i>
+                <div class="logo-text">
+                    <h1 id="title">نظام التشفير المتقدم</h1>
+                    <div class="certification-badges">
+                        <span class="badge aes-badge">
+                            <i class="fas fa-key"></i>
+                            AES-256-GCM
+                        </span>
+                        <span class="badge pbkdf2-badge">
+                            <i class="fas fa-redo"></i>
+                            PBKDF2 310K
+                        </span>
+                        <span class="badge mil-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            مستوى عسكري
+                        </span>
+                    </div>
+                </div>
             </div>
-            <h1 id="title">نظام التشفير المتقدم</h1>
+            
             <p class="subtitle" id="subtitle">
-                نظام تشفير من المستوى العسكري باستخدام خوارزميات متقدمة غير قابلة للكسر. أدخل النص، اختر كلمة مرور قوية، وقم بتشفير بياناتك بأمان كامل.
+                نظام تشفير من المستوى العسكري باستخدام Web Crypto API مع AES-256-GCM وPBKDF2 مع 310,000 تكرار. 
+                تشفير محلي 100% - لا توجد بيانات ترسل إلى أي خادم.
             </p>
         </header>
-        
+
+        <!-- التنبيهات الأمنية -->
+        <div class="security-alerts">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="alert-content">
+                    <strong>تحذير أمني:</strong> تأكد من استخدام كلمة مرور قوية (16+ حرفًا) مع خليط من الأحجام والأرقام والرموز.
+                </div>
+                <button class="alert-close">&times;</button>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
         <div class="main-content">
+            <!-- قسم التشفير -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-key"></i>
-                    <div class="card-title" id="encryptTitle">تشفير النص</div>
+                    <i class="fas fa-lock"></i>
+                    <div class="card-title" id="encryptTitle">تشفير النص الآمن</div>
                 </div>
                 
                 <div class="input-group">
-                    <label for="plainText" id="plainTextLabel">النص المراد تشفيره:</label>
-                    <textarea id="plainText" rows="6" placeholder="أدخل النص الذي تريد تشفيره هنا..."></textarea>
-                </div>
-                
-                <div class="input-group">
-                    <label for="password" id="passwordLabel">كلمة المرور للتشفير:</label>
-                    <input type="password" id="password" placeholder="أدخل كلمة مرور قوية جدًا...">
-                    <div class="password-strength">
-                        <div class="strength-bar" id="strengthBar"></div>
+                    <label for="plainText" id="plainTextLabel">
+                        <i class="fas fa-pen"></i>
+                        النص المراد تشفيره:
+                    </label>
+                    <div class="textarea-wrapper">
+                        <textarea id="plainText" rows="6" placeholder="أدخل النص الذي تريد تشفيره هنا..."></textarea>
+                        <div class="textarea-stats">
+                            <span class="char-count">عدد الأحرف: <span id="plainTextCount">0</span></span>
+                            <span class="encoding">ترميز: UTF-8</span>
+                        </div>
                     </div>
-                    <div class="strength-text">
-                        <span id="strengthLabel">قوة كلمة المرور:</span>
-                        <span id="strengthValue" class="strength-weak">ضعيفة</span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password" id="passwordLabel">
+                        <i class="fas fa-key"></i>
+                        كلمة المرور للتشفير:
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="password" placeholder="أدخل كلمة مرور قوية جداً...">
+                        <button class="toggle-password" type="button" id="togglePassword">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="password-strength-container">
+                        <div class="strength-labels">
+                            <span id="strengthLabel">قوة كلمة المرور:</span>
+                            <span id="strengthValue" class="strength-weak">ضعيفة</span>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="strength-requirements" id="strengthRequirements">
+                            <span class="requirement"><i class="fas fa-times"></i> 8 أحرف على الأقل</span>
+                            <span class="requirement"><i class="fas fa-times"></i> حرف كبير</span>
+                            <span class="requirement"><i class="fas fa-times"></i> حرف صغير</span>
+                            <span class="requirement"><i class="fas fa-times"></i> رقم</span>
+                            <span class="requirement"><i class="fas fa-times"></i> رمز خاص</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="encryption-options">
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="checkbox" id="enableCompression" checked>
+                            <span>ضغط البيانات قبل التشفير</span>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="enableTimestamp" checked>
+                            <span>إضافة طابع زمني للتحقق</span>
+                        </label>
                     </div>
                 </div>
                 
@@ -61,9 +194,29 @@
                         <i class="fas fa-eraser"></i>
                         <span id="clearEncryptBtnText">مسح الحقول</span>
                     </button>
+                    <button class="btn btn-info" id="generatePasswordBtn">
+                        <i class="fas fa-random"></i>
+                        <span>كلمة مرور عشوائية</span>
+                    </button>
+                </div>
+
+                <div class="encryption-info">
+                    <div class="info-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>خوارزمية: <strong>AES-256-GCM</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-redo"></i>
+                        <span>تكرارات PBKDF2: <strong>310,000</strong></span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>طول المفتاح: <strong>256 بت</strong></span>
+                    </div>
                 </div>
             </div>
             
+            <!-- قسم فك التشفير -->
             <div class="card">
                 <div class="card-header">
                     <i class="fas fa-unlock"></i>
@@ -71,18 +224,37 @@
                 </div>
                 
                 <div class="input-group">
-                    <label for="encryptedText" id="encryptedTextLabel">النص المشفر:</label>
+                    <label for="encryptedText" id="encryptedTextLabel">
+                        <i class="fas fa-file-code"></i>
+                        النص المشفر:
+                    </label>
                     <div class="result-container">
-                        <textarea id="encryptedText" rows="6" placeholder="النص المشفر سيظهر هنا..."></textarea>
+                        <textarea id="encryptedText" rows="6" placeholder="الصق النص المشفر هنا..."></textarea>
                         <button class="copy-btn" id="copyEncryptedBtn" title="نسخ النص المشفر">
                             <i class="far fa-copy"></i>
                         </button>
+                        <div class="encrypted-info" id="encryptedInfo">
+                            <i class="fas fa-info-circle"></i>
+                            <span>تنسيق Base64 مشفر</span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="input-group">
-                    <label for="decryptPassword" id="decryptPasswordLabel">كلمة المرور لفك التشفير:</label>
-                    <input type="password" id="decryptPassword" placeholder="أدخل كلمة المرور نفسها...">
+                    <label for="decryptPassword" id="decryptPasswordLabel">
+                        <i class="fas fa-key"></i>
+                        كلمة المرور لفك التشفير:
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="decryptPassword" placeholder="أدخل كلمة المرور نفسها...">
+                        <button class="toggle-password" type="button" id="toggleDecryptPassword">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="attempt-counter">
+                        <i class="fas fa-history"></i>
+                        <span>محاولات فك التشفير: <span id="decryptAttempts">0</span></span>
+                    </div>
                 </div>
                 
                 <div class="btn-group">
@@ -94,70 +266,236 @@
                         <i class="fas fa-eraser"></i>
                         <span id="clearDecryptBtnText">مسح الحقول</span>
                     </button>
+                    <button class="btn btn-danger" id="secureWipeBtn">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>مسح آمن</span>
+                    </button>
                 </div>
                 
-                <div class="input-group" style="margin-top: 25px;">
-                    <label for="decryptedText" id="decryptedTextLabel">النص بعد فك التشفير:</label>
+                <div class="input-group">
+                    <label for="decryptedText" id="decryptedTextLabel">
+                        <i class="fas fa-file-alt"></i>
+                        النص بعد فك التشفير:
+                    </label>
                     <div class="result-container">
                         <textarea id="decryptedText" rows="4" placeholder="النص المفكوك سيظهر هنا..." readonly></textarea>
                         <button class="copy-btn" id="copyDecryptedBtn" title="نسخ النص المفكوك">
                             <i class="far fa-copy"></i>
                         </button>
+                        <div class="decryption-meta" id="decryptionMeta"></div>
+                    </div>
+                </div>
+
+                <div class="decryption-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>وقت فك التشفير: <span id="decryptTime">0</span> مللي ثانية</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>صحة البيانات: <span id="dataIntegrity">غير معروف</span></span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="security-info">
-            <i class="fas fa-shield-alt"></i>
-            <h2 class="security-title" id="securityTitle">مستوى أمني لا يمكن اختراقه</h2>
-            <p id="securityDescription">
-                يستخدم نظامنا خوارزميات تشفير من المستوى العسكري تضمن حماية بياناتك بشكل كامل. حتى فرق الأمن السيبراني المتقدمة لا يمكنها فك هذا التشفير دون كلمة المرور الصحيحة.
-            </p>
+        <!-- معلومات الأمان المتقدمة -->
+        <div class="security-dashboard">
+            <div class="dashboard-header">
+                <i class="fas fa-tachometer-alt"></i>
+                <h3>لوحة التحكم الأمنية</h3>
+            </div>
             
-            <div class="security-features">
-                <div class="feature">
-                    <i class="fas fa-user-secret"></i>
-                    <div class="feature-title" id="feature1Title">تشفير من الطراز العسكري</div>
-                    <p id="feature1Desc">مزيج من AES-256 و RSA-4096 و SHA-512</p>
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-user-shield"></i>
+                        <h4>حماية ضد الهجمات</h4>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="protection-item active">
+                            <i class="fas fa-check-circle"></i>
+                            <span>منع هجمات القوة الغاشمة</span>
+                        </div>
+                        <div class="protection-item active">
+                            <i class="fas fa-check-circle"></i>
+                            <span>حماية من هجمات التوقيت</span>
+                        </div>
+                        <div class="protection-item">
+                            <i class="fas fa-times-circle"></i>
+                            <span>كشف Keyloggers (يحتاج امتداد)</span>
+                        </div>
+                        <div class="protection-item active">
+                            <i class="fas fa-check-circle"></i>
+                            <span>تنظيف الذاكرة الحساسة</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="feature">
-                    <i class="fas fa-fingerprint"></i>
-                    <div class="feature-title" id="feature2Title">مفتاح تشفير فريد</div>
-                    <p id="feature2Desc">مفتاح تشفير مشتق من كلمة المرور مع Salt عشوائي</p>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-layer-group"></i>
+                        <h4>طبقات التشفير</h4>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="layer-item">
+                            <span class="layer-name">PBKDF2</span>
+                            <span class="layer-status active">310,000 تكرار</span>
+                        </div>
+                        <div class="layer-item">
+                            <span class="layer-name">AES-256-GCM</span>
+                            <span class="layer-status active">256-bit</span>
+                        </div>
+                        <div class="layer-item">
+                            <span class="layer-name">HMAC</span>
+                            <span class="layer-status active">SHA-256</span>
+                        </div>
+                        <div class="layer-item">
+                            <span class="layer-name">Salt/IV</span>
+                            <span class="layer-status active">عشوائي لكل تشفير</span>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="feature">
-                    <i class="fas fa-bolt"></i>
-                    <div class="feature-title" id="feature3Title">سرعة وأداء عالي</div>
-                    <p id="feature3Desc">تشفير وفك تشفير سريع مع الحفاظ على الأمان القصوى</p>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>إحصاءات الأمان</h4>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="stat-item">
+                            <span>إجمالي عمليات التشفير:</span>
+                            <span id="totalEncryptions">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>المحاولات الفاشلة:</span>
+                            <span id="failedAttempts">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>قوة التشفير:</span>
+                            <span class="security-level-high">عالية جداً</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>الوقت المقدر للكسر:</span>
+                            <span class="crack-time">> 10³⁸ سنة</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         
+        <!-- تذكير الأمان -->
+        <div class="security-reminder">
+            <div class="reminder-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h4>تذكير أمني مهم</h4>
+            </div>
+            <div class="reminder-content">
+                <p><strong>⚠️ تحذير:</strong> هذا النظام يوفر تشفيرًا قويًا، لكن الأمان النهائي يعتمد على:</p>
+                <ul>
+                    <li>استخدام كلمات مرور قوية وفريدة</li>
+                    <li>تأمين جهازك ضد البرمجيات الخبيثة</li>
+                    <li>عدم مشاركة كلمات المرور أو النصوص المشفرة عبر قنوات غير آمنة</li>
+                    <li>النسخ الاحتياطي الآمن للمفاتيح الهامة</li>
+                </ul>
+            </div>
+        </div>
+        
         <footer>
-            <p id="footerText">نظام التشفير المتقدم © 2023 - مصمم لتوفير أقصى درجات الأمان لحماية بياناتك</p>
-            <p>⚠️ <strong id="warningText">تحذير:</strong> <span id="warningMessage">لا تفقد كلمة المرور الخاصة بك! بدونها، لا يمكن استعادة البيانات المشفرة حتى من قبل مطور النظام.</span></p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h5>نظام التشفير المتقدم © 2024</h5>
+                    <p>مصمم لتوفير أقصى درجات الأمان باستخدام معايير التشفير العالمية</p>
+                </div>
+                <div class="footer-section">
+                    <div class="tech-stack">
+                        <span class="tech-item">Web Crypto API</span>
+                        <span class="tech-item">AES-256-GCM</span>
+                        <span class="tech-item">PBKDF2</span>
+                        <span class="tech-item">SHA-256</span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <p class="disclaimer">
+                        <strong>إخلاء مسؤولية:</strong> هذا النظام يوفر تشفيرًا قويًا، لكنه لا يحمي من الهجمات المادية 
+                        أو البرمجيات الخبيثة على جهاز المستخدم. استشر خبير أمني للاستخدامات الحرجة.
+                    </p>
+                </div>
+            </div>
         </footer>
         
+        <!-- الإشعارات -->
         <div class="notification" id="notification">
             <i class="fas fa-check-circle"></i>
             <span id="notificationMessage">تم نسخ النص إلى الحافظة بنجاح!</span>
+        </div>
+        
+        <!-- نافذة كلمة المرور العشوائية -->
+        <div class="modal" id="passwordModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>مولد كلمة المرور العشوائية</h4>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="password-options">
+                        <label class="option">
+                            <input type="number" id="passwordLength" min="12" max="64" value="16">
+                            <span>طول كلمة المرور</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="includeUppercase" checked>
+                            <span>أحرف كبيرة</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="includeLowercase" checked>
+                            <span>أحرف صغيرة</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="includeNumbers" checked>
+                            <span>أرقام</span>
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" id="includeSymbols" checked>
+                            <span>رموز خاصة</span>
+                        </label>
+                    </div>
+                    <div class="generated-password">
+                        <input type="text" id="generatedPassword" readonly>
+                        <button class="copy-generated" id="copyGeneratedPassword">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength-display">
+                        <span>قوة كلمة المرور:</span>
+                        <span class="strength-very-strong" id="generatedStrength">قوية جداً</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="regeneratePassword">
+                        <i class="fas fa-redo"></i>
+                        توليد جديد
+                    </button>
+                    <button class="btn btn-primary" id="usePassword">
+                        <i class="fas fa-check"></i>
+                        استخدام هذه الكلمة
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // تسجيل Service Worker
+        // تهيئة Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
+                        console.log('ServiceWorker registration successful');
                     })
-                    .catch(error => {
-                        console.log('Service Worker registration failed:', error);
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
                     });
             });
         }
