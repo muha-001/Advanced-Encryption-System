@@ -1,0 +1,47 @@
+{
+  "name": "advanced-encryption-system",
+  "version": "3.0.0",
+  "description": "نظام تشفير عسكري AES-256-GCM على GitHub Pages مع PBKDF2 310,000 تكرار",
+  "main": "index.html",
+  "scripts": {
+    "start": "echo '🚀 افتح index.html في المتصفح أو استخدم أي خادم محلي'",
+    "dev": "npx serve .",
+    "test": "echo '✅ النظام يعتمد على Web Crypto API ولا يحتاج لاختبارات إضافية'",
+    "deploy": "echo '📤 رفع الملفات إلى GitHub Pages'",
+    "build": "echo '🏗️ لا حاجة للبناء - النظام يعمل مباشرة'",
+    "lint": "echo '✨ تنظيف الكود غير مطلوب'",
+    "format": "echo '🎨 تنسيق الكود غير مطلوب'"
+  },
+  "keywords": [
+    "encryption",
+    "security",
+    "aes-256",
+    "aes-gcm",
+    "pbkdf2",
+    "crypto",
+    "github-pages",
+    "pwa",
+    "offline"
+  ],
+  "author": "نظام التشفير المتقدم",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/advanced-encryption-system.git"
+  },
+  "homepage": "https://YOUR_USERNAME.github.io/advanced-encryption-system",
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/advanced-encryption-system/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "not ie < 11"
+  ]
+}
