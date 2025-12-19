@@ -1,5 +1,6 @@
 // ============================================
 // نظام التشفير المتقدم - التطبيق الرئيسي
+// الإصدار المحسّن للأجهزة المحمولة
 // ============================================
 
 class EncryptionApp {
@@ -7,7 +8,7 @@ class EncryptionApp {
         // إعدادات التطبيق
         this.config = {
             appName: 'نظام التشفير المتقدم',
-            version: '3.0.0',
+            version: '3.1.0',
             algorithm: 'AES-256-GCM',
             iterations: 310000,
             maxAttempts: 10,
@@ -31,11 +32,12 @@ class EncryptionApp {
             passwordAttempts: new Map(),
             lastActivity: Date.now(),
             encryptionHistory: [],
-            isOnline: navigator.onLine
+            isOnline: navigator.onLine,
+            cryptoEngineReady: false
         };
 
-        // تهيئة التطبيق
-        this.init();
+        // تهيئة التطبيق بطريقة آمنة
+        setTimeout(() => this.init(), 100);
     }
 
     async init() {
@@ -43,11 +45,20 @@ class EncryptionApp {
             // تسجيل بدء التطبيق
             console.log(`🚀 ${this.config.appName} v${this.config.version} - بدء التشغيل`);
             
+            // التحقق من دعم Web Crypto API أولاً
+            if (!this.checkCryptoSupport()) {
+                this.showNotification('❌ المتصفح لا يدعم Web Crypto API', 'error');
+                this.hideLoadingScreen();
+                return;
+            }
+            
             // تهيئة واجهة المستخدم
             this.initUI();
             
-            // التحقق من الأمان
-            await this.checkSecurity();
+            // التحقق من الأمان (بدون انتظار)
+            this.checkSecurity().catch(error => {
+                console.warn('⚠️ بعض فحوصات الأمان فشلت:', error);
+            });
             
             // ربط الأحداث
             this.bindEvents();
@@ -58,19 +69,30 @@ class EncryptionApp {
             // تحديث حالة الاتصال
             this.updateOnlineStatus();
             
-            // إخفاء شاشة التحميل بعد التحقق
+            // تهيئة محرك التشفير بشكل منفصل
+            this.initializeCryptoEngine();
+            
+            // إخفاء شاشة التحميل بعد 3 ثوان كحد أقصى
             setTimeout(() => {
-                this.hideLoadingScreen();
-            }, 2000);
-            
-            this.state.isInitialized = true;
-            
-            this.showNotification('✅ نظام التشفير جاهز للاستخدام', 'success');
+                if (!this.state.isInitialized) {
+                    this.state.isInitialized = true;
+                    this.hideLoadingScreen();
+                    this.showNotification('⚠️ النظام يعمل بوظائف محدودة', 'warning');
+                }
+            }, 3000);
             
         } catch (error) {
             console.error('❌ فشل تهيئة التطبيق:', error);
-            this.showNotification('فشل تهيئة النظام. يرجى تحديث الصفحة.', 'error');
+            // إخفاء شاشة التحميل حتى في حالة الخطأ
+            setTimeout(() => {
+                this.hideLoadingScreen();
+                this.showNotification('⚠️ حدث خطأ في التهيئة، جرب تحديث الصفحة', 'warning');
+            }, 1000);
         }
+    }
+
+    checkCryptoSupport() {
+        return !!(window.crypto && window.crypto.subtle);
     }
 
     // ===== تهيئة واجهة المستخدم =====
@@ -98,18 +120,26 @@ class EncryptionApp {
         if (!progressBar) return;
         
         const stepsData = [
-            { text: 'جاري تحميل الوحدات الأساسية', duration: 500 },
+            { text: 'جاري تحميل الوحدات الأساسية', duration: 600 },
             { text: 'جاري تهيئة نظام التشفير', duration: 800 },
             { text: 'جاري التحقق من البيئة الآمنة', duration: 700 },
-            { text: 'جاري التشغيل النهائي', duration: 600 }
+            { text: 'جاري التشغيل النهائي', duration: 500 }
         ];
         
         let currentStep = 0;
-        const totalDuration = stepsData.reduce((sum, step) => sum + step.duration, 0);
         
-        const animate = () => {
+        const animateStep = () => {
             if (currentStep >= stepsData.length) {
                 progressBar.style.width = '100%';
+                
+                // عند اكتمال التحميل، تمكين الزر مباشرة
+                setTimeout(() => {
+                    const continueBtn = document.getElementById('continueBtn');
+                    if (continueBtn) {
+                        continueBtn.disabled = false;
+                        this.showNotification('✅ النظام جاهز، اضغط للمتابعة', 'success');
+                    }
+                }, 300);
                 return;
             }
             
@@ -122,7 +152,8 @@ class EncryptionApp {
             
             // تحديث الخطوة
             steps.forEach((s, i) => {
-                if (i === currentStep) {
+                s.classList.remove('active');
+                if (i <= currentStep) {
                     s.classList.add('active');
                 }
             });
@@ -132,10 +163,10 @@ class EncryptionApp {
             progressBar.style.width = `${progress}%`;
             
             currentStep++;
-            setTimeout(animate, step.duration);
+            setTimeout(animateStep, step.duration);
         };
         
-        animate();
+        animateStep();
     }
 
     setupPasswordStrength() {
@@ -155,6 +186,31 @@ class EncryptionApp {
         }
     }
 
+    // ===== تهيئة محرك التشفير =====
+    async initializeCryptoEngine() {
+        try {
+            // انتظار تحميل الملف أولاً
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            if (typeof CryptoEngine !== 'undefined') {
+                window.cryptoEngine = new CryptoEngine();
+                this.state.cryptoEngineReady = true;
+                console.log('✅ محرك التشفير تم تهيئته بنجاح');
+                
+                // إذا كان التطبيق جاهزاً، إظهار إشعار
+                if (this.state.isInitialized) {
+                    this.showNotification('✅ محرك التشفير جاهز للاستخدام', 'success');
+                }
+            } else {
+                console.warn('⚠️ CryptoEngine غير متاح بعد، سيتم تحميله عند الحاجة');
+                // سنحاول تحميله لاحقاً عند الحاجة
+            }
+        } catch (error) {
+            console.error('❌ فشل تهيئة محرك التشفير:', error);
+            // لا نوقف التطبيق إذا فشل تحميل المحرك
+        }
+    }
+
     // ===== التحقق من الأمان =====
     async checkSecurity() {
         return new Promise(async (resolve, reject) => {
@@ -171,9 +227,6 @@ class EncryptionApp {
                 // 4. التحقق من GitHub Pages
                 await this.checkGitHubPages();
                 
-                // 5. التحقق من المتصفح
-                await this.checkBrowser();
-                
                 // تمكين زر المتابعة
                 const continueBtn = document.getElementById('continueBtn');
                 if (continueBtn) {
@@ -186,9 +239,18 @@ class EncryptionApp {
                     resolve();
                 }
                 
+                // تمكين الزر بعد 2 ثانية كحد أقصى
+                setTimeout(() => {
+                    if (continueBtn && continueBtn.disabled) {
+                        continueBtn.disabled = false;
+                        this.showNotification('✅ يمكنك المتابعة الآن', 'info');
+                    }
+                }, 2000);
+                
             } catch (error) {
                 console.error('❌ فشل التحقق من الأمان:', error);
-                reject(error);
+                // عدم رفض الـ Promise حتى لو فشلت الفحوصات
+                resolve();
             }
         });
     }
@@ -204,7 +266,7 @@ class EncryptionApp {
                     isSecure ? 'success' : 'error');
                 
                 resolve(isSecure);
-            }, 500);
+            }, 400);
         });
     }
 
@@ -217,12 +279,9 @@ class EncryptionApp {
                     hasCrypto ? 'متاح ✓' : 'غير متاح ✗',
                     hasCrypto ? 'success' : 'error');
                 
-                if (hasCrypto) {
-                    window.cryptoEngine = new CryptoEngine();
-                }
-                
+                // لا ننشئ cryptoEngine هنا
                 resolve(hasCrypto);
-            }, 800);
+            }, 600);
         });
     }
 
@@ -237,7 +296,7 @@ class EncryptionApp {
                     hasStorage ? 'success' : 'error');
                 
                 resolve(hasStorage);
-            }, 600);
+            }, 300);
         });
     }
 
@@ -251,33 +310,7 @@ class EncryptionApp {
                     isGitHubPages ? 'success' : 'info');
                 
                 resolve(isGitHubPages);
-            }, 400);
-        });
-    }
-
-    async checkBrowser() {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const features = [
-                    'Promise',
-                    'fetch',
-                    'crypto',
-                    'crypto.subtle',
-                    'TextEncoder',
-                    'TextDecoder',
-                    'Uint8Array',
-                    'localStorage',
-                    'sessionStorage'
-                ];
-                
-                const isModern = features.every(feature => feature in window);
-                
-                this.updateSecurityStatus('browserStatus',
-                    isModern ? 'حديث ✓' : 'قديم ✗',
-                    isModern ? 'success' : 'error');
-                
-                resolve(isModern);
-            }, 300);
+            }, 200);
         });
     }
 
@@ -459,6 +492,16 @@ class EncryptionApp {
                 randomSalt: document.getElementById('optionRandomSalt')?.checked || true
             };
             
+            // التحقق من وجود محرك التشفير
+            if (!window.cryptoEngine) {
+                if (typeof CryptoEngine !== 'undefined') {
+                    window.cryptoEngine = new CryptoEngine();
+                    this.state.cryptoEngineReady = true;
+                } else {
+                    throw new Error('محرك التشفير غير متاح. يرجى تحديث الصفحة.');
+                }
+            }
+            
             // تنفيذ التشفير
             const result = await window.cryptoEngine.encrypt(plainText, password, options);
             
@@ -499,6 +542,7 @@ class EncryptionApp {
         
         if (resultContainer) {
             resultContainer.classList.remove('hidden');
+            resultContainer.style.display = 'block';
         }
         
         if (encryptedText) {
@@ -535,6 +579,16 @@ class EncryptionApp {
             this.showNotification('🔓 جاري فك تشفير النص...', 'info');
             
             const startTime = performance.now();
+            
+            // التحقق من وجود محرك التشفير
+            if (!window.cryptoEngine) {
+                if (typeof CryptoEngine !== 'undefined') {
+                    window.cryptoEngine = new CryptoEngine();
+                    this.state.cryptoEngineReady = true;
+                } else {
+                    throw new Error('محرك التشفير غير متاح. يرجى تحديث الصفحة.');
+                }
+            }
             
             // تنفيذ فك التشفير
             let parsedEncrypted;
@@ -590,6 +644,7 @@ class EncryptionApp {
         
         if (resultContainer) {
             resultContainer.classList.remove('hidden');
+            resultContainer.style.display = 'block';
         }
         
         if (decryptedText && result.text) {
@@ -951,6 +1006,7 @@ class EncryptionApp {
             const resultContainer = document.getElementById('encryptionResult');
             if (resultContainer) {
                 resultContainer.classList.add('hidden');
+                resultContainer.style.display = 'none';
             }
             
             this.showNotification('🗑️ تم مسح حقول التشفير', 'info');
@@ -966,6 +1022,7 @@ class EncryptionApp {
             const resultContainer = document.getElementById('decryptionResult');
             if (resultContainer) {
                 resultContainer.classList.add('hidden');
+                resultContainer.style.display = 'none';
             }
             
             this.showNotification('🗑️ تم مسح حقول فك التشفير', 'info');
@@ -1070,6 +1127,7 @@ class EncryptionApp {
         const securityCheck = document.getElementById('securityCheck');
         if (securityCheck) {
             securityCheck.classList.remove('hidden');
+            securityCheck.style.display = 'flex';
         }
     }
 
@@ -1078,12 +1136,17 @@ class EncryptionApp {
         const mainApp = document.getElementById('mainApp');
         
         if (securityCheck) {
-            securityCheck.classList.add('hidden');
-        }
-        
-        if (mainApp) {
-            mainApp.classList.remove('hidden');
-            mainApp.style.animation = 'fadeIn 0.8s ease-out';
+            securityCheck.style.opacity = '0';
+            setTimeout(() => {
+                securityCheck.style.display = 'none';
+                if (mainApp) {
+                    mainApp.classList.remove('hidden');
+                    mainApp.style.display = 'block';
+                    mainApp.style.animation = 'fadeIn 0.8s ease-out';
+                    this.state.isInitialized = true;
+                    this.showNotification('🚀 نظام التشفير جاهز للاستخدام', 'success');
+                }
+            }, 500);
         }
     }
 
@@ -1130,6 +1193,36 @@ class EncryptionApp {
             if (e.target.classList.contains('alert-close')) {
                 e.target.closest('.alert').style.display = 'none';
             }
+        });
+        
+        // تحسينات للأجهزة المحمولة
+        this.setupMobileEnhancements();
+    }
+
+    setupMobileEnhancements() {
+        // تحسين إدخال النص على الهواتف
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('focus', () => {
+                // تأخير بسيط لضمان ظهور لوحة المفاتيح بشكل صحيح
+                setTimeout(() => {
+                    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            });
+        });
+        
+        // تحسين الأزرار على الهواتف
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', () => {
+                button.style.transform = 'scale(0.98)';
+            });
+            
+            button.addEventListener('touchend', () => {
+                setTimeout(() => {
+                    button.style.transform = 'scale(1)';
+                }, 150);
+            });
         });
     }
 
