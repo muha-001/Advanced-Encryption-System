@@ -1,5 +1,6 @@
 // ============================================
 // محرك التشفير المتقدم - AES-256-GCM مع PBKDF2
+// الإصدار المحسّن مع معالجة أخطاء محسنة
 // ============================================
 
 class CryptoEngine {
@@ -14,14 +15,19 @@ class CryptoEngine {
             tagLength: 128
         };
         
-        this.crypto = window.crypto.subtle;
-        
         // التحقق من دعم Web Crypto API
-        if (!this.crypto) {
+        if (!window.crypto || !window.crypto.subtle) {
             throw new Error('Web Crypto API غير مدعوم في هذا المتصفح');
         }
         
+        this.crypto = window.crypto.subtle;
+        
         console.log('🚀 محرك التشفير المتقدم جاهز للعمل');
+        
+        // تسجيل نجاح التحميل
+        if (typeof window !== 'undefined') {
+            window.CryptoEngineLoaded = true;
+        }
     }
 
     // ===== التشفير الأساسي =====
@@ -63,7 +69,7 @@ class CryptoEngine {
             
             // 6. إنشاء بنية البيانات المشفرة
             const encryptedData = {
-                version: '3.0',
+                version: '3.1',
                 algorithm: this.config.algorithm,
                 iterations: this.config.iterations,
                 keyLength: this.config.keyLength,
@@ -94,8 +100,13 @@ class CryptoEngine {
             
             // إذا طلب الضغط
             if (options.compression) {
-                encryptedData.ciphertext = await this.compressData(encryptedData.ciphertext);
-                encryptedData.metadata.compression = true;
+                try {
+                    encryptedData.ciphertext = await this.compressData(encryptedData.ciphertext);
+                    encryptedData.metadata.compression = true;
+                } catch (error) {
+                    console.warn('⚠️ فشل الضغط:', error);
+                    encryptedData.metadata.compression = false;
+                }
             }
             
             return encryptedData;
@@ -121,7 +132,7 @@ class CryptoEngine {
                 try {
                     data = JSON.parse(encryptedData);
                 } catch {
-                    // قد يكون النص مشفراً مباشرة
+                    // إذا لم يكن JSON، حاول معالجته كنص مشفر مباشر
                     data = this.parseEncryptedString(encryptedData);
                 }
             } else if (typeof encryptedData === 'object') {
@@ -139,7 +150,12 @@ class CryptoEngine {
             
             // إذا كانت البيانات مضغوطة
             if (data.metadata?.compression) {
-                data.ciphertext = await this.decompressData(data.ciphertext);
+                try {
+                    data.ciphertext = await this.decompressData(data.ciphertext);
+                } catch (error) {
+                    console.warn('⚠️ فشل فك الضغط:', error);
+                    throw new Error('فشل فك ضغط البيانات');
+                }
             }
             
             // 1. فك ترميز البيانات
@@ -206,7 +222,7 @@ class CryptoEngine {
                 errorMessage = 'تنسيق البيانات المشفرة غير صحيح';
             }
             
-            throw new Error(`${errorMessage}: ${error.message}`);
+            throw new Error(`${errorMessage}`);
         }
     }
 
@@ -247,34 +263,49 @@ class CryptoEngine {
             
         } catch (error) {
             console.error('❌ فشل اشتقاق المفتاح:', error);
-            throw error;
+            throw new Error('فشل اشتقاق المفتاح: كلمة المرور قد تكون قصيرة جداً');
         }
     }
 
     // ===== توليد قيم عشوائية آمنة =====
     generateRandomBytes(length) {
-        return window.crypto.getRandomValues(new Uint8Array(length));
+        try {
+            return window.crypto.getRandomValues(new Uint8Array(length));
+        } catch (error) {
+            console.error('❌ فشل توليد القيم العشوائية:', error);
+            throw new Error('فشل توليد القيم العشوائية الآمنة');
+        }
     }
 
     // ===== تحويل بين التنسيقات =====
     arrayToBase64(array) {
-        if (array instanceof ArrayBuffer) {
-            array = new Uint8Array(array);
+        try {
+            if (array instanceof ArrayBuffer) {
+                array = new Uint8Array(array);
+            }
+            
+            const binary = String.fromCharCode(...array);
+            return btoa(binary);
+        } catch (error) {
+            console.error('❌ فشل تحويل المصفوفة إلى Base64:', error);
+            throw new Error('فشل تحويل البيانات');
         }
-        
-        const binary = String.fromCharCode(...array);
-        return btoa(binary);
     }
 
     base64ToArray(base64) {
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        
-        for (let i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
+        try {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            
+            return bytes.buffer;
+        } catch (error) {
+            console.error('❌ فشل تحويل Base64 إلى مصفوفة:', error);
+            throw new Error('تنسيق Base64 غير صحيح');
         }
-        
-        return bytes.buffer;
     }
 
     // ===== الضغط والتفريغ =====
@@ -287,12 +318,6 @@ class CryptoEngine {
                 const compressedBlob = await new Response(compressedStream).blob();
                 const compressedArrayBuffer = await compressedBlob.arrayBuffer();
                 return this.arrayToBase64(compressedArrayBuffer);
-            }
-            
-            // طريقة بديلة باستخدام pako إذا تم تضمينها
-            if (typeof pako !== 'undefined') {
-                const compressed = pako.gzip(data);
-                return this.arrayToBase64(compressed);
             }
             
             // إذا لم يكن الضغط مدعوماً، إرجاع البيانات كما هي
@@ -314,12 +339,6 @@ class CryptoEngine {
                 const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
                 const decompressedBlob = await new Response(decompressedStream).blob();
                 return await decompressedBlob.text();
-            }
-            
-            // طريقة بديلة باستخدام pako
-            if (typeof pako !== 'undefined') {
-                const decompressed = pako.ungzip(new Uint8Array(arrayBuffer));
-                return new TextDecoder().decode(decompressed);
             }
             
             // إذا لم يكن التفريغ مدعوماً، إرجاع البيانات كما هي
@@ -365,27 +384,6 @@ class CryptoEngine {
                 return false;
             }
             
-            // محاولة إعادة تشفير للتحقق (اختياري)
-            if (decryptedText && decryptedText.length < 1000) { // فقط للنصوص القصيرة
-                try {
-                    const testEncrypted = await this.encrypt(
-                        decryptedText,
-                        'test-password',
-                        { timestamp: false, compression: false }
-                    );
-                    
-                    // التحقق من أن الهيكل متشابه
-                    if (testEncrypted.algorithm !== encryptedData.algorithm) {
-                        console.warn('⚠️ الخوارزمية لا تتطابق');
-                        return false;
-                    }
-                    
-                } catch (testError) {
-                    console.warn('⚠️ فشل التحقق بالاختبار:', testError);
-                    // لا نعيد false لأن هذا ليس فشلاً حاسماً
-                }
-            }
-            
             return true;
             
         } catch (error) {
@@ -400,7 +398,7 @@ class CryptoEngine {
             // قد تكون سلسلة Base64 مباشرة
             if (encryptedString.length > 100 && !encryptedString.includes('{')) {
                 return {
-                    version: '3.0',
+                    version: '3.1',
                     algorithm: this.config.algorithm,
                     iterations: this.config.iterations,
                     salt: encryptedString.substring(0, 24),
@@ -417,35 +415,11 @@ class CryptoEngine {
             throw new Error('تنسيق السلسلة غير معروف');
             
         } catch (error) {
-            throw new Error(`فشل تحليل السلسلة: ${error.message}`);
+            throw new Error(`تنسيق البيانات غير معروف`);
         }
     }
 
     // ===== أدوات إضافية =====
-    async generateKeyPair() {
-        try {
-            const keyPair = await this.crypto.generateKey(
-                {
-                    name: 'RSA-OAEP',
-                    modulusLength: 4096,
-                    publicExponent: new Uint8Array([1, 0, 1]),
-                    hash: 'SHA-256'
-                },
-                true,
-                ['encrypt', 'decrypt']
-            );
-            
-            return {
-                publicKey: await this.crypto.exportKey('spki', keyPair.publicKey),
-                privateKey: await this.crypto.exportKey('pkcs8', keyPair.privateKey)
-            };
-            
-        } catch (error) {
-            console.error('❌ فشل توليد زوج المفاتيح:', error);
-            throw error;
-        }
-    }
-
     async hashData(data, algorithm = 'SHA-256') {
         try {
             const encoder = new TextEncoder();
@@ -517,4 +491,5 @@ if (typeof module !== 'undefined' && module.exports) {
 } else {
     // للاستخدام في المتصفح
     window.CryptoEngine = CryptoEngine;
+    console.log('✅ CryptoEngine جاهز للاستخدام في المتصفح');
 }
