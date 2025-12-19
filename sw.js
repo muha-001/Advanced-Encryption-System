@@ -1,6 +1,10 @@
-// اسم التخزين المؤقت
-const CACHE_NAME = 'advanced-encryption-system-v3';
+// ============================================
+// Service Worker لـ GitHub Pages
+// ============================================
+
+const CACHE_NAME = 'github-pages-encryption-system-v3';
 const CACHE_VERSION = '3.0.0';
+const GITHUB_PAGES = true;
 
 // الملفات التي سيتم تخزينها مؤقتاً
 const urlsToCache = [
@@ -13,18 +17,20 @@ const urlsToCache = [
 ];
 
 // ============================================
-// تثبيت Service Worker
+// التثبيت
 // ============================================
 
 self.addEventListener('install', event => {
+  console.log('🚀 Installing Service Worker for GitHub Pages');
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log(`📦 Installing Cache: ${CACHE_NAME} v${CACHE_VERSION}`);
+        console.log('📦 Opening cache:', CACHE_NAME);
         return cache.addAll(urlsToCache);
       })
       .then(() => {
-        console.log('✅ Cache installed successfully');
+        console.log('✅ All resources cached');
         return self.skipWaiting();
       })
       .catch(error => {
@@ -34,10 +40,12 @@ self.addEventListener('install', event => {
 });
 
 // ============================================
-// تفعيل Service Worker
+// التفعيل
 // ============================================
 
 self.addEventListener('activate', event => {
+  console.log('⚡ Activating Service Worker');
+  
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
@@ -52,7 +60,7 @@ self.addEventListener('activate', event => {
         );
       })
       .then(() => {
-        console.log('✅ Service Worker activated');
+        console.log('✅ Service Worker activated for GitHub Pages');
         return self.clients.claim();
       })
   );
@@ -66,8 +74,11 @@ self.addEventListener('fetch', event => {
   // تجاهل الطلبات غير GET
   if (event.request.method !== 'GET') return;
 
-  // تجاهل الطلبات من مصادر مختلفة (Cross-Origin)
-  if (!event.request.url.startsWith(self.location.origin)) {
+  // فقط الطلبات من نفس المصدر لـ GitHub Pages
+  const isSameOrigin = event.request.url.startsWith(self.location.origin);
+  const isFontAwesome = event.request.url.includes('cdnjs.cloudflare.com');
+  
+  if (!isSameOrigin && !isFontAwesome) {
     return;
   }
 
@@ -105,16 +116,16 @@ self.addEventListener('fetch', event => {
           .catch(error => {
             console.error('❌ Fetch failed:', error);
             
-            // في حالة الفشل، إرجاع صفحة بديلة
+            // في حالة الفشل، إرجاع الصفحة الرئيسية للطلبات التصفحية
             if (event.request.headers.get('accept').includes('text/html')) {
               return caches.match('./index.html');
             }
             
-            // للطلبات الأخرى، إرجاع رسالة خطأ
             return new Response(
               JSON.stringify({
                 error: 'Network error',
-                message: 'فشل الاتصال بالشبكة'
+                message: 'GitHub Pages - فشل الاتصال بالشبكة',
+                offline: true
               }),
               {
                 status: 503,
@@ -138,8 +149,23 @@ self.addEventListener('message', event => {
   if (event.data.type === 'CLEAR_CACHE') {
     caches.delete(CACHE_NAME)
       .then(success => {
-        console.log('🧹 Cache cleared');
+        console.log('🧹 Cache cleared for GitHub Pages');
         event.ports[0].postMessage({ success: success });
+      });
+  }
+  
+  if (event.data.type === 'GET_CACHE_INFO') {
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.keys();
+      })
+      .then(requests => {
+        event.ports[0].postMessage({
+          cacheName: CACHE_NAME,
+          version: CACHE_VERSION,
+          isGitHubPages: GITHUB_PAGES,
+          cachedItems: requests.length
+        });
       });
   }
 });
@@ -147,12 +173,6 @@ self.addEventListener('message', event => {
 // ============================================
 // تحديث الخلفية
 // ============================================
-
-self.addEventListener('periodicsync', event => {
-  if (event.tag === 'update-cache') {
-    event.waitUntil(updateCache());
-  }
-});
 
 async function updateCache() {
   try {
@@ -170,9 +190,9 @@ async function updateCache() {
       }
     }
     
-    console.log('✅ Cache update completed');
+    console.log('✅ GitHub Pages cache update completed');
   } catch (error) {
-    console.error('Cache update failed:', error);
+    console.error('GitHub Pages cache update failed:', error);
   }
 }
 
@@ -181,7 +201,6 @@ async function updateCache() {
 // ============================================
 
 self.addEventListener('activate', event => {
-  // تنظيف التخزين المؤقت الزائد
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -190,8 +209,7 @@ self.addEventListener('activate', event => {
             .then(cache => {
               return cache.keys()
                 .then(requests => {
-                  // حذف الملفات القديمة
-                  const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 أيام
+                  const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
                   
                   return Promise.all(
                     requests.map(request => {
@@ -215,70 +233,59 @@ self.addEventListener('activate', event => {
 });
 
 // ============================================
-// إعدادات الخصوصية
+// الوضع دون اتصال لـ GitHub Pages
 // ============================================
 
-// لا نتعقب المستخدمين
-self.addEventListener('fetch', event => {
-  // منع تتبع التحليلات إذا لم يوافق المستخدم
-  if (event.request.url.includes('analytics') || 
-      event.request.url.includes('tracking') ||
-      event.request.url.includes('google-analytics')) {
-    event.respondWith(new Response(null, { status: 204 }));
-    return;
-  }
-});
-
-// ============================================
-// وضع عدم الاتصال
-// ============================================
-
-// دعم وضع عدم الاتصال الكامل
 self.addEventListener('fetch', event => {
   // إذا كان الطلب لصفحة HTML وحدث خطأ، عرض صفحة عدم الاتصال
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .catch(() => {
-          return caches.match('./index.html');
+          return caches.match('./index.html')
+            .then(response => {
+              if (response) {
+                return response;
+              }
+              // صفحة عدم الاتصال مخصصة
+              return new Response(
+                `
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>نظام التشفير - وضع عدم الاتصال</title>
+                    <style>
+                        body { font-family: Arial; text-align: center; padding: 50px; }
+                        h1 { color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <h1>🔌 وضع عدم الاتصال</h1>
+                    <p>أنت غير متصل بالإنترنت. نظام التشفير يعمل محلياً.</p>
+                    <p>يمكنك استخدام الميزات الأساسية.</p>
+                </body>
+                </html>
+                `,
+                {
+                  headers: { 'Content-Type': 'text/html' }
+                }
+              );
+            });
         })
     );
   }
 });
 
 // ============================================
-// الأمان
+// تسجيل الأخطاء
 // ============================================
 
-// منع هجمات XSS
-const securityHeaders = {
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'X-XSS-Protection': '1; mode=block',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()'
-};
+self.addEventListener('error', event => {
+  console.error('Service Worker Error:', event.error);
+});
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // إضافة رؤوس الأمان
-        const secureResponse = new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: new Headers(response.headers)
-        });
-        
-        Object.entries(securityHeaders).forEach(([header, value]) => {
-          secureResponse.headers.set(header, value);
-        });
-        
-        return secureResponse;
-      })
-      .catch(error => {
-        console.error('Security headers error:', error);
-        return response;
-      })
-  );
+self.addEventListener('unhandledrejection', event => {
+  console.error('Service Worker Unhandled Rejection:', event.reason);
 });
