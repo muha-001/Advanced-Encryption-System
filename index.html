@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <!-- === رؤوس الأمان المحسنة === -->
@@ -235,7 +235,7 @@
                             <span class="title-gradient">🔐 نظام التشفير المتقدم</span>
                         </h1>
                         <div class="title-sub">
-                            <span class="version">v3.0.0</span>
+                            <span class="version">v3.1.0</span>
                             <span class="separator">•</span>
                             <span class="algorithm">AES-256-GCM</span>
                             <span class="separator">•</span>
@@ -341,7 +341,7 @@
                             <textarea 
                                 id="plainText" 
                                 placeholder="أدخل النص الذي تريد تشفيره هنا..."
-                                rows="5"
+                                rows="4"
                                 spellcheck="false"
                                 autocomplete="off"
                                 autocorrect="off"
@@ -441,7 +441,7 @@
                     
                     <!-- أزرار التحكم -->
                     <div class="action-buttons">
-                        <button class="btn btn-encrypt" onclick="app.encrypt()">
+                        <button class="btn btn-encrypt" onclick="app.encrypt()" id="encryptBtn">
                             <i class="fas fa-lock"></i>
                             <span>🔒 تشفير النص</span>
                         </button>
@@ -474,7 +474,7 @@
                             <textarea 
                                 id="encryptedText" 
                                 readonly 
-                                rows="4"
+                                rows="3"
                                 placeholder="سيظهر النص المشفر هنا..."
                                 spellcheck="false"></textarea>
                         </div>
@@ -520,7 +520,7 @@
                             <textarea 
                                 id="encryptedInput" 
                                 placeholder="الصق النص المشفر هنا..."
-                                rows="4"
+                                rows="3"
                                 spellcheck="false"
                                 autocomplete="off"
                                 autocorrect="off"
@@ -564,7 +564,7 @@
                     
                     <!-- أزرار التحكم -->
                     <div class="action-buttons">
-                        <button class="btn btn-decrypt" onclick="app.decrypt()">
+                        <button class="btn btn-decrypt" onclick="app.decrypt()" id="decryptBtn">
                             <i class="fas fa-unlock"></i>
                             <span>🔓 فك التشفير</span>
                         </button>
@@ -597,7 +597,7 @@
                             <textarea 
                                 id="decryptedText" 
                                 readonly 
-                                rows="6"
+                                rows="4"
                                 placeholder="سيظهر النص المفكوك هنا..."
                                 spellcheck="false"></textarea>
                         </div>
@@ -768,7 +768,7 @@
                 <div class="footer-section">
                     <h5>نظام التشفير المتقدم © 2024</h5>
                     <p>مُستضاف على GitHub Pages - تشفير محلي 100%</p>
-                    <p class="version-info">الإصدار 3.0.0 | آخر تحديث: <span id="currentDate">2024-01-01</span></p>
+                    <p class="version-info">الإصدار 3.1.0 | آخر تحديث: <span id="currentDate">2024-01-01</span></p>
                 </div>
                 
                 <div class="footer-section">
@@ -893,59 +893,63 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- نافذة المعلومات -->
-    <div class="modal" id="infoModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-info-circle"></i> عن نظام التشفير</h3>
-                <button class="modal-close" onclick="app.hideInfoModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="info-content">
-                    <div class="info-section">
-                        <h4>📋 نظرة عامة</h4>
-                        <p>نظام تشفير متقدم يعمل على GitHub Pages باستخدام تقنيات التشفير الحديثة والمعايير الأمنية العسكرية.</p>
-                    </div>
-                    <div class="info-section">
-                        <h4>🔐 تقنيات التشفير</h4>
-                        <ul>
-                            <li><strong>AES-256-GCM</strong>: خوارزمية تشفير معتمدة من NSA ومستوى عسكري</li>
-                            <li><strong>PBKDF2</strong>: 310,000 تكرار وفق معيار OWASP 2023</li>
-                            <li><strong>IV عشوائي 96-bit</strong>: قيمة عشوائية فريدة لكل عملية تشفير</li>
-                            <li><strong>ملح عشوائي 128-bit</strong>: يحمي من هجمات القاموس</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <h4>🚀 ميزات النظام</h4>
-                        <ul>
-                            <li>تشفير محلي 100% - لا بيانات تغادر المتصفح</li>
-                            <li>دعم العمل دون اتصال بالإنترنت</li>
-                            <li>واجهة مستخدم عربية متكاملة</li>
-                            <li>حماية من هجمات القوة الغاشمة</li>
-                            <li>جلسات آمنة تنتهي تلقائياً</li>
-                        </ul>
+        <!-- نافذة المعلومات -->
+        <div class="modal" id="infoModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-info-circle"></i> عن نظام التشفير</h3>
+                    <button class="modal-close" onclick="app.hideInfoModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-content">
+                        <div class="info-section">
+                            <h4>📋 نظرة عامة</h4>
+                            <p>نظام تشفير متقدم يعمل على GitHub Pages باستخدام تقنيات التشفير الحديثة والمعايير الأمنية العسكرية.</p>
+                        </div>
+                        <div class="info-section">
+                            <h4>🔐 تقنيات التشفير</h4>
+                            <ul>
+                                <li><strong>AES-256-GCM</strong>: خوارزمية تشفير معتمدة من NSA ومستوى عسكري</li>
+                                <li><strong>PBKDF2</strong>: 310,000 تكرار وفق معيار OWASP 2023</li>
+                                <li><strong>IV عشوائي 96-bit</strong>: قيمة عشوائية فريدة لكل عملية تشفير</li>
+                                <li><strong>ملح عشوائي 128-bit</strong>: يحمي من هجمات القاموس</li>
+                            </ul>
+                        </div>
+                        <div class="info-section">
+                            <h4>🚀 ميزات النظام</h4>
+                            <ul>
+                                <li>تشفير محلي 100% - لا بيانات تغادر المتصفح</li>
+                                <li>دعم العمل دون اتصال بالإنترنت</li>
+                                <li>واجهة مستخدم عربية متكاملة</li>
+                                <li>حماية من هجمات القوة الغاشمة</li>
+                                <li>جلسات آمنة تنتهي تلقائياً</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="app.hideInfoModal()">
-                    فهمت
-                </button>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="app.hideInfoModal()">
+                        فهمت
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ملفات JavaScript -->
-    <script src="app.js"></script>
+    <!-- تحميل crypto-engine.js أولاً -->
     <script src="crypto-engine.js"></script>
+    <!-- ثم تحميل app.js -->
+    <script src="app.js"></script>
     
     <script>
-        // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
+        // تهيئة التطبيق بعد تحميل الصفحة بالكامل
+        window.addEventListener('load', function() {
+            console.log('📦 جميع الملفات تم تحميلها، بدء التطبيق...');
+            
             // تسجيل وقت التحميل
             window.pageLoadStart = performance.now();
             
@@ -953,29 +957,104 @@
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => {
-                        console.log('Service Worker registered:', registration);
+                        console.log('✅ Service Worker مسجل:', registration);
                     })
                     .catch(error => {
-                        console.log('Service Worker registration failed:', error);
+                        console.log('⚠️ فشل تسجيل Service Worker:', error);
                     });
             }
             
-            // تحميل التطبيق
-            window.app = new EncryptionApp();
-            
-            // تعيين التاريخ الحالي
-            const now = new Date();
-            document.getElementById('currentDate').textContent = 
-                `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
-            
-            // حساب وقت التحميل
-            const loadTime = performance.now() - window.pageLoadStart;
-            document.getElementById('pageLoadTime').textContent = 
-                `تم التحميل في ${Math.round(loadTime)} مللي ثانية`;
+            // تأخير بسيط لضمان تحميل جميع الملفات
+            setTimeout(function() {
+                try {
+                    // إنشاء التطبيق
+                    window.app = new EncryptionApp();
+                    
+                    // تعيين التاريخ الحالي
+                    const now = new Date();
+                    const dateEl = document.getElementById('currentDate');
+                    if (dateEl) {
+                        dateEl.textContent = 
+                            `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+                    }
+                    
+                    // حساب وقت التحميل
+                    const loadTime = performance.now() - window.pageLoadStart;
+                    const loadTimeEl = document.getElementById('pageLoadTime');
+                    if (loadTimeEl) {
+                        loadTimeEl.textContent = 
+                            `تم التحميل في ${Math.round(loadTime)} مللي ثانية`;
+                    }
+                    
+                    console.log('✅ التطبيق جاهز للاستخدام');
+                    
+                } catch (error) {
+                    console.error('❌ فشل تحميل التطبيق:', error);
+                    
+                    // إخفاء شاشة التحميل حتى في حالة الخطأ
+                    const loadingScreen = document.getElementById('loadingScreen');
+                    if (loadingScreen) {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            
+                            // إظهار رسالة خطأ
+                            const securityCheck = document.getElementById('securityCheck');
+                            if (securityCheck) {
+                                securityCheck.classList.remove('hidden');
+                                securityCheck.innerHTML = `
+                                    <div class="check-content">
+                                        <div class="check-icon" style="color: #ef4444;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <h2>⚠️ حدث خطأ في التحميل</h2>
+                                        <p class="check-subtitle">تعذر تحميل نظام التشفير. يرجى:</p>
+                                        <div class="check-list">
+                                            <div class="check-item">
+                                                <div class="check-icon-status">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </div>
+                                                <div class="check-info">
+                                                    <span class="check-title">تحديث الصفحة</span>
+                                                    <span class="check-desc">اضغط F5 أو زر التحديث</span>
+                                                </div>
+                                            </div>
+                                            <div class="check-item">
+                                                <div class="check-icon-status">
+                                                    <i class="fas fa-browser"></i>
+                                                </div>
+                                                <div class="check-info">
+                                                    <span class="check-title">استخدام متصفح حديث</span>
+                                                    <span class="check-desc">Chrome, Firefox, Edge</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary btn-large" onclick="location.reload()">
+                                            <i class="fas fa-redo"></i>
+                                            <span>🔄 تحديث الصفحة</span>
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        }, 500);
+                    }
+                }
+            }, 300);
         });
         
         // منع تصغير النص على iOS
         document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // تحسينات للأجهزة المحمولة
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.body.classList.add('mobile-device');
+            
+            // إضافة meta tag إضافي للتحكم في حجم العرض
+            const viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (viewportMeta) {
+                viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
+            }
+        }
     </script>
 </body>
 </html>
