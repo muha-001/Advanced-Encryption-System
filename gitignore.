@@ -1,0 +1,10 @@
+# ملف .gitignore
+.DS_Store
+Thumbs.db
+node_modules/
+.vscode/
+.idea/
+*.log
+.env
+*.tmp
+*.temp
