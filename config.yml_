@@ -5,7 +5,7 @@ title: "نظام التشفير المتقدم"
 name: "نظام التشفير المتقدم"
 description: "نظام تشفير عسكري على GitHub Pages باستخدام AES-256-GCM وPBKDF2 مع 310,000 تكرار"
 baseurl: "/advanced-encryption-system" # أو اتركه فارغاً إذا كان في root
-url: "https://YOUR_USERNAME.github.io" # رابط موقعك
+url: "https://muha-001.github.io" # رابط موقعك
 
 # إعدادات Jekyll
 theme: jekyll-theme-cayman
