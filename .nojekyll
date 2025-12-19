@@ -1,0 +1,159 @@
+
+### **8. 📄 ملف 404.html** (اختياري)
+
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الصفحة غير موجودة - نظام التشفير المتقدم</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #10b981;
+            --dark: #0f172a;
+            --light: #f9fafb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .error-code {
+            font-size: 120px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--light);
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #cbd5e1;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .encryption-info {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .tech-item {
+            background: rgba(37, 99, 235, 0.1);
+            color: #60a5fa;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-code">404</div>
+        <h1>⚠️ الصفحة غير موجودة</h1>
+        <p>عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.</p>
+        <p>ربما أردت زيارة صفحة نظام التشفير المتقدم على GitHub Pages.</p>
+        
+        <div class="btn-group">
+            <a href="./" class="btn">
+                <i class="fas fa-home"></i>
+                العودة للصفحة الرئيسية
+            </a>
+            <a href="https://github.com/YOUR_USERNAME/advanced-encryption-system" class="btn btn-secondary" target="_blank" rel="noopener">
+                <i class="fab fa-github"></i>
+                مستودع GitHub
+            </a>
+        </div>
+        
+        <div class="encryption-info">
+            <p><strong>💡 معلومة:</strong> نظام التشفير هذا يستخدم:</p>
+            <div class="tech-stack">
+                <span class="tech-item">AES-256-GCM</span>
+                <span class="tech-item">PBKDF2 310K</span>
+                <span class="tech-item">Web Crypto API</span>
+                <span class="tech-item">GitHub Pages</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>
