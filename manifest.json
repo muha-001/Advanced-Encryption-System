@@ -1,7 +1,7 @@
 {
-  "name": "نظام التشفير المتقدم",
+  "name": "نظام التشفير المتقدم - GitHub Pages",
   "short_name": "التشفير المتقدم",
-  "description": "نظام تشفير عسكري باستخدام AES-256-GCM وPBKDF2 مع 310,000 تكرار. تشفير محلي 100%.",
+  "description": "نظام تشفير عسكري على GitHub Pages. تشفير محلي 100% باستخدام AES-256-GCM وPBKDF2.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -9,69 +9,36 @@
   "background_color": "#0f172a",
   "theme_color": "#2563eb",
   "orientation": "portrait-primary",
+  "scope": "./",
+  "id": "/advanced-encryption-system/",
+  "categories": ["security", "productivity", "utilities"],
   "icons": [
     {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
-      "sizes": "72x72",
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%232563eb%22>🔐</text></svg>",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
-      "sizes": "96x96",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
-      "sizes": "128x128",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
-      "sizes": "144x144",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
-      "sizes": "152x152",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%2310b981%22>🔐</text></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
-      "sizes": "384x384",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock.svg",
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%23ef4444%22>🔐</text></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["security", "productivity", "utilities"],
   "screenshots": [
     {
-      "src": "https://via.placeholder.com/1280x720/0f172a/2563eb?text=Advanced+Encryption+System",
+      "src": "https://via.placeholder.com/1280x720/0f172a/2563eb?text=Advanced+Encryption+System+GitHub+Pages",
       "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "https://via.placeholder.com/750x1334/0f172a/2563eb?text=Advanced+Encryption+System",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "wide",
+      "label": "واجهة نظام التشفير على GitHub Pages"
     }
   ],
   "shortcuts": [
@@ -82,7 +49,7 @@
       "url": "./index.html?action=encrypt",
       "icons": [
         {
-          "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock-plus.svg",
+          "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%232563eb%22>🔒</text></svg>",
           "sizes": "96x96"
         }
       ]
@@ -94,13 +61,13 @@
       "url": "./index.html?action=decrypt",
       "icons": [
         {
-          "src": "https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icon-filled/lock-open.svg",
+          "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%2310b981%22>🔓</text></svg>",
           "sizes": "96x96"
         }
       ]
     }
   ],
-  "permissions": ["clipboard-write", "clipboard-read"],
+  "permissions": ["clipboard-write"],
   "prefer_related_applications": false,
   "related_applications": []
 }
