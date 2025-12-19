@@ -1,7 +1,7 @@
 {
-  "name": "نظام التشفير المتقدم - GitHub Pages",
+  "name": "نظام التشفير المتقدم - AES-256-GCM",
   "short_name": "التشفير المتقدم",
-  "description": "نظام تشفير عسكري على GitHub Pages. تشفير محلي 100% باستخدام AES-256-GCM وPBKDF2.",
+  "description": "نظام تشفير عسكري باستخدام AES-256-GCM وPBKDF2 310,000 تكرار. تشفير محلي 100% على GitHub Pages.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -34,18 +34,18 @@
   ],
   "screenshots": [
     {
-      "src": "https://via.placeholder.com/1280x720/0f172a/2563eb?text=Advanced+Encryption+System+GitHub+Pages",
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox='0 0 1280 720'><rect width='1280' height='720' fill='%230f172a'/><text x='640' y='360' font-family='Arial' font-size='48' fill='%232563eb' text-anchor='middle'>نظام التشفير المتقدم</text><text x='640' y='420' font-family='Arial' font-size='24' fill='%23cbd5e1' text-anchor='middle'>AES-256-GCM على GitHub Pages</text></svg>",
       "sizes": "1280x720",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "form_factor": "wide",
-      "label": "واجهة نظام التشفير على GitHub Pages"
+      "label": "واجهة نظام التشفير"
     }
   ],
   "shortcuts": [
     {
       "name": "تشفير نص جديد",
       "short_name": "تشفير",
-      "description": "تشفير نص باستخدام كلمة مرور قوية",
+      "description": "تشفير نص باستخدام AES-256-GCM",
       "url": "./index.html?action=encrypt",
       "icons": [
         {
@@ -67,7 +67,16 @@
       ]
     }
   ],
-  "permissions": ["clipboard-write"],
+  "permissions": [
+    "clipboard-write",
+    "clipboard-read"
+  ],
   "prefer_related_applications": false,
-  "related_applications": []
+  "related_applications": [],
+  "protocol_handlers": [
+    {
+      "protocol": "web+encrypt",
+      "url": "./index.html?data=%s"
+    }
+  ]
 }
