@@ -1,0 +1,101 @@
+# _config.yml - إعدادات GitHub Pages للنظام
+
+# معلومات الموقع
+title: "نظام التشفير المتقدم"
+name: "نظام التشفير المتقدم"
+description: "نظام تشفير عسكري على GitHub Pages باستخدام AES-256-GCM وPBKDF2 مع 310,000 تكرار"
+baseurl: "/advanced-encryption-system" # أو اتركه فارغاً إذا كان في root
+url: "https://YOUR_USERNAME.github.io" # رابط موقعك
+
+# إعدادات Jekyll
+theme: jekyll-theme-cayman
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# تعطيل معالجة Jekyll للملفات الثابتة
+include:
+  - ".well-known/"
+  - "CNAME"
+  - "*.js"
+  - "*.css"
+  - "*.html"
+  - "*.json"
+  - "*.webmanifest"
+  - "*.png"
+  - "*.jpg"
+  - "*.svg"
+  - "*.ico"
+
+# استبعاد ملفات النظام
+exclude:
+  - "node_modules/"
+  - "vendor/"
+  - "Gemfile"
+  - "Gemfile.lock"
+  - "package.json"
+  - "package-lock.json"
+  - "README.md"
+
+# إعدادات الأمان (سيتم تطبيقها عبر meta tags)
+security:
+  csp: true
+  x_frame_options: "DENY"
+  x_content_type_options: "nosniff"
+  x_xss_protection: "1; mode=block"
+  referrer_policy: "strict-origin-when-cross-origin"
+
+# SEO
+author: "نظام التشفير المتقدم"
+github_username: "YOUR_USERNAME"
+
+# الترجمة
+lang: "ar"
+locale: "ar_SA"
+direction: "rtl"
+
+# التخصيص
+logo: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>"
+favicon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>"
+
+# تحسينات الأداء
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+
+# Sitemap
+sitemap:
+  file: "/sitemap.xml"
+  changefreq: "monthly"
+  priority: 0.7
+
+# Google Analytics (اختياري)
+# google_analytics: "UA-XXXXX-Y"
+
+# تعليقات (اختياري)
+# disqus:
+#   shortname: your-disqus-shortname
+
+# مشاركة اجتماعية (اختياري)
+# twitter:
+#   username: your-twitter-handle
+
+# التخصيص المتقدم
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# وقت البناء
+timezone: "Asia/Riyadh"
+
+# مفاتيح التشفير (للتوضيح فقط)
+encryption_info:
+  algorithm: "AES-256-GCM"
+  key_derivation: "PBKDF2 with 310,000 iterations"
+  key_length: 256
+  security_level: "Military Grade"
+  local_only: true
