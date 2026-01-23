@@ -92,6 +92,9 @@ class CryptoEngine {
                 this.deriveKeyPBKDF2(password, salt2)
             ]);
 
+            // استيراد مفتاح الطبقة الأولى (AES-GCM)
+            const key1 = await this.importKey(key1Data, this.config.layer1.algorithm);
+
             // تحديد الخوارزمية الصحيحة للطبقة الثانية
             let layer2Algorithm;
             let key2;
