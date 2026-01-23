@@ -43,17 +43,30 @@ class CryptoEngine {
 
     async checkChaChaSupport() {
         try {
+            // أولاً: محاولة الدعم الأصلي (Native)
             const key = await this.crypto.generateKey(
                 { name: 'ChaCha20-Poly1305', length: 256 },
                 true,
                 ['encrypt', 'decrypt']
             );
             this.chachaSupported = true;
-            console.log('✅ ChaCha20-Poly1305 مدعوم محلياً');
+            this.useExternalChaCha = false;
+            console.log('✅ ChaCha20-Poly1305 مدعوم محلياً (Native)');
         } catch (e) {
-            console.warn('⚠️ ChaCha20-Poly1305 غير مدعوم، سيتم استخدام AES-CTR كطبقة ثانية (IV: 16 bytes)');
-            this.config.layer2.algorithm = 'AES-CTR'; // Fallback
-            this.config.layer2.ivLength = 16;
+            // ثانياً: التحقق من المكتبة الخارجية
+            if (typeof window.chacha20poly1305 !== 'undefined') {
+                this.chachaSupported = true;
+                this.useExternalChaCha = true;
+                console.log('✅ ChaCha20-Poly1305 مدعوم عبر المكتبة الخارجية (Polyfill)');
+
+                // تحديث الإعدادات
+                this.config.layer2.algorithm = 'ChaCha20-Poly1305';
+                this.config.layer2.ivLength = 12; // Noble uses 12-byte nonce
+            } else {
+                console.warn('⚠️ ChaCha20-Poly1305 غير مدعوم، سيتم استخدام AES-CTR كطبقة ثانية (IV: 16 bytes)');
+                this.config.layer2.algorithm = 'AES-CTR'; // Fallback
+                this.config.layer2.ivLength = 16;
+            }
         }
     }
 
@@ -80,11 +93,17 @@ class CryptoEngine {
             ]);
 
             // تحديد الخوارزمية الصحيحة للطبقة الثانية
-            const layer2Algorithm = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
+            let layer2Algorithm;
+            let key2;
 
-            // استيراد المفاتيح لـ Web Crypto
-            const key1 = await this.importKey(key1Data, this.config.layer1.algorithm);
-            const key2 = await this.importKey(key2Data, layer2Algorithm);
+            if (this.useExternalChaCha) {
+                // إذا كنا نستخدم المكتبة الخارجية، المفتاح هو مجرد مصفوفة بايتات
+                layer2Algorithm = 'ChaCha20-Poly1305-External';
+                key2 = new Uint8Array(key2Data); // Raw bytes for noble-ciphers
+            } else {
+                layer2Algorithm = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
+                key2 = await this.importKey(key2Data, layer2Algorithm);
+            }
 
             // 3. التشفير الطبقة 1 (الداخلي): AES-256-GCM
             const iv1 = this.generateRandomBytes(12);
@@ -104,23 +123,27 @@ class CryptoEngine {
             );
 
             // 4. التشفير الطبقة 2 (الخارجي): ChaCha20 أو AES-CTR
-            // layer2Algorithm تم تحديده مسبقاً
+            let iv2, finalCipher;
+            const ivLength = (this.chachaSupported || this.useExternalChaCha) ? 12 : 16;
+            iv2 = this.generateRandomBytes(ivLength);
 
-            // تحديد طول IV بناءً على الخوارزمية
-            // ChaCha20: 12 bytes
-            // AES-CTR: 16 bytes
-            const ivLength = this.chachaSupported ? 12 : 16;
-            const iv2 = this.generateRandomBytes(ivLength);
+            if (this.useExternalChaCha) {
+                // استخدام مكتبة noble-ciphers
+                const chacha = window.chacha20poly1305(key2, iv2);
+                finalCipher = chacha.encrypt(new Uint8Array(layer1Cipher));
+                layer2Algorithm = 'ChaCha20-Poly1305'; // اسم موحد للناتج
+            } else {
+                // استخدام Native Web Crypto
+                const layer2Params = this.chachaSupported ?
+                    { name: 'ChaCha20-Poly1305', iv: iv2 } :
+                    { name: 'AES-CTR', counter: iv2, length: 64 };
 
-            const layer2Params = this.chachaSupported ?
-                { name: 'ChaCha20-Poly1305', iv: iv2 } :
-                { name: 'AES-CTR', counter: iv2, length: 64 };
-
-            const finalCipher = await this.crypto.encrypt(
-                layer2Params,
-                key2,
-                layer1Cipher // تشفير الناتج السابق
-            );
+                finalCipher = await this.crypto.encrypt(
+                    layer2Params,
+                    key2,
+                    layer1Cipher
+                );
+            }
 
             // 5. بناء التقرير النهائي
             const encryptedData = {

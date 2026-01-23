@@ -8,11 +8,11 @@
 
     <!-- === رؤوس الأمان المحسنة === -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
-                   script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; 
+                   script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://esm.sh; 
                    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
                    font-src 'self' data: https://cdnjs.cloudflare.com; 
                    img-src 'self' data: https:; 
-                   connect-src 'self' https://cdn.jsdelivr.net; 
+                   connect-src 'self' https://cdn.jsdelivr.net https://esm.sh; 
                    base-uri 'self'; 
                    form-action 'self';">
 
@@ -921,6 +921,13 @@
     <!-- ملفات JavaScript -->
     <!-- مكتبة Argon2id -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
+
+    <!-- مكتبة ChaCha20-Poly1305 (Polyfill) -->
+    <script type="module">
+        import { chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@2.1.1/chacha.js';
+        window.chacha20poly1305 = chacha20poly1305;
+        console.log('✅ تم تحميل مكتبة ChaCha20-Poly1305 الخارجية');
+    </script>
 
     <!-- تحميل crypto-engine.js أولاً -->
     <script src="crypto-engine.js"></script>
