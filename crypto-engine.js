@@ -274,7 +274,7 @@ class CryptoEngine {
             if (middleAlgo === 'ChaCha20-Poly1305' && this.useExternalChaCha) {
                 // استخدام noble-ciphers
                 const key2 = new Uint8Array(key2Data);
-                const chacha = window.chacha20poly1305(key2, iv2);
+                const chacha = window.chacha20poly1305(key2, new Uint8Array(iv2));
                 try {
                     cipher1 = chacha.decrypt(new Uint8Array(cipher2));
                 } catch (e) { throw new Error('فشل فك تشفير ChaCha20 (Polyfill): ' + e.message); }
