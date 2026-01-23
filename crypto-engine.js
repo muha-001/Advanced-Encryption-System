@@ -36,7 +36,7 @@ class CryptoEngine {
         // التحقق من دعم ChaCha20
         this.supportCheckPromise = this.checkChaChaSupport();
 
-        console.log('🚀 محرك التشفير الثلاثي (Triple Argon2 v5.0) جاهز للعمل');
+        console.log('🚀 محرك التشفير الثلاثي (Triple Argon2 v5.1) جاهز للعمل');
         console.log(`🔒 3x Argon2id Layers (1GB each)`);
     }
 

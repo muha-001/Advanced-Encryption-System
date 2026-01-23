@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Triple Argon2 (GCM+ChaCha+CTR) بنجاح!', 'success');
+            this.showNotification('✅ تم التشفير بنظام Triple Argon2 v5.1 (GCM+ChaCha+CTR) بنجاح!', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
