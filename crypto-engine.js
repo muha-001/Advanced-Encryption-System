@@ -34,7 +34,7 @@ class CryptoEngine {
         this.chachaSupported = false;
 
         // التحقق من دعم ChaCha20
-        this.checkChaChaSupport();
+        this.supportCheckPromise = this.checkChaChaSupport();
 
         console.log('🚀 محرك التشفير الهجين (Paranoid Mode) جاهز للعمل');
         console.log(`🔒 Argon2id Memory: ${this.config.layer1.memoryCost / 1024} MB`);
@@ -63,6 +63,9 @@ class CryptoEngine {
             if (!plainText || !password) throw new Error('البيانات ناقصة');
             if (typeof hashwasm === 'undefined') throw new Error('مكتبة Argon2id (hash-wasm) غير محملة');
 
+            // انتظار انتهاء فحص الدعم (لمنع حالة تعارض السباق)
+            await this.supportCheckPromise;
+
             const startTime = performance.now();
 
             // 1. توليد الأملاح
@@ -76,9 +79,12 @@ class CryptoEngine {
                 this.deriveKeyPBKDF2(password, salt2)
             ]);
 
+            // تحديد الخوارزمية الصحيحة للطبقة الثانية
+            const layer2Algorithm = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
+
             // استيراد المفاتيح لـ Web Crypto
             const key1 = await this.importKey(key1Data, this.config.layer1.algorithm);
-            const key2 = await this.importKey(key2Data, this.config.layer2.algorithm);
+            const key2 = await this.importKey(key2Data, layer2Algorithm);
 
             // 3. التشفير الطبقة 1 (الداخلي): AES-256-GCM
             const iv1 = this.generateRandomBytes(12);
@@ -98,7 +104,7 @@ class CryptoEngine {
             );
 
             // 4. التشفير الطبقة 2 (الخارجي): ChaCha20 أو AES-CTR
-            const layer2Algorithm = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
+            // layer2Algorithm تم تحديده مسبقاً
 
             // تحديد طول IV بناءً على الخوارزمية
             // ChaCha20: 12 bytes
