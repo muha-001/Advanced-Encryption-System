@@ -222,18 +222,33 @@ class CryptoEngine {
             ]);
 
             const key1 = await this.importKey(key1Data, 'AES-GCM');
-            const key2 = await this.importKey(key2Data, data.layers.outer.algo);
 
             // 3. فك الطبقة الخارجية (ChaCha/AES-CTR)
-            const layer2Params = data.layers.outer.algo === 'ChaCha20-Poly1305' ?
-                { name: 'ChaCha20-Poly1305', iv: iv2 } :
-                { name: 'AES-CTR', counter: iv2, length: 64 };
+            let innerCipher;
+            const outerAlgo = data.layers.outer.algo;
 
-            const innerCipher = await this.crypto.decrypt(
-                layer2Params,
-                key2,
-                ciphertext
-            );
+            // التحقق مما إذا كان يجب استخدام المكتبة الخارجية لفك تشفير ChaCha20
+            if (outerAlgo === 'ChaCha20-Poly1305' && this.useExternalChaCha) {
+                console.log('🔄 فك تشفير ChaCha20 باستخدام Polyfill...');
+                const key2 = new Uint8Array(key2Data);
+                const chacha = window.chacha20poly1305(key2, iv2);
+                try {
+                    innerCipher = chacha.decrypt(new Uint8Array(ciphertext));
+                } catch (e) { throw new Error('فشل فك تشفير ChaCha20 (Polyfill): ' + e.message); }
+            } else {
+                // استخدام Native Web Crypto (لـ AES-CTR أو ChaCha20 الأصلي)
+                const key2 = await this.importKey(key2Data, outerAlgo);
+
+                const layer2Params = outerAlgo === 'ChaCha20-Poly1305' ?
+                    { name: 'ChaCha20-Poly1305', iv: iv2 } :
+                    { name: 'AES-CTR', counter: iv2, length: 64 };
+
+                innerCipher = await this.crypto.decrypt(
+                    layer2Params,
+                    key2,
+                    ciphertext
+                );
+            }
 
             // 4. فك الطبقة الداخلية (AES-GCM)
             const decrypted = await this.crypto.decrypt(
