@@ -51,8 +51,9 @@ class CryptoEngine {
             this.chachaSupported = true;
             console.log('✅ ChaCha20-Poly1305 مدعوم محلياً');
         } catch (e) {
-            console.warn('⚠️ ChaCha20-Poly1305 غير مدعوم، سيتم استخدام AES-CTR كطبقة ثانية');
+            console.warn('⚠️ ChaCha20-Poly1305 غير مدعوم، سيتم استخدام AES-CTR كطبقة ثانية (IV: 16 bytes)');
             this.config.layer2.algorithm = 'AES-CTR'; // Fallback
+            this.config.layer2.ivLength = 16;
         }
     }
 
@@ -97,8 +98,14 @@ class CryptoEngine {
             );
 
             // 4. التشفير الطبقة 2 (الخارجي): ChaCha20 أو AES-CTR
-            const iv2 = this.generateRandomBytes(12); // ChaCha needs 12 bytes usually
             const layer2Algorithm = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
+
+            // تحديد طول IV بناءً على الخوارزمية
+            // ChaCha20: 12 bytes
+            // AES-CTR: 16 bytes
+            const ivLength = this.chachaSupported ? 12 : 16;
+            const iv2 = this.generateRandomBytes(ivLength);
+
             const layer2Params = this.chachaSupported ?
                 { name: 'ChaCha20-Poly1305', iv: iv2 } :
                 { name: 'AES-CTR', counter: iv2, length: 64 };
