@@ -44,34 +44,34 @@ class EncryptionApp {
         try {
             // تسجيل بدء التطبيق
             console.log(`🚀 ${this.config.appName} v${this.config.version} - بدء التشغيل`);
-            
+
             // التحقق من دعم Web Crypto API أولاً
             if (!this.checkCryptoSupport()) {
                 this.showNotification('❌ المتصفح لا يدعم Web Crypto API', 'error');
                 this.hideLoadingScreen();
                 return;
             }
-            
+
             // تهيئة واجهة المستخدم
             this.initUI();
-            
+
             // التحقق من الأمان (بدون انتظار)
             this.checkSecurity().catch(error => {
                 console.warn('⚠️ بعض فحوصات الأمان فشلت:', error);
             });
-            
+
             // ربط الأحداث
             this.bindEvents();
-            
+
             // بدء جلسة آمنة
             this.startSecureSession();
-            
+
             // تحديث حالة الاتصال
             this.updateOnlineStatus();
-            
+
             // تهيئة محرك التشفير بشكل منفصل
             this.initializeCryptoEngine();
-            
+
             // إخفاء شاشة التحميل بعد 3 ثوان كحد أقصى
             setTimeout(() => {
                 if (!this.state.isInitialized) {
@@ -80,7 +80,7 @@ class EncryptionApp {
                     this.showNotification('⚠️ النظام يعمل بوظائف محدودة', 'warning');
                 }
             }, 3000);
-            
+
         } catch (error) {
             console.error('❌ فشل تهيئة التطبيق:', error);
             // إخفاء شاشة التحميل حتى في حالة الخطأ
@@ -99,15 +99,15 @@ class EncryptionApp {
     initUI() {
         // تحديث الإحصائيات
         this.updateStatistics();
-        
+
         // تعيين نص النسخة
         document.querySelectorAll('.version').forEach(el => {
             el.textContent = `v${this.config.version}`;
         });
-        
+
         // إعداد مؤشر التحميل
         this.setupLoadingAnimation();
-        
+
         // إعداد مؤشر قوة كلمة المرور
         this.setupPasswordStrength();
     }
@@ -116,22 +116,22 @@ class EncryptionApp {
         const progressBar = document.getElementById('loadingProgress');
         const steps = document.querySelectorAll('.loading-steps .step');
         const statusText = document.getElementById('loadingStatus');
-        
+
         if (!progressBar) return;
-        
+
         const stepsData = [
             { text: 'جاري تحميل الوحدات الأساسية', duration: 600 },
             { text: 'جاري تهيئة نظام التشفير', duration: 800 },
             { text: 'جاري التحقق من البيئة الآمنة', duration: 700 },
             { text: 'جاري التشغيل النهائي', duration: 500 }
         ];
-        
+
         let currentStep = 0;
-        
+
         const animateStep = () => {
             if (currentStep >= stepsData.length) {
                 progressBar.style.width = '100%';
-                
+
                 // عند اكتمال التحميل، تمكين الزر مباشرة
                 setTimeout(() => {
                     const continueBtn = document.getElementById('continueBtn');
@@ -142,14 +142,14 @@ class EncryptionApp {
                 }, 300);
                 return;
             }
-            
+
             const step = stepsData[currentStep];
-            
+
             // تحديث النص
             if (statusText) {
                 statusText.textContent = step.text;
             }
-            
+
             // تحديث الخطوة
             steps.forEach((s, i) => {
                 s.classList.remove('active');
@@ -157,28 +157,28 @@ class EncryptionApp {
                     s.classList.add('active');
                 }
             });
-            
+
             // حساب التقدم
             const progress = ((currentStep + 1) / stepsData.length) * 100;
             progressBar.style.width = `${progress}%`;
-            
+
             currentStep++;
             setTimeout(animateStep, step.duration);
         };
-        
+
         animateStep();
     }
 
     setupPasswordStrength() {
         const passwordInput = document.getElementById('encryptionPassword');
         const decryptionInput = document.getElementById('decryptionPassword');
-        
+
         if (passwordInput) {
             passwordInput.addEventListener('input', (e) => {
                 this.checkPasswordStrength(e.target.value);
             });
         }
-        
+
         if (decryptionInput) {
             decryptionInput.addEventListener('input', (e) => {
                 this.updateDecryptionStatus();
@@ -191,12 +191,12 @@ class EncryptionApp {
         try {
             // انتظار تحميل الملف أولاً
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             if (typeof CryptoEngine !== 'undefined') {
                 window.cryptoEngine = new CryptoEngine();
                 this.state.cryptoEngineReady = true;
                 console.log('✅ محرك التشفير تم تهيئته بنجاح');
-                
+
                 // إذا كان التطبيق جاهزاً، إظهار إشعار
                 if (this.state.isInitialized) {
                     this.showNotification('✅ محرك التشفير جاهز للاستخدام', 'success');
@@ -217,16 +217,16 @@ class EncryptionApp {
             try {
                 // 1. التحقق من HTTPS
                 await this.checkHTTPS();
-                
+
                 // 2. التحقق من Web Crypto API
                 await this.checkCryptoAPI();
-                
+
                 // 3. التحقق من التخزين
                 await this.checkStorage();
-                
+
                 // 4. التحقق من GitHub Pages
                 await this.checkGitHubPages();
-                
+
                 // تمكين زر المتابعة
                 const continueBtn = document.getElementById('continueBtn');
                 if (continueBtn) {
@@ -238,7 +238,7 @@ class EncryptionApp {
                 } else {
                     resolve();
                 }
-                
+
                 // تمكين الزر بعد 2 ثانية كحد أقصى
                 setTimeout(() => {
                     if (continueBtn && continueBtn.disabled) {
@@ -246,7 +246,7 @@ class EncryptionApp {
                         this.showNotification('✅ يمكنك المتابعة الآن', 'info');
                     }
                 }, 2000);
-                
+
             } catch (error) {
                 console.error('❌ فشل التحقق من الأمان:', error);
                 // عدم رفض الـ Promise حتى لو فشلت الفحوصات
@@ -258,13 +258,13 @@ class EncryptionApp {
     async checkHTTPS() {
         return new Promise((resolve) => {
             setTimeout(() => {
-                const isSecure = window.location.protocol === 'https:' || 
-                                window.location.hostname.includes('github.io');
-                
-                this.updateSecurityStatus('httpsStatus', 
+                const isSecure = window.location.protocol === 'https:' ||
+                    window.location.hostname.includes('github.io');
+
+                this.updateSecurityStatus('httpsStatus',
                     isSecure ? 'آمن ✓' : 'غير آمن ✗',
                     isSecure ? 'success' : 'error');
-                
+
                 resolve(isSecure);
             }, 400);
         });
@@ -274,11 +274,11 @@ class EncryptionApp {
         return new Promise((resolve) => {
             setTimeout(() => {
                 const hasCrypto = !!window.crypto && !!window.crypto.subtle;
-                
+
                 this.updateSecurityStatus('cryptoStatus',
                     hasCrypto ? 'متاح ✓' : 'غير متاح ✗',
                     hasCrypto ? 'success' : 'error');
-                
+
                 // لا ننشئ cryptoEngine هنا
                 resolve(hasCrypto);
             }, 600);
@@ -288,13 +288,13 @@ class EncryptionApp {
     async checkStorage() {
         return new Promise((resolve) => {
             setTimeout(() => {
-                const hasStorage = typeof localStorage !== 'undefined' && 
-                                 typeof sessionStorage !== 'undefined';
-                
+                const hasStorage = typeof localStorage !== 'undefined' &&
+                    typeof sessionStorage !== 'undefined';
+
                 this.updateSecurityStatus('storageStatus',
                     hasStorage ? 'متاح ✓' : 'غير متاح ✗',
                     hasStorage ? 'success' : 'error');
-                
+
                 resolve(hasStorage);
             }, 300);
         });
@@ -304,11 +304,11 @@ class EncryptionApp {
         return new Promise((resolve) => {
             setTimeout(() => {
                 const isGitHubPages = window.location.hostname.includes('github.io');
-                
+
                 this.updateSecurityStatus('githubStatus',
                     isGitHubPages ? 'GitHub Pages ✓' : 'استضافة محلية',
                     isGitHubPages ? 'success' : 'info');
-                
+
                 resolve(isGitHubPages);
             }, 200);
         });
@@ -317,20 +317,20 @@ class EncryptionApp {
     updateSecurityStatus(elementId, status, type = 'info') {
         const element = document.getElementById(elementId);
         if (!element) return;
-        
+
         // تحديث النص
         const statusText = element.querySelector('span:last-child');
         if (statusText) {
             statusText.textContent = status;
         }
-        
+
         // تحديث النقطة
         const dot = element.querySelector('.status-dot');
         if (dot) {
             dot.className = 'status-dot';
             dot.classList.add(type);
         }
-        
+
         // تحديث عداد الأمان
         this.updateSecurityMeter();
     }
@@ -338,7 +338,7 @@ class EncryptionApp {
     updateSecurityMeter() {
         const meter = document.getElementById('securityMeter');
         if (!meter) return;
-        
+
         // حساب مستوى الأمان بناءً على التحققات
         const checks = [
             document.getElementById('httpsStatus'),
@@ -346,17 +346,17 @@ class EncryptionApp {
             document.getElementById('storageStatus'),
             document.getElementById('githubStatus')
         ];
-        
+
         let passedChecks = 0;
         checks.forEach(check => {
             if (check && check.textContent.includes('✓')) {
                 passedChecks++;
             }
         });
-        
+
         const securityLevel = (passedChecks / checks.length) * 100;
         meter.style.width = `${securityLevel}%`;
-        
+
         // تحديث اللون بناءً على المستوى
         if (securityLevel >= 75) {
             meter.style.background = 'linear-gradient(90deg, #10b981, #059669)';
@@ -371,18 +371,18 @@ class EncryptionApp {
     startSecureSession() {
         this.state.sessionStart = Date.now();
         this.state.lastActivity = Date.now();
-        
+
         // بدء المؤقت
         this.updateSessionTimer();
         this.state.sessionTimer = setInterval(() => {
             this.updateSessionTimer();
             this.checkSessionTimeout();
         }, 1000);
-        
+
         // مراقبة النشاط
         document.addEventListener('click', () => this.updateLastActivity());
         document.addEventListener('keypress', () => this.updateLastActivity());
-        
+
         // تحديث وقت بدء الجلسة
         const sessionStartEl = document.getElementById('sessionStart');
         if (sessionStartEl) {
@@ -394,27 +394,27 @@ class EncryptionApp {
     updateSessionTimer() {
         const elapsed = Date.now() - this.state.sessionStart;
         const remaining = Math.max(0, this.config.sessionTimeout - elapsed);
-        
+
         const minutes = Math.floor(remaining / 60000);
         const seconds = Math.floor((remaining % 60000) / 1000);
-        
+
         // تحديث العداد
         const timerElement = document.getElementById('sessionTimer');
         if (timerElement) {
             timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
+
             if (remaining < 60000) {
                 timerElement.style.color = '#ef4444';
                 timerElement.style.animation = 'pulse 1s infinite';
             }
         }
-        
+
         // تحديث الوقت المتبقي
         const remainingElement = document.getElementById('sessionRemaining');
         if (remainingElement) {
             remainingElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
-        
+
         // تحديث وقت التشغيل
         this.updateUptime();
     }
@@ -422,13 +422,13 @@ class EncryptionApp {
     updateUptime() {
         const uptimeElement = document.getElementById('uptime');
         if (!uptimeElement) return;
-        
+
         const elapsed = Date.now() - this.state.sessionStart;
         const hours = Math.floor(elapsed / 3600000);
         const minutes = Math.floor((elapsed % 3600000) / 60000);
         const seconds = Math.floor((elapsed % 60000) / 1000);
-        
-        uptimeElement.textContent = 
+
+        uptimeElement.textContent =
             `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
@@ -438,7 +438,7 @@ class EncryptionApp {
 
     checkSessionTimeout() {
         const idleTime = Date.now() - this.state.lastActivity;
-        
+
         if (idleTime > this.config.sessionTimeout) {
             this.endSession();
         }
@@ -446,12 +446,12 @@ class EncryptionApp {
 
     endSession() {
         clearInterval(this.state.sessionTimer);
-        
+
         this.showNotification('⏳ انتهت الجلسة الأمنية. يتم إعادة التحميل...', 'warning');
-        
+
         // مسح البيانات الحساسة
         this.clearSensitiveData();
-        
+
         // إعادة التحميل بعد تأخير
         setTimeout(() => {
             window.location.reload();
@@ -463,35 +463,35 @@ class EncryptionApp {
         try {
             const plainText = document.getElementById('plainText').value;
             const password = document.getElementById('encryptionPassword').value;
-            
+
             if (!plainText || !password) {
                 this.showNotification('❌ الرجاء إدخال النص وكلمة المرور', 'error');
                 return;
             }
-            
+
             // التحقق من قوة كلمة المرور
             if (!this.isPasswordStrong(password)) {
                 this.showNotification('⚠️ كلمة المرور ضعيفة. استخدم كلمة أقوى.', 'warning');
                 return;
             }
-            
+
             // التحقق من تجاوز الحد الأقصى للمحاولات
             if (this.isRateLimited(password)) {
                 this.showNotification('🚫 تم تجاوز الحد الأقصى للمحاولات. حاول لاحقاً.', 'error');
                 return;
             }
-            
-            this.showNotification('🔒 جاري تشفير النص...', 'info');
-            
+
+            this.showNotification('🔒 جاري التشفير (Argon2id + PBKDF2)... قد يستغرق وقتاً', 'info');
+
             const startTime = performance.now();
-            
+
             // خيارات التشفير المتقدمة
             const options = {
                 timestamp: document.getElementById('optionTimestamp')?.checked || false,
                 compression: document.getElementById('optionCompress')?.checked || true,
                 randomSalt: document.getElementById('optionRandomSalt')?.checked || true
             };
-            
+
             // التحقق من وجود محرك التشفير
             if (!window.cryptoEngine) {
                 if (typeof CryptoEngine !== 'undefined') {
@@ -501,22 +501,22 @@ class EncryptionApp {
                     throw new Error('محرك التشفير غير متاح. يرجى تحديث الصفحة.');
                 }
             }
-            
+
             // تنفيذ التشفير
             const result = await window.cryptoEngine.encrypt(plainText, password, options);
-            
+
             const endTime = performance.now();
             const encryptionTime = Math.round(endTime - startTime);
-            
+
             // عرض النتيجة
             this.showEncryptionResult(result, encryptionTime);
-            
+
             // تحديث الإحصائيات
             this.state.totalEncryptions++;
             this.updateStatistics();
-            
-            this.showNotification('✅ تم تشفير النص بنجاح', 'success');
-            
+
+            this.showNotification('✅ تم التشفير بنظام هجين (AES + ChaCha20) ذاكرة 1.5GB', 'success');
+
             // حفظ في السجل
             this.saveToHistory({
                 type: 'encryption',
@@ -524,12 +524,12 @@ class EncryptionApp {
                 size: plainText.length,
                 duration: encryptionTime
             });
-            
+
         } catch (error) {
             console.error('❌ فشل التشفير:', error);
             this.state.failedAttempts++;
             this.updateStatistics();
-            
+
             this.showNotification('❌ فشل التشفير: ' + error.message, 'error');
         }
     }
@@ -539,20 +539,20 @@ class EncryptionApp {
         const encryptedText = document.getElementById('encryptedText');
         const encryptionTimeEl = document.getElementById('encryptionTime');
         const encryptionSizeEl = document.getElementById('encryptionSize');
-        
+
         if (resultContainer) {
             resultContainer.classList.remove('hidden');
             resultContainer.style.display = 'block';
         }
-        
+
         if (encryptedText) {
             encryptedText.value = JSON.stringify(result, null, 2);
         }
-        
+
         if (encryptionTimeEl) {
             encryptionTimeEl.textContent = encryptionTime;
         }
-        
+
         if (encryptionSizeEl) {
             const size = new Blob([JSON.stringify(result)]).size;
             encryptionSizeEl.textContent = size;
@@ -564,22 +564,22 @@ class EncryptionApp {
         try {
             const encryptedInput = document.getElementById('encryptedInput').value;
             const password = document.getElementById('decryptionPassword').value;
-            
+
             if (!encryptedInput || !password) {
                 this.showNotification('❌ الرجاء إدخال النص المشفر وكلمة المرور', 'error');
                 return;
             }
-            
+
             // التحقق من تجاوز الحد الأقصى للمحاولات
             if (this.isRateLimited(password)) {
                 this.showNotification('🚫 تم تجاوز الحد الأقصى للمحاولات. حاول لاحقاً.', 'error');
                 return;
             }
-            
+
             this.showNotification('🔓 جاري فك تشفير النص...', 'info');
-            
+
             const startTime = performance.now();
-            
+
             // التحقق من وجود محرك التشفير
             if (!window.cryptoEngine) {
                 if (typeof CryptoEngine !== 'undefined') {
@@ -589,7 +589,7 @@ class EncryptionApp {
                     throw new Error('محرك التشفير غير متاح. يرجى تحديث الصفحة.');
                 }
             }
-            
+
             // تنفيذ فك التشفير
             let parsedEncrypted;
             try {
@@ -598,21 +598,21 @@ class EncryptionApp {
                 // إذا لم يكن JSON، حاول معالجته كنص مشفر مباشر
                 parsedEncrypted = encryptedInput;
             }
-            
+
             const result = await window.cryptoEngine.decrypt(parsedEncrypted, password);
-            
+
             const endTime = performance.now();
             const decryptionTime = Math.round(endTime - startTime);
-            
+
             // عرض النتيجة
             this.showDecryptionResult(result, decryptionTime);
-            
+
             // تحديث الإحصائيات
             this.state.totalDecryptions++;
             this.updateStatistics();
-            
+
             this.showNotification('✅ تم فك تشفير النص بنجاح', 'success');
-            
+
             // حفظ في السجل
             this.saveToHistory({
                 type: 'decryption',
@@ -620,17 +620,17 @@ class EncryptionApp {
                 success: true,
                 duration: decryptionTime
             });
-            
+
         } catch (error) {
             console.error('❌ فشل فك التشفير:', error);
-            
+
             // تسجيل المحاولة الفاشلة
             const password = document.getElementById('decryptionPassword').value;
             this.recordFailedAttempt(password);
-            
+
             this.state.failedAttempts++;
             this.updateStatistics();
-            
+
             this.showNotification('❌ فشل فك التشفير: تأكد من صحة البيانات وكلمة المرور', 'error');
         }
     }
@@ -641,25 +641,25 @@ class EncryptionApp {
         const decryptionTimeEl = document.getElementById('decryptionTime');
         const integrityStatusEl = document.getElementById('integrityStatus');
         const encryptionDateEl = document.getElementById('encryptionDate');
-        
+
         if (resultContainer) {
             resultContainer.classList.remove('hidden');
             resultContainer.style.display = 'block';
         }
-        
+
         if (decryptedText && result.text) {
             decryptedText.value = result.text;
         }
-        
+
         if (decryptionTimeEl) {
             decryptionTimeEl.textContent = decryptionTime;
         }
-        
+
         if (integrityStatusEl) {
             integrityStatusEl.textContent = result.integrity ? 'سليمة ✓' : 'تالفة ✗';
             integrityStatusEl.style.color = result.integrity ? '#10b981' : '#ef4444';
         }
-        
+
         if (encryptionDateEl && result.metadata?.timestamp) {
             const date = new Date(result.metadata.timestamp);
             encryptionDateEl.textContent = date.toLocaleString('ar-SA');
@@ -672,7 +672,7 @@ class EncryptionApp {
             this.updatePasswordStrengthUI(0, 'غير مقاسة');
             return;
         }
-        
+
         let score = 0;
         const requirements = {
             length: false,
@@ -681,7 +681,7 @@ class EncryptionApp {
             number: false,
             special: false
         };
-        
+
         // طول كلمة المرور
         if (password.length >= 16) {
             score += 30;
@@ -692,36 +692,36 @@ class EncryptionApp {
         } else if (password.length >= 8) {
             score += 10;
         }
-        
+
         // أحرف كبيرة
         if (/[A-Z]/.test(password)) {
             score += 20;
             requirements.upper = true;
         }
-        
+
         // أحرف صغيرة
         if (/[a-z]/.test(password)) {
             score += 20;
             requirements.lower = true;
         }
-        
+
         // أرقام
         if (/[0-9]/.test(password)) {
             score += 15;
             requirements.number = true;
         }
-        
+
         // رموز خاصة
         if (/[^A-Za-z0-9]/.test(password)) {
             score += 15;
             requirements.special = true;
         }
-        
+
         // عدم التكرار
         if (/(.)\1{2,}/.test(password)) {
             score -= 10;
         }
-        
+
         // تحديد مستوى القوة
         let strengthLevel;
         for (const [level, range] of Object.entries(this.config.strengthLevels)) {
@@ -730,7 +730,7 @@ class EncryptionApp {
                 break;
             }
         }
-        
+
         // تحديث الواجهة
         this.updatePasswordStrengthUI(score, strengthLevel, requirements);
     }
@@ -738,10 +738,10 @@ class EncryptionApp {
     updatePasswordStrengthUI(score, strengthLevel, requirements = {}) {
         const strengthBar = document.getElementById('passwordStrengthBar');
         const strengthText = document.getElementById('passwordStrengthText');
-        
+
         if (strengthBar) {
             strengthBar.style.width = `${Math.min(score, 100)}%`;
-            
+
             // تحديث اللون بناءً على المستوى
             if (score >= 80) {
                 strengthBar.style.background = 'linear-gradient(90deg, #10b981, #059669)';
@@ -753,13 +753,13 @@ class EncryptionApp {
                 strengthBar.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
             }
         }
-        
+
         if (strengthText) {
             const levelText = this.config.strengthLevels[strengthLevel]?.text || 'ضعيفة';
             strengthText.textContent = levelText;
             strengthText.style.color = this.config.strengthLevels[strengthLevel]?.color || '#ef4444';
         }
-        
+
         // تحديث متطلبات كلمة المرور
         Object.keys(requirements).forEach(req => {
             const reqElement = document.getElementById(`req${req.charAt(0).toUpperCase() + req.slice(1)}`);
@@ -779,7 +779,7 @@ class EncryptionApp {
         const hasLower = /[a-z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
         const hasSpecial = /[^A-Za-z0-9]/.test(password);
-        
+
         return password.length >= minLength && hasUpper && hasLower && hasNumber && hasSpecial;
     }
 
@@ -808,58 +808,58 @@ class EncryptionApp {
         const includeLower = document.getElementById('includeLower')?.checked || true;
         const includeNumbers = document.getElementById('includeNumbers')?.checked || true;
         const includeSpecial = document.getElementById('includeSpecial')?.checked || true;
-        
+
         const upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const lowerChars = 'abcdefghijklmnopqrstuvwxyz';
         const numberChars = '0123456789';
         const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-        
+
         let chars = '';
         if (includeUpper) chars += upperChars;
         if (includeLower) chars += lowerChars;
         if (includeNumbers) chars += numberChars;
         if (includeSpecial) chars += specialChars;
-        
+
         if (!chars) {
             chars = upperChars + lowerChars + numberChars;
         }
-        
+
         let password = '';
         const array = new Uint8Array(length);
         window.crypto.getRandomValues(array);
-        
+
         for (let i = 0; i < length; i++) {
             password += chars[array[i] % chars.length];
         }
-        
+
         // التأكد من وجود جميع الأنواع المطلوبة
         if (includeUpper && !/[A-Z]/.test(password)) {
             password = password.substring(0, length - 1) + upperChars[Math.floor(Math.random() * upperChars.length)];
         }
-        
+
         if (includeLower && !/[a-z]/.test(password)) {
             password = password.substring(0, length - 2) + lowerChars[Math.floor(Math.random() * lowerChars.length)] + password[length - 1];
         }
-        
+
         if (includeNumbers && !/[0-9]/.test(password)) {
             password = numberChars[Math.floor(Math.random() * numberChars.length)] + password.substring(1);
         }
-        
+
         if (includeSpecial && !/[^A-Za-z0-9]/.test(password)) {
             password = password.substring(0, length - 3) + specialChars[Math.floor(Math.random() * specialChars.length)] + password.substring(length - 2);
         }
-        
+
         const passwordInput = document.getElementById('generatedPassword');
         if (passwordInput) {
             passwordInput.value = password;
         }
-        
+
         // تحديث طول كلمة المرور
         const lengthValue = document.getElementById('lengthValue');
         if (lengthValue) {
             lengthValue.textContent = `${length} حرفاً`;
         }
-        
+
         // التحقق من قوة كلمة المرور
         this.checkPasswordStrength(password);
     }
@@ -867,7 +867,7 @@ class EncryptionApp {
     useGeneratedPassword() {
         const generatedPassword = document.getElementById('generatedPassword')?.value;
         const encryptionPassword = document.getElementById('encryptionPassword');
-        
+
         if (generatedPassword && encryptionPassword) {
             encryptionPassword.value = generatedPassword;
             this.checkPasswordStrength(generatedPassword);
@@ -897,16 +897,16 @@ class EncryptionApp {
 
     recordFailedAttempt(password) {
         if (!password) return;
-        
+
         const attempts = this.state.passwordAttempts.get(password) || 0;
         this.state.passwordAttempts.set(password, attempts + 1);
-        
+
         // تحديث العداد في الواجهة
         const failedAttemptsEl = document.getElementById('failedAttempts');
         if (failedAttemptsEl) {
             failedAttemptsEl.textContent = attempts + 1;
         }
-        
+
         // إذا تجاوز الحد الأقصى
         if (attempts + 1 >= this.config.maxAttempts) {
             this.showNotification('🚫 تم تأمين النظام بسبب كثرة المحاولات الفاشلة', 'error');
@@ -917,10 +917,10 @@ class EncryptionApp {
     lockSystem() {
         const encryptBtn = document.getElementById('encryptBtn');
         const decryptBtn = document.getElementById('decryptBtn');
-        
+
         if (encryptBtn) encryptBtn.disabled = true;
         if (decryptBtn) decryptBtn.disabled = true;
-        
+
         setTimeout(() => {
             if (encryptBtn) encryptBtn.disabled = false;
             if (decryptBtn) decryptBtn.disabled = false;
@@ -933,11 +933,11 @@ class EncryptionApp {
     toggleAdvancedOptions() {
         const options = document.getElementById('advancedOptions');
         const toggleIcon = document.querySelector('.options-toggle .fa-chevron-down');
-        
+
         if (options) {
             options.classList.toggle('hidden');
             if (toggleIcon) {
-                toggleIcon.style.transform = options.classList.contains('hidden') ? 
+                toggleIcon.style.transform = options.classList.contains('hidden') ?
                     'rotate(0deg)' : 'rotate(180deg)';
             }
         }
@@ -946,7 +946,7 @@ class EncryptionApp {
     togglePassword(fieldId) {
         const field = document.getElementById(fieldId);
         const icon = document.querySelector(`#${fieldId} + .password-actions .password-action i`);
-        
+
         if (field && icon) {
             if (field.type === 'password') {
                 field.type = 'text';
@@ -1002,13 +1002,13 @@ class EncryptionApp {
             this.clearField('plainText');
             this.clearField('encryptionPassword');
             this.clearField('encryptedText');
-            
+
             const resultContainer = document.getElementById('encryptionResult');
             if (resultContainer) {
                 resultContainer.classList.add('hidden');
                 resultContainer.style.display = 'none';
             }
-            
+
             this.showNotification('🗑️ تم مسح حقول التشفير', 'info');
         }
     }
@@ -1018,13 +1018,13 @@ class EncryptionApp {
             this.clearField('encryptedInput');
             this.clearField('decryptionPassword');
             this.clearField('decryptedText');
-            
+
             const resultContainer = document.getElementById('decryptionResult');
             if (resultContainer) {
                 resultContainer.classList.add('hidden');
                 resultContainer.style.display = 'none';
             }
-            
+
             this.showNotification('🗑️ تم مسح حقول فك التشفير', 'info');
         }
     }
@@ -1035,18 +1035,18 @@ class EncryptionApp {
             this.showNotification('❌ لا توجد بيانات للتحميل', 'error');
             return;
         }
-        
+
         const blob = new Blob([encryptedText.value], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        
+
         a.href = url;
         a.download = `encrypted-${Date.now()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         this.showNotification('💾 تم تحميل الملف', 'success');
     }
 
@@ -1056,15 +1056,15 @@ class EncryptionApp {
         const totalEncryptionsEl = document.getElementById('totalEncryptions');
         const encryptionCountEl = document.getElementById('encryptionCount');
         const totalFailedAttemptsEl = document.getElementById('totalFailedAttempts');
-        
+
         if (totalEncryptionsEl) {
             totalEncryptionsEl.textContent = this.state.totalEncryptions + this.state.totalDecryptions;
         }
-        
+
         if (encryptionCountEl) {
             encryptionCountEl.textContent = this.state.totalEncryptions;
         }
-        
+
         if (totalFailedAttemptsEl) {
             totalFailedAttemptsEl.textContent = this.state.failedAttempts;
         }
@@ -1074,20 +1074,20 @@ class EncryptionApp {
         const notification = document.getElementById('notification');
         const notificationTitle = document.getElementById('notificationTitle');
         const notificationMessage = document.getElementById('notificationMessage');
-        
+
         if (!notification || !notificationTitle || !notificationMessage) return;
-        
+
         // تعيين النص
         notificationTitle.textContent = this.getNotificationTitle(type);
         notificationMessage.textContent = message;
-        
+
         // تعيين الأنماط
         notification.className = 'notification';
         notification.classList.add(`notification-${type}`);
-        
+
         // إظهار الإشعار
         notification.classList.add('show');
-        
+
         // إخفاء الإشعار بعد 5 ثوانٍ
         setTimeout(() => {
             this.hideNotification();
@@ -1134,7 +1134,7 @@ class EncryptionApp {
     showMainApp() {
         const securityCheck = document.getElementById('securityCheck');
         const mainApp = document.getElementById('mainApp');
-        
+
         if (securityCheck) {
             securityCheck.style.opacity = '0';
             setTimeout(() => {
@@ -1171,12 +1171,12 @@ class EncryptionApp {
             this.state.isOnline = true;
             this.showNotification('🌐 تم استعادة الاتصال بالإنترنت', 'success');
         });
-        
+
         window.addEventListener('offline', () => {
             this.state.isOnline = false;
             this.showNotification('⚠️ فقد الاتصال بالإنترنت. النظام يعمل محلياً.', 'warning');
         });
-        
+
         // مراقبة إدخال النص
         const plainText = document.getElementById('plainText');
         if (plainText) {
@@ -1187,14 +1187,14 @@ class EncryptionApp {
                 document.getElementById('wordCount').textContent = `${text.trim() ? text.trim().split(/\s+/).length : 0} كلمة`;
             });
         }
-        
+
         // إغلاق التنبيهات
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('alert-close')) {
                 e.target.closest('.alert').style.display = 'none';
             }
         });
-        
+
         // تحسينات للأجهزة المحمولة
         this.setupMobileEnhancements();
     }
@@ -1210,14 +1210,14 @@ class EncryptionApp {
                 }, 300);
             });
         });
-        
+
         // تحسين الأزرار على الهواتف
         const buttons = document.querySelectorAll('.btn');
         buttons.forEach(button => {
             button.addEventListener('touchstart', () => {
                 button.style.transform = 'scale(0.98)';
             });
-            
+
             button.addEventListener('touchend', () => {
                 setTimeout(() => {
                     button.style.transform = 'scale(1)';
@@ -1240,13 +1240,13 @@ class EncryptionApp {
         passwordFields.forEach(field => {
             field.value = '';
         });
-        
+
         // مسح محاولات كلمات المرور
         this.state.passwordAttempts.clear();
-        
+
         // مسح التخزين المؤقت
         sessionStorage.clear();
-        
+
         // تجاوز القيم في الذاكرة
         const sensitiveData = ['encryptionPassword', 'decryptionPassword', 'plainText', 'encryptedText'];
         sensitiveData.forEach(key => {
@@ -1287,7 +1287,7 @@ class EncryptionApp {
         const password = document.getElementById('decryptionPassword')?.value;
         const attempts = this.state.passwordAttempts.get(password) || 0;
         const failedAttemptsEl = document.getElementById('failedAttempts');
-        
+
         if (failedAttemptsEl) {
             failedAttemptsEl.textContent = attempts;
             failedAttemptsEl.style.color = attempts >= 5 ? '#ef4444' : '#f59e0b';

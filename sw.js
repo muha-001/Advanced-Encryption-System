@@ -18,7 +18,8 @@ const CORE_FILES = [
 
 // الملفات الخارجية
 const EXTERNAL_FILES = [
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+    'https://cdn.jsdelivr.net/npm/hash-wasm@4'
 ];
 
 // ============================================

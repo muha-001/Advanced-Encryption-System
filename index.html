@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+
     <!-- === رؤوس الأمان المحسنة === -->
-    <meta http-equiv="Content-Security-Policy" 
-          content="default-src 'self'; 
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
                    script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; 
                    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
                    font-src 'self' data: https://cdnjs.cloudflare.com; 
@@ -16,45 +16,48 @@
                    frame-ancestors 'none'; 
                    base-uri 'self'; 
                    form-action 'self';">
-    
+
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
-    
+
     <title>🔐 نظام التشفير المتقدم - AES-256-GCM | GitHub Pages</title>
-    <meta name="description" content="نظام تشفير عسكري AES-256-GCM مع PBKDF2 310,000 تكرار. تشفير محلي 100% على GitHub Pages. لا بيانات تخرج من متصفحك.">
+    <meta name="description"
+        content="نظام تشفير عسكري AES-256-GCM مع PBKDF2 310,000 تكرار. تشفير محلي 100% على GitHub Pages. لا بيانات تخرج من متصفحك.">
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
-    
+
     <!-- روابط التصميم -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    
+
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%232563eb%22>🔐</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%232563eb%22>🔐</text></svg>">
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="نظام التشفير">
-    
+
     <!-- Open Graph -->
     <meta property="og:title" content="🔐 نظام التشفير المتقدم - AES-256-GCM">
-    <meta property="og:description" content="تشفير عسكري AES-256-GCM مع PBKDF2 310,000 تكرار. تشفير محلي 100% على GitHub Pages">
+    <meta property="og:description"
+        content="تشفير عسكري AES-256-GCM مع PBKDF2 310,000 تكرار. تشفير محلي 100% على GitHub Pages">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://img.icons8.com/color/480/000000/security-checked.png">
     <meta property="og:url" content="https://muha-001.github.io/advanced-encryption-system/">
-    
+
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="نظام التشفير المتقدم">
     <meta name="twitter:description" content="تشفير AES-256-GCM عسكري المستوى على GitHub Pages">
-    
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://muha-001.github.io/advanced-encryption-system/">
-    
+
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
@@ -73,6 +76,7 @@
     }
     </script>
 </head>
+
 <body>
     <!-- شاشة التحميل -->
     <div id="loadingScreen">
@@ -102,7 +106,7 @@
             </div>
             <h2>🔍 التحقق من بيئة التشفير الآمنة</h2>
             <p class="check-subtitle">يتم التحقق من جميع متطلبات الأمان اللازمة للتشفير العسكري</p>
-            
+
             <div class="check-list">
                 <div class="check-item">
                     <div class="check-icon-status">
@@ -117,7 +121,7 @@
                         <span>جارٍ التحقق...</span>
                     </div>
                 </div>
-                
+
                 <div class="check-item">
                     <div class="check-icon-status">
                         <i class="fas fa-key"></i>
@@ -131,7 +135,7 @@
                         <span>جارٍ التحقق...</span>
                     </div>
                 </div>
-                
+
                 <div class="check-item">
                     <div class="check-icon-status">
                         <i class="fas fa-database"></i>
@@ -145,7 +149,7 @@
                         <span>جارٍ التحقق...</span>
                     </div>
                 </div>
-                
+
                 <div class="check-item">
                     <div class="check-icon-status">
                         <i class="fab fa-github"></i>
@@ -160,7 +164,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="check-security-level">
                 <div class="security-meter">
                     <div class="meter-bar" id="securityMeter"></div>
@@ -172,12 +176,12 @@
                     <span>عسكري</span>
                 </div>
             </div>
-            
+
             <button id="continueBtn" class="btn btn-primary btn-large" disabled>
                 <i class="fas fa-lock"></i>
                 <span>🔐 الدخول إلى نظام التشفير</span>
             </button>
-            
+
             <p class="check-note">
                 <i class="fas fa-info-circle"></i>
                 💡 جميع عمليات التشفير تتم محلياً على جهازك - لا توجد بيانات تُرسل إلى أي خادم
@@ -205,7 +209,7 @@
                     </span>
                 </div>
             </div>
-            
+
             <div class="status-right">
                 <div class="status-item">
                     <i class="fas fa-clock"></i>
@@ -243,7 +247,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="header-info">
                     <div class="info-card">
                         <i class="fas fa-bolt"></i>
@@ -261,15 +265,17 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="header-subtitle">
                 <p>
-                    نظام تشفير من المستوى العسكري يعمل على <strong>GitHub Pages</strong>. 
-                    يستخدم <strong>Web Crypto API</strong> مع <strong>AES-256-GCM</strong> و<strong>PBKDF2</strong> مع 310,000 تكرار. 
-                    جميع عمليات التشفير تتم محلياً على جهازك - <span class="highlight">لا توجد بيانات ترسل إلى أي خادم</span>.
+                    نظام تشفير من المستوى العسكري يعمل على <strong>GitHub Pages</strong>.
+                    يستخدم <strong>Web Crypto API</strong> مع <strong>AES-256-GCM</strong> و<strong>PBKDF2</strong> مع
+                    310,000 تكرار.
+                    جميع عمليات التشفير تتم محلياً على جهازك - <span class="highlight">لا توجد بيانات ترسل إلى أي
+                        خادم</span>.
                 </p>
             </div>
-            
+
             <div class="certification-badges">
                 <div class="badge-container">
                     <span class="cert-badge aes-badge">
@@ -311,7 +317,8 @@
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div class="alert-content">
-                    <strong>مهم!</strong> احتفظ بنسخة احتياطية من كلمات المرور والمفاتيح. فقدانها يعني فقدان البيانات المشفرة إلى الأبد.
+                    <strong>مهم!</strong> احتفظ بنسخة احتياطية من كلمات المرور والمفاتيح. فقدانها يعني فقدان البيانات
+                    المشفرة إلى الأبد.
                 </div>
                 <button class="alert-close" onclick="this.parentElement.style.display='none'">
                     <i class="fas fa-times"></i>
@@ -330,7 +337,7 @@
                     <h2>🔒 تشفير النص</h2>
                     <p class="section-desc">تشفير النصوص باستخدام AES-256-GCM مع PBKDF2</p>
                 </div>
-                
+
                 <div class="encryption-card">
                     <div class="input-group">
                         <label for="plainText">
@@ -338,14 +345,8 @@
                             النص المراد تشفيره
                         </label>
                         <div class="textarea-container">
-                            <textarea 
-                                id="plainText" 
-                                placeholder="أدخل النص الذي تريد تشفيره هنا..."
-                                rows="4"
-                                spellcheck="false"
-                                autocomplete="off"
-                                autocorrect="off"
-                                autocapitalize="off"></textarea>
+                            <textarea id="plainText" placeholder="أدخل النص الذي تريد تشفيره هنا..." rows="4"
+                                spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
                             <div class="textarea-actions">
                                 <button class="text-action" onclick="app.pasteText('plainText')">
                                     <i class="fas fa-paste"></i>
@@ -361,19 +362,15 @@
                             <span id="wordCount">0 كلمة</span>
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="encryptionPassword">
                             <i class="fas fa-key"></i>
                             كلمة المرور للتشفير
                         </label>
                         <div class="password-container">
-                            <input 
-                                type="password" 
-                                id="encryptionPassword" 
-                                placeholder="أدخل كلمة مرور قوية (16+ حرفاً)"
-                                autocomplete="new-password"
-                                spellcheck="false">
+                            <input type="password" id="encryptionPassword" placeholder="أدخل كلمة مرور قوية (16+ حرفاً)"
+                                autocomplete="new-password" spellcheck="false">
                             <div class="password-actions">
                                 <button class="password-action" onclick="app.togglePassword('encryptionPassword')">
                                     <i class="fas fa-eye"></i>
@@ -383,7 +380,7 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <!-- مؤشر قوة كلمة المرور -->
                         <div class="password-strength">
                             <div class="strength-header">
@@ -402,7 +399,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- خيارات التشفير المتقدمة -->
                     <div class="advanced-options">
                         <div class="options-header">
@@ -438,7 +435,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- أزرار التحكم -->
                     <div class="action-buttons">
                         <button class="btn btn-encrypt" onclick="app.encrypt()" id="encryptBtn">
@@ -454,7 +451,7 @@
                             <span>❓ المساعدة</span>
                         </button>
                     </div>
-                    
+
                     <!-- نتيجة التشفير -->
                     <div class="result-container hidden" id="encryptionResult">
                         <div class="result-header">
@@ -471,11 +468,7 @@
                             </div>
                         </div>
                         <div class="result-content">
-                            <textarea 
-                                id="encryptedText" 
-                                readonly 
-                                rows="3"
-                                placeholder="سيظهر النص المشفر هنا..."
+                            <textarea id="encryptedText" readonly rows="3" placeholder="سيظهر النص المشفر هنا..."
                                 spellcheck="false"></textarea>
                         </div>
                         <div class="result-info">
@@ -499,7 +492,7 @@
                     </div>
                 </div>
             </section>
-            
+
             <!-- قسم فك التشفير -->
             <section class="decryption-section">
                 <div class="section-header">
@@ -509,7 +502,7 @@
                     <h2>🔓 فك تشفير النص</h2>
                     <p class="section-desc">فك تشفير النصوص المشفرة باستخدام نفس كلمة المرور</p>
                 </div>
-                
+
                 <div class="decryption-card">
                     <div class="input-group">
                         <label for="encryptedInput">
@@ -517,14 +510,8 @@
                             النص المشفر
                         </label>
                         <div class="textarea-container">
-                            <textarea 
-                                id="encryptedInput" 
-                                placeholder="الصق النص المشفر هنا..."
-                                rows="3"
-                                spellcheck="false"
-                                autocomplete="off"
-                                autocorrect="off"
-                                autocapitalize="off"></textarea>
+                            <textarea id="encryptedInput" placeholder="الصق النص المشفر هنا..." rows="3"
+                                spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
                             <div class="textarea-actions">
                                 <button class="text-action" onclick="app.pasteText('encryptedInput')">
                                     <i class="fas fa-paste"></i>
@@ -535,18 +522,15 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="input-group">
                         <label for="decryptionPassword">
                             <i class="fas fa-key"></i>
                             كلمة المرور لفك التشفير
                         </label>
                         <div class="password-container">
-                            <input 
-                                type="password" 
-                                id="decryptionPassword" 
-                                placeholder="أدخل كلمة المرور المستخدمة في التشفير"
-                                autocomplete="current-password"
+                            <input type="password" id="decryptionPassword"
+                                placeholder="أدخل كلمة المرور المستخدمة في التشفير" autocomplete="current-password"
                                 spellcheck="false">
                             <div class="password-actions">
                                 <button class="password-action" onclick="app.togglePassword('decryptionPassword')">
@@ -554,14 +538,14 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="attempt-counter">
                             <i class="fas fa-exclamation-circle"></i>
                             <span>المحاولات الفاشلة: <strong id="failedAttempts">0</strong></span>
                             <small>بعد 10 محاولات سيتم إغلاق النظام</small>
                         </div>
                     </div>
-                    
+
                     <!-- أزرار التحكم -->
                     <div class="action-buttons">
                         <button class="btn btn-decrypt" onclick="app.decrypt()" id="decryptBtn">
@@ -577,7 +561,7 @@
                             <span>📷 مسح QR</span>
                         </button>
                     </div>
-                    
+
                     <!-- نتيجة فك التشفير -->
                     <div class="result-container hidden" id="decryptionResult">
                         <div class="result-header">
@@ -594,11 +578,7 @@
                             </div>
                         </div>
                         <div class="result-content">
-                            <textarea 
-                                id="decryptedText" 
-                                readonly 
-                                rows="4"
-                                placeholder="سيظهر النص المفكوك هنا..."
+                            <textarea id="decryptedText" readonly rows="4" placeholder="سيظهر النص المفكوك هنا..."
                                 spellcheck="false"></textarea>
                         </div>
                         <div class="result-info">
@@ -628,7 +608,7 @@
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
-            
+
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <div class="card-icon">
@@ -652,7 +632,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
                     <div class="card-icon">
                         <i class="fas fa-chart-line"></i>
@@ -675,7 +655,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
                     <div class="card-icon">
                         <i class="fas fa-clock"></i>
@@ -707,7 +687,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
                     <div class="card-icon">
                         <i class="fas fa-calculator"></i>
@@ -770,7 +750,7 @@
                     <p>مُستضاف على GitHub Pages - تشفير محلي 100%</p>
                     <p class="version-info">الإصدار 3.1.0 | آخر تحديث: <span id="currentDate">2024-01-01</span></p>
                 </div>
-                
+
                 <div class="footer-section">
                     <h5>التقنيات المستخدمة</h5>
                     <div class="tech-stack">
@@ -781,7 +761,7 @@
                         <span class="tech-item">GitHub Pages</span>
                     </div>
                 </div>
-                
+
                 <div class="footer-section">
                     <h5>روابط سريعة</h5>
                     <div class="footer-links">
@@ -793,16 +773,16 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="footer-bottom">
                 <div class="disclaimer">
                     <i class="fas fa-exclamation-triangle"></i>
                     <span>
-                        <strong>تنبيه:</strong> هذا النظام مصمم للأغراض التعليمية والأمنية المشروعة. 
+                        <strong>تنبيه:</strong> هذا النظام مصمم للأغراض التعليمية والأمنية المشروعة.
                         المستخدم يتحمل المسؤولية الكاملة عن استخدام النظام.
                     </span>
                 </div>
-                
+
                 <div class="footer-stats">
                     <span><i class="fas fa-code"></i> صنع ب ❤️ للأمان الرقمي</span>
                     <span class="separator">|</span>
@@ -810,7 +790,7 @@
                 </div>
             </div>
         </footer>
-        
+
         <!-- الإشعارات -->
         <div class="notification-container">
             <div class="notification" id="notification">
@@ -826,7 +806,7 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- النافذة المنبثقة لكلمة المرور -->
         <div class="modal" id="passwordModal">
             <div class="modal-content">
@@ -862,7 +842,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="generated-password">
                         <input type="text" id="generatedPassword" readonly>
                         <div class="password-actions-modal">
@@ -874,7 +854,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="password-strength-modal">
                         <div class="strength-indicator">
                             <div class="strength-bar-modal" id="modalStrengthBar"></div>
@@ -907,7 +887,8 @@
                     <div class="info-content">
                         <div class="info-section">
                             <h4>📋 نظرة عامة</h4>
-                            <p>نظام تشفير متقدم يعمل على GitHub Pages باستخدام تقنيات التشفير الحديثة والمعايير الأمنية العسكرية.</p>
+                            <p>نظام تشفير متقدم يعمل على GitHub Pages باستخدام تقنيات التشفير الحديثة والمعايير الأمنية
+                                العسكرية.</p>
                         </div>
                         <div class="info-section">
                             <h4>🔐 تقنيات التشفير</h4>
@@ -940,19 +921,22 @@
     </div>
 
     <!-- ملفات JavaScript -->
+    <!-- مكتبة Argon2id -->
+    <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
+
     <!-- تحميل crypto-engine.js أولاً -->
     <script src="crypto-engine.js"></script>
     <!-- ثم تحميل app.js -->
     <script src="app.js"></script>
-    
+
     <script>
         // تهيئة التطبيق بعد تحميل الصفحة بالكامل
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             console.log('📦 جميع الملفات تم تحميلها، بدء التطبيق...');
-            
+
             // تسجيل وقت التحميل
             window.pageLoadStart = performance.now();
-            
+
             // تسجيل Service Worker
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js')
@@ -963,41 +947,41 @@
                         console.log('⚠️ فشل تسجيل Service Worker:', error);
                     });
             }
-            
+
             // تأخير بسيط لضمان تحميل جميع الملفات
-            setTimeout(function() {
+            setTimeout(function () {
                 try {
                     // إنشاء التطبيق
                     window.app = new EncryptionApp();
-                    
+
                     // تعيين التاريخ الحالي
                     const now = new Date();
                     const dateEl = document.getElementById('currentDate');
                     if (dateEl) {
-                        dateEl.textContent = 
-                            `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+                        dateEl.textContent =
+                            `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
                     }
-                    
+
                     // حساب وقت التحميل
                     const loadTime = performance.now() - window.pageLoadStart;
                     const loadTimeEl = document.getElementById('pageLoadTime');
                     if (loadTimeEl) {
-                        loadTimeEl.textContent = 
+                        loadTimeEl.textContent =
                             `تم التحميل في ${Math.round(loadTime)} مللي ثانية`;
                     }
-                    
+
                     console.log('✅ التطبيق جاهز للاستخدام');
-                    
+
                 } catch (error) {
                     console.error('❌ فشل تحميل التطبيق:', error);
-                    
+
                     // إخفاء شاشة التحميل حتى في حالة الخطأ
                     const loadingScreen = document.getElementById('loadingScreen');
                     if (loadingScreen) {
                         loadingScreen.style.opacity = '0';
                         setTimeout(() => {
                             loadingScreen.style.display = 'none';
-                            
+
                             // إظهار رسالة خطأ
                             const securityCheck = document.getElementById('securityCheck');
                             if (securityCheck) {
@@ -1041,14 +1025,14 @@
                 }
             }, 300);
         });
-        
+
         // منع تصغير النص على iOS
-        document.addEventListener('touchstart', function() {}, {passive: true});
-        
+        document.addEventListener('touchstart', function () { }, { passive: true });
+
         // تحسينات للأجهزة المحمولة
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             document.body.classList.add('mobile-device');
-            
+
             // إضافة meta tag إضافي للتحكم في حجم العرض
             const viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta) {
@@ -1057,4 +1041,5 @@
         }
     </script>
 </body>
+
 </html>
