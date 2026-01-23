@@ -7,26 +7,37 @@
 class CryptoEngine {
     constructor() {
         this.config = {
-            // الطبقة 1: AES-256-GCM
+            // الطبقة 1 (الداخلية): AES-256-GCM
             layer1: {
                 algorithm: 'AES-GCM',
                 keyDerivation: 'Argon2id',
-                memoryCost: 1572864, // 1.5 GB in KB
+                memoryCost: 1048576, // 1 GB (High security for Inner)
                 parallelism: 1,
-                iterations: 2, // Argon2 iterations
-                hashLength: 32, // 256-bit key
+                iterations: 2,
+                hashLength: 32,
                 ivLength: 12
             },
 
-            // الطبقة 2: ChaCha20-Poly1305 (أو AES-CTR إذا لم يتوفر)
+            // الطبقة 2 (الوسطى): ChaCha20-Poly1305
             layer2: {
-                algorithm: 'ChaCha20-Poly1305', // Fallback to AES-CTR
-                keyDerivation: 'PBKDF2',
-                iterations: 2000000, // 2 Million iterations
-                hash: 'SHA-256',
-                keyLength: 256,
-                saltLength: 32, // Stronger salt
+                algorithm: 'ChaCha20-Poly1305',
+                keyDerivation: 'Argon2id',
+                memoryCost: 1048576, // 1 GB (High security for Middle)
+                parallelism: 1,
+                iterations: 2,
+                hashLength: 32,
                 ivLength: 12
+            },
+
+            // الطبقة 3 (الخارجية): AES-CTR
+            layer3: {
+                algorithm: 'AES-CTR',
+                keyDerivation: 'Argon2id',
+                memoryCost: 1048576, // 1 GB (High security for Outer)
+                parallelism: 1,
+                iterations: 2,
+                hashLength: 32,
+                ivLength: 16 // 16 bytes for AES-CTR
             }
         };
 
