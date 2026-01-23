@@ -36,9 +36,8 @@ class CryptoEngine {
         // التحقق من دعم ChaCha20
         this.supportCheckPromise = this.checkChaChaSupport();
 
-        console.log('🚀 محرك التشفير الهجين (Paranoid Mode v4.1) جاهز للعمل');
-        console.log(`🔒 Argon2id Memory: ${this.config.layer1.memoryCost / 1024} MB`);
-        console.log(`🔒 PBKDF2 Iterations: ${this.config.layer2.iterations}`);
+        console.log('🚀 محرك التشفير الثلاثي (Triple Argon2 v5.0) جاهز للعمل');
+        console.log(`🔒 3x Argon2id Layers (1GB each)`);
     }
 
     async checkChaChaSupport() {
@@ -76,41 +75,44 @@ class CryptoEngine {
             if (!plainText || !password) throw new Error('البيانات ناقصة');
             if (typeof hashwasm === 'undefined') throw new Error('مكتبة Argon2id (hash-wasm) غير محملة');
 
-            // انتظار انتهاء فحص الدعم (لمنع حالة تعارض السباق)
+            // انتظار انتهاء فحص الدعم
             await this.supportCheckPromise;
 
             const startTime = performance.now();
 
-            // 1. توليد الأملاح
-            const salt1 = this.generateRandomBytes(16);
-            const salt2 = this.generateRandomBytes(32);
+            // 1. توليد 3 أملاح فريدة (لعزل الطبقات)
+            const salt1 = this.generateRandomBytes(16); // للطبقة 3 (الخارجية)
+            const salt2 = this.generateRandomBytes(16); // للطبقة 2 (الوسطى)
+            const salt3 = this.generateRandomBytes(16); // للطبقة 1 (الداخلية)
 
-            // 2. اشتقاق المفاتيح (توازي)
-            console.log('🔨 جاري اشتقاق المفاتيح الهجينة...');
-            const [key1Data, key2Data] = await Promise.all([
-                this.deriveKeyArgon2id(password, salt1),
-                this.deriveKeyPBKDF2(password, salt2)
-            ]);
+            // 2. اشتقاق المفاتيح (تسلسلي لتوفير الذاكرة)
+            // ننفذها بالتسلسل لتجنب استخدام 3GB+ RAM في نفس اللحظة
+            console.log('🔨 جاري اشتقاق المفاتيح (Triple Argon2)...');
 
-            // استيراد مفتاح الطبقة الأولى (AES-GCM)
-            const key1 = await this.importKey(key1Data, this.config.layer1.algorithm);
+            console.log('--- اشتقاق مفتاح الطبقة الخارجية ---');
+            const key3Data = await this.deriveKeyArgon2id(password, salt1, this.config.layer3.memoryCost); // Key for Outer (AES-CTR)
 
-            // تحديد الخوارزمية الصحيحة للطبقة الثانية
-            let layer2Algorithm;
+            console.log('--- اشتقاق مفتاح الطبقة الوسطى ---');
+            const key2Data = await this.deriveKeyArgon2id(password, salt2, this.config.layer2.memoryCost); // Key for Middle (ChaCha)
+
+            console.log('--- اشتقاق مفتاح الطبقة الداخلية ---');
+            const key1Data = await this.deriveKeyArgon2id(password, salt3, this.config.layer1.memoryCost); // Key for Inner (GCM)
+
+            // استيراد المفاتيح
+            const key3 = await this.importKey(key3Data, 'AES-CTR');
+
+            // مفتاح ChaCha20 - معالجة خاصة للـ Polyfill
             let key2;
-
+            let layer2AlgoName = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
             if (this.useExternalChaCha) {
-                // إذا كنا نستخدم المكتبة الخارجية، المفتاح هو مجرد مصفوفة بايتات
-                layer2Algorithm = 'ChaCha20-Poly1305-External';
-                key2 = new Uint8Array(key2Data); // Raw bytes for noble-ciphers
+                key2 = new Uint8Array(key2Data); // Raw bytes
             } else {
-                layer2Algorithm = this.chachaSupported ? 'ChaCha20-Poly1305' : 'AES-CTR';
-                key2 = await this.importKey(key2Data, layer2Algorithm);
+                key2 = await this.importKey(key2Data, layer2AlgoName);
             }
 
-            // 3. التشفير الطبقة 1 (الداخلي): AES-256-GCM
-            const iv1 = this.generateRandomBytes(12);
-            // ضغط وتشفير (الطبقة 1 - AES-GCM)
+            const key1 = await this.importKey(key1Data, 'AES-GCM');
+
+            // 3. التجهيز والضغط
             let dataToEncrypt;
             if (options.compression) {
                 const compressed = await this.compressString(plainText);
@@ -119,63 +121,70 @@ class CryptoEngine {
                 dataToEncrypt = new TextEncoder().encode(plainText);
             }
 
-            const layer1Cipher = await this.crypto.encrypt(
+            // 4. التشفير - الطبقة 1 (الداخلية): AES-GCM
+            const iv1 = this.generateRandomBytes(12);
+            const cipher1 = await this.crypto.encrypt(
                 { name: 'AES-GCM', iv: iv1 },
                 key1,
                 dataToEncrypt
             );
 
-            // 4. التشفير الطبقة 2 (الخارجي): ChaCha20 أو AES-CTR
-            let iv2, finalCipher;
-            const ivLength = (this.chachaSupported || this.useExternalChaCha) ? 12 : 16;
-            iv2 = this.generateRandomBytes(ivLength);
+            // 5. التشفير - الطبقة 2 (الوسطى): ChaCha20 (أو AES-CTR كبديل)
+            const iv2 = this.generateRandomBytes(12); // 12 bytes standard for ChaCha
+            let cipher2;
 
             if (this.useExternalChaCha) {
-                // استخدام مكتبة noble-ciphers
                 const chacha = window.chacha20poly1305(key2, iv2);
-                finalCipher = chacha.encrypt(new Uint8Array(layer1Cipher));
-                layer2Algorithm = 'ChaCha20-Poly1305'; // اسم موحد للناتج
+                cipher2 = chacha.encrypt(new Uint8Array(cipher1));
+                layer2AlgoName = 'ChaCha20-Poly1305';
             } else {
-                // استخدام Native Web Crypto
-                const layer2Params = this.chachaSupported ?
+                const params = layer2AlgoName === 'ChaCha20-Poly1305' ?
                     { name: 'ChaCha20-Poly1305', iv: iv2 } :
                     { name: 'AES-CTR', counter: iv2, length: 64 };
-
-                finalCipher = await this.crypto.encrypt(
-                    layer2Params,
-                    key2,
-                    layer1Cipher
-                );
+                cipher2 = await this.crypto.encrypt(params, key2, cipher1);
             }
 
-            // 5. بناء التقرير النهائي
+            // 6. التشفير - الطبقة 3 (الخارجية): AES-CTR
+            const iv3 = this.generateRandomBytes(16); // 16 bytes for AES-CTR
+            const cipher3 = await this.crypto.encrypt(
+                { name: 'AES-CTR', counter: iv3, length: 64 },
+                key3,
+                cipher2
+            );
+
+            // 7. بناء التقرير النهائي
             const encryptedData = {
-                version: '4.0-HYBRID',
+                version: '5.0-TRIPLE',
                 timestamp: Date.now(),
                 layers: {
-                    outer: {
-                        algo: layer2Algorithm,
-                        iv: this.arrayToBase64(iv2),
-                        salt: this.arrayToBase64(salt2), // Salt for PBKDF2
-                        iter: this.config.layer2.iterations
+                    outer: { // AES-CTR
+                        algo: 'AES-CTR',
+                        iv: this.arrayToBase64(iv3),
+                        salt: this.arrayToBase64(salt1),
+                        mem: this.config.layer3.memoryCost
                     },
-                    inner: {
+                    middle: { // ChaCha20
+                        algo: layer2AlgoName,
+                        iv: this.arrayToBase64(iv2),
+                        salt: this.arrayToBase64(salt2),
+                        mem: this.config.layer2.memoryCost
+                    },
+                    inner: { // AES-GCM
                         algo: 'AES-GCM',
                         iv: this.arrayToBase64(iv1),
-                        salt: this.arrayToBase64(salt1), // Salt for Argon2id
+                        salt: this.arrayToBase64(salt3),
                         mem: this.config.layer1.memoryCost
                     }
                 },
-                ciphertext: this.arrayToBase64(finalCipher)
+                ciphertext: this.arrayToBase64(cipher3)
             };
 
             const endTime = performance.now();
-
-            // إضافة معلومات الأداء
             encryptedData.performance = {
                 time: Math.round(endTime - startTime),
-                argon2Memory: this.config.layer1.memoryCost
+                memory: 'Triple Argon2 (1GB x3)'
             };
+            return encryptedData;
 
             return encryptedData;
 
@@ -194,13 +203,17 @@ class CryptoEngine {
                 return this.decryptLegacyV3(encryptedData, password);
             }
 
-            // معالجة الإصدار v4.0-HYBRID
+            // معالجة الإصدار v5.0-TRIPLE
             let data = encryptedData;
             if (typeof data === 'string') {
                 try { data = JSON.parse(data); } catch { throw new Error('تنسيق البيانات غير صالح'); }
             }
 
-            if (!data.version || !data.version.includes('HYBRID')) {
+            if (!data.version || !data.version.includes('TRIPLE')) {
+                // If it's the recent Hybrid v4, we could add support, but sticking to the plan:
+                if (data.version && data.version.includes('HYBRID')) {
+                    throw new Error('هذه الرسالة مشفرة بنظام Hybrid v4 القديم. هذا النظام يدعم Triple v5 فقط.');
+                }
                 // محاولة ذكية لكشف الإصدار
                 if (data.salt && data.iv && data.ciphertext && !data.layers) {
                     return this.decryptLegacyV3(data, password);
@@ -211,60 +224,70 @@ class CryptoEngine {
             const startTime = performance.now();
 
             // 1. استخراج المتغيرات
-            const salt1 = this.base64ToArray(data.layers.inner.salt);
-            const salt2 = this.base64ToArray(data.layers.outer.salt);
+            const salt1 = this.base64ToArray(data.layers.outer.salt);   // AES-CTR
+            const salt2 = this.base64ToArray(data.layers.middle.salt);  // ChaCha
+            const salt3 = this.base64ToArray(data.layers.inner.salt);   // AES-GCM
+
+            const iv3 = this.base64ToArray(data.layers.outer.iv);
+            const iv2 = this.base64ToArray(data.layers.middle.iv);
             const iv1 = this.base64ToArray(data.layers.inner.iv);
-            const iv2 = this.base64ToArray(data.layers.outer.iv);
+
             const ciphertext = this.base64ToArray(data.ciphertext);
 
-            // 2. اشتقاق المفاتيح
-            console.log('🔓 جاري اشتقاق المفاتيح لفك التشفير...');
-            const [key1Data, key2Data] = await Promise.all([
-                this.deriveKeyArgon2id(password, salt1, data.layers.inner.mem),
-                this.deriveKeyPBKDF2(password, salt2, data.layers.outer.iter)
-            ]);
+            // 2. اشتقاق المفاتيح (تسلسلي لتوفير الذاكرة)
+            console.log('🔓 جاري اشتقاق المفاتيح لفك التشفير (Triple)...');
 
+            console.log('--- مفتاح Outer ---');
+            const key3Data = await this.deriveKeyArgon2id(password, salt1, data.layers.outer.mem);
+
+            console.log('--- مفتاح Middle ---');
+            const key2Data = await this.deriveKeyArgon2id(password, salt2, data.layers.middle.mem);
+
+            console.log('--- مفتاح Inner ---');
+            const key1Data = await this.deriveKeyArgon2id(password, salt3, data.layers.inner.mem);
+
+            const key3 = await this.importKey(key3Data, 'AES-CTR');
             const key1 = await this.importKey(key1Data, 'AES-GCM');
 
-            // 3. فك الطبقة الخارجية (ChaCha/AES-CTR)
-            let innerCipher;
-            const outerAlgo = data.layers.outer.algo;
+            // 3. فك الطبقة 3 (الخارجية): AES-CTR
+            const cipher2 = await this.crypto.decrypt(
+                { name: 'AES-CTR', counter: new Uint8Array(iv3), length: 64 },
+                key3,
+                ciphertext
+            );
 
-            // التحقق مما إذا كان يجب استخدام المكتبة الخارجية لفك تشفير ChaCha20
-            if (outerAlgo === 'ChaCha20-Poly1305' && this.useExternalChaCha) {
-                console.log('🔄 فك تشفير ChaCha20 باستخدام Polyfill...');
+            // 4. فك الطبقة 2 (الوسطى): ChaCha20
+            let cipher1;
+            const middleAlgo = data.layers.middle.algo;
+
+            if (middleAlgo === 'ChaCha20-Poly1305' && this.useExternalChaCha) {
+                // استخدام noble-ciphers
                 const key2 = new Uint8Array(key2Data);
                 const chacha = window.chacha20poly1305(key2, iv2);
                 try {
-                    innerCipher = chacha.decrypt(new Uint8Array(ciphertext));
+                    cipher1 = chacha.decrypt(new Uint8Array(cipher2));
                 } catch (e) { throw new Error('فشل فك تشفير ChaCha20 (Polyfill): ' + e.message); }
             } else {
-                // استخدام Native Web Crypto (لـ AES-CTR أو ChaCha20 الأصلي)
-                const key2 = await this.importKey(key2Data, outerAlgo);
-
-                const layer2Params = outerAlgo === 'ChaCha20-Poly1305' ?
+                // استخدام Native
+                const key2 = await this.importKey(key2Data, middleAlgo);
+                const params = middleAlgo === 'ChaCha20-Poly1305' ?
                     { name: 'ChaCha20-Poly1305', iv: iv2 } :
-                    { name: 'AES-CTR', counter: iv2, length: 64 };
+                    { name: 'AES-CTR', counter: new Uint8Array(iv2), length: 64 };
 
-                innerCipher = await this.crypto.decrypt(
-                    layer2Params,
-                    key2,
-                    ciphertext
-                );
+                cipher1 = await this.crypto.decrypt(params, key2, cipher2);
             }
 
-            // 4. فك الطبقة الداخلية (AES-GCM)
+            // 5. فك الطبقة 1 (الداخلية): AES-GCM
             const decrypted = await this.crypto.decrypt(
-                { name: 'AES-GCM', iv: iv1 },
+                { name: 'AES-GCM', iv: new Uint8Array(iv1) },
                 key1,
-                innerCipher
+                cipher1
             );
 
-            // فك التشفير والضغط
+            // 6. فك الضغط
             const decryptedBytes = new Uint8Array(decrypted);
             let plainText;
 
-            // محاولة فك الضغط (GZIP magic bytes: 0x1f 0x8b)
             if (decryptedBytes.length > 2 && decryptedBytes[0] === 0x1f && decryptedBytes[1] === 0x8b) {
                 try {
                     plainText = await this.decompressString(decryptedBytes);
@@ -281,7 +304,7 @@ class CryptoEngine {
                 metadata: {
                     version: data.version,
                     timestamp: data.timestamp,
-                    security: 'Paranoid (Hybrid)'
+                    security: 'Triple Argon2 (GCM+ChaCha+CTR)'
                 },
                 performance: {
                     time: Math.round(performance.now() - startTime)

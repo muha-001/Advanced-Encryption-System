@@ -481,7 +481,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('🔒 جاري التشفير (Argon2id + PBKDF2)... قد يستغرق وقتاً', 'info');
+            this.showNotification('🛡️ جاري التشفير الثلاثي (3x Argon2)... يرجى الانتظار، هذا سيأخذ وقتاً!', 'info');
 
             const startTime = performance.now();
 
@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام هجين (AES + ChaCha20) ذاكرة 1.5GB', 'success');
+            this.showNotification('✅ تم التشفير بنظام Triple Argon2 (GCM+ChaCha+CTR) بنجاح!', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
