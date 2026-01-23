@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'encryption-system-v3';
-const CACHE_VERSION = '3.0.0';
+const CACHE_NAME = 'encryption-system-v4';
+const CACHE_VERSION = '4.0.0';
 const APP_NAME = 'نظام التشفير المتقدم';
 
 // الملفات التي سيتم تخزينها مؤقتاً
@@ -28,18 +28,18 @@ const EXTERNAL_FILES = [
 
 self.addEventListener('install', (event) => {
     console.log(`🚀 ${APP_NAME} - تثبيت Service Worker`);
-    
+
     event.waitUntil(
         (async () => {
             try {
                 // فتح التخزين المؤقت
                 const cache = await caches.open(CACHE_NAME);
                 console.log('📦 فتح التخزين المؤقت:', CACHE_NAME);
-                
+
                 // تخزين الملفات الأساسية
                 await cache.addAll(CORE_FILES);
                 console.log('✅ تم تخزين الملفات الأساسية');
-                
+
                 // تخزين الملفات الخارجية
                 for (const url of EXTERNAL_FILES) {
                     try {
@@ -49,11 +49,11 @@ self.addEventListener('install', (event) => {
                         console.warn(`⚠️ فشل تخزين ${url}:`, error);
                     }
                 }
-                
+
                 // تفعيل Service Worker فوراً
                 await self.skipWaiting();
                 console.log('⚡ Service Worker مفعل وجاهز للعمل');
-                
+
             } catch (error) {
                 console.error('❌ فشل التثبيت:', error);
                 throw error;
@@ -68,7 +68,7 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     console.log(`⚡ ${APP_NAME} - تفعيل Service Worker`);
-    
+
     event.waitUntil(
         (async () => {
             try {
@@ -82,11 +82,11 @@ self.addEventListener('activate', (event) => {
                         }
                     })
                 );
-                
+
                 // المطالبة بالتحكم في العملاء
                 await self.clients.claim();
                 console.log('✅ Service Worker مسيطر على جميع الصفحات');
-                
+
                 // إرسال رسالة إلى الصفحات
                 const clients = await self.clients.matchAll();
                 clients.forEach((client) => {
@@ -96,7 +96,7 @@ self.addEventListener('activate', (event) => {
                         cacheName: CACHE_NAME
                     });
                 });
-                
+
             } catch (error) {
                 console.error('❌ فشل التفعيل:', error);
             }
@@ -111,38 +111,38 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     // تجاهل الطلبات غير GET
     if (event.request.method !== 'GET') return;
-    
+
     const url = new URL(event.request.url);
-    
+
     // تجاهل الطلبات غير HTTP/HTTPS
     if (!url.protocol.startsWith('http')) return;
-    
+
     // تجاهل الطلبات لموارد محددة
-    if (url.pathname.includes('browser-sync') || 
+    if (url.pathname.includes('browser-sync') ||
         url.pathname.includes('socket.io') ||
         url.pathname.includes('__webpack')) {
         return;
     }
-    
+
     event.respondWith(
         (async () => {
             try {
                 // محاولة جلب من التخزين المؤقت أولاً
                 const cachedResponse = await caches.match(event.request);
-                
+
                 if (cachedResponse) {
                     console.log(`🔍 وجد في التخزين المؤقت: ${url.pathname}`);
-                    
+
                     // تحديث التخزين المؤقت في الخلفية
                     this.updateCacheInBackground(event.request);
-                    
+
                     return cachedResponse;
                 }
-                
+
                 // إذا لم يوجد في التخزين المؤقت، جلب من الشبكة
                 console.log(`🌐 جلب من الشبكة: ${url.pathname}`);
                 const networkResponse = await fetch(event.request);
-                
+
                 // التحقق من صحة الاستجابة
                 if (networkResponse && networkResponse.status === 200) {
                     // تخزين في التخزين المؤقت
@@ -150,12 +150,12 @@ self.addEventListener('fetch', (event) => {
                     await cache.put(event.request, networkResponse.clone());
                     console.log(`💾 تم تخزين: ${url.pathname}`);
                 }
-                
+
                 return networkResponse;
-                
+
             } catch (error) {
                 console.error(`❌ فشل جلب ${url.pathname}:`, error);
-                
+
                 // إذا كان طلباً لصفحة HTML، إرجاع الصفحة الرئيسية
                 if (event.request.mode === 'navigate') {
                     const fallbackResponse = await caches.match('./index.html');
@@ -163,7 +163,7 @@ self.addEventListener('fetch', (event) => {
                         return fallbackResponse;
                     }
                 }
-                
+
                 // صفحة عدم الاتصال
                 return new Response(
                     `
@@ -289,7 +289,7 @@ async function updateCacheInBackground(request) {
             const cache = await caches.open(CACHE_NAME);
             await cache.put(request, response);
             console.log(`🔄 تم تحديث التخزين المؤقت: ${request.url}`);
-            
+
             // إعلام الصفحة بالتحديث
             const clients = await self.clients.matchAll();
             clients.forEach((client) => {
@@ -312,14 +312,14 @@ async function updateCacheInBackground(request) {
 
 self.addEventListener('message', (event) => {
     console.log('📨 استقبال رسالة:', event.data);
-    
+
     if (!event.data || !event.data.type) return;
-    
+
     switch (event.data.type) {
         case 'SKIP_WAITING':
             self.skipWaiting();
             break;
-            
+
         case 'CLEAR_CACHE':
             caches.delete(CACHE_NAME)
                 .then(() => {
@@ -329,7 +329,7 @@ self.addEventListener('message', (event) => {
                     }
                 });
             break;
-            
+
         case 'GET_CACHE_INFO':
             caches.open(CACHE_NAME)
                 .then((cache) => cache.keys())
@@ -344,7 +344,7 @@ self.addEventListener('message', (event) => {
                     }
                 });
             break;
-            
+
         case 'UPDATE_CACHE':
             this.updateCache();
             break;
@@ -357,10 +357,10 @@ self.addEventListener('message', (event) => {
 
 async function updateCache() {
     console.log('🔄 بدء تحديث التخزين المؤقت');
-    
+
     try {
         const cache = await caches.open(CACHE_NAME);
-        
+
         for (const url of [...CORE_FILES, ...EXTERNAL_FILES]) {
             try {
                 const response = await fetch(url, { cache: 'no-store' });
@@ -372,9 +372,9 @@ async function updateCache() {
                 console.warn(`⚠️ فشل تحديث ${url}:`, error);
             }
         }
-        
+
         console.log('✅ اكتمل تحديث التخزين المؤقت');
-        
+
         // إعلام الصفحة
         const clients = await self.clients.matchAll();
         clients.forEach((client) => {
@@ -383,7 +383,7 @@ async function updateCache() {
                 timestamp: new Date().toISOString()
             });
         });
-        
+
     } catch (error) {
         console.error('❌ فشل تحديث التخزين المؤقت:', error);
     }
@@ -399,10 +399,10 @@ self.addEventListener('activate', (event) => {
         (async () => {
             // حذف التخزين المؤقت الأقدم من أسبوع
             const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-            
+
             const cache = await caches.open(CACHE_NAME);
             const requests = await cache.keys();
-            
+
             await Promise.all(
                 requests.map(async (request) => {
                     const response = await cache.match(request);
@@ -437,9 +437,9 @@ self.addEventListener('unhandledrejection', (event) => {
 
 self.addEventListener('push', (event) => {
     if (!event.data) return;
-    
+
     const data = event.data.json();
-    
+
     const options = {
         body: data.body || 'تحديث جديد متاح',
         icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%232563eb%22>🔐</text></svg>',
@@ -457,7 +457,7 @@ self.addEventListener('push', (event) => {
             }
         ]
     };
-    
+
     event.waitUntil(
         self.registration.showNotification(data.title || 'نظام التشفير', options)
     );
@@ -465,7 +465,7 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    
+
     if (event.action === 'open') {
         event.waitUntil(
             clients.openWindow('./')
