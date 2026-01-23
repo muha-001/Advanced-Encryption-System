@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'encryption-system-v4';
-const CACHE_VERSION = '4.0.0';
+const CACHE_NAME = 'encryption-system-v4.1';
+const CACHE_VERSION = '4.1.0';
 const APP_NAME = 'نظام التشفير المتقدم';
 
 // الملفات التي سيتم تخزينها مؤقتاً

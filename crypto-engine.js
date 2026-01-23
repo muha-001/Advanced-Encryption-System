@@ -36,7 +36,7 @@ class CryptoEngine {
         // التحقق من دعم ChaCha20
         this.supportCheckPromise = this.checkChaChaSupport();
 
-        console.log('🚀 محرك التشفير الهجين (Paranoid Mode) جاهز للعمل');
+        console.log('🚀 محرك التشفير الهجين (Paranoid Mode v4.1) جاهز للعمل');
         console.log(`🔒 Argon2id Memory: ${this.config.layer1.memoryCost / 1024} MB`);
         console.log(`🔒 PBKDF2 Iterations: ${this.config.layer2.iterations}`);
     }
