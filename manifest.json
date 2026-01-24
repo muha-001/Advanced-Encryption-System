@@ -1,7 +1,7 @@
 {
-  "name": "نظام التشفير المتقدم - AES-256-GCM",
-  "short_name": "التشفير المتقدم",
-  "description": "نظام تشفير نووي v6.5 (PBKDF2+Argon2+HKDF) مع AES-GCM و ChaCha20. تشفير محلي 100% على GitHub Pages.",
+  "name": "نظام التشفير النووي - Nuclear Pipeline",
+  "short_name": "التشفير النووي",
+  "description": "نظام تشفير بمسار نووي v6.6.1 (PBKDF2+Argon2+HKDF) مع AES-GCM و ChaCha20. تشفير محلي 100% بدون إنترنت.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -38,7 +38,7 @@
   ],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox='0 0 1280 720'><rect width='1280' height='720' fill='%230f172a'/><text x='640' y='360' font-family='Arial' font-size='48' fill='%232563eb' text-anchor='middle'>نظام التشفير المتقدم</text><text x='640' y='420' font-family='Arial' font-size='24' fill='%23cbd5e1' text-anchor='middle'>AES-256-GCM على GitHub Pages</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox='0 0 1280 720'><rect width='1280' height='720' fill='%230f172a'/><text x='640' y='360' font-family='Arial' font-size='48' fill='%232563eb' text-anchor='middle'>نظام التشفير النووي</text><text x='640' y='420' font-family='Arial' font-size='24' fill='%23cbd5e1' text-anchor='middle'>V6.6.1 Nuclear Pipeline</text></svg>",
       "sizes": "1280x720",
       "type": "image/svg+xml",
       "form_factor": "wide",
@@ -47,9 +47,9 @@
   ],
   "shortcuts": [
     {
-      "name": "تشفير نص جديد",
+      "name": "تشفير نووي جديد",
       "short_name": "تشفير",
-      "description": "تشفير نص باستخدام AES-256-GCM",
+      "description": "تشفير نص بمسار نووي محصن",
       "url": "./index.html?action=encrypt",
       "icons": [
         {
@@ -59,9 +59,9 @@
       ]
     },
     {
-      "name": "فك تشفير نص",
+      "name": "فك التشفير النووي",
       "short_name": "فك",
-      "description": "فك تشفير نص مشفر",
+      "description": "فك تشفير مسار نووي",
       "url": "./index.html?action=decrypt",
       "icons": [
         {

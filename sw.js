@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'encryption-system-v6.6.1';
-const CACHE_VERSION = '6.6.1';
+const CACHE_NAME = 'encryption-system-v6.6.2';
+const CACHE_VERSION = '6.6.2';
 const APP_NAME = 'نظام التشفير المتقدم';
 
 // الملفات التي سيتم تخزينها مؤقتاً
@@ -20,7 +20,8 @@ const CORE_FILES = [
 // الملفات الخارجية
 const EXTERNAL_FILES = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    'https://cdn.jsdelivr.net/npm/hash-wasm@4'
+    'https://cdn.jsdelivr.net/npm/hash-wasm@4',
+    'https://esm.sh/@noble/ciphers@2.1.1/chacha.js'
 ];
 
 // ============================================
