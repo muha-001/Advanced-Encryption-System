@@ -293,7 +293,7 @@ class CryptoEngine {
     async deriveSubKeys(masterSecret) {
         // استيراد السر الرئيسي كمفتاح أولي (IKM)
         const masterKey = await this.crypto.importKey(
-            'raw', masterSecret, 'HKDF', false, ['deriveKey']
+            'raw', masterSecret, 'HKDF', false, ['deriveKey', 'deriveBits']
         );
 
         // -- المفتاح الداخلي (Inner - AES-GCM) --
