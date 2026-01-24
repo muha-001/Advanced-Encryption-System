@@ -1,7 +1,7 @@
 {
   "name": "نظام التشفير المتقدم - AES-256-GCM",
   "short_name": "التشفير المتقدم",
-  "description": "نظام تشفير عسكري باستخدام AES-256-GCM وPBKDF2 310,000 تكرار. تشفير محلي 100% على GitHub Pages.",
+  "description": "نظام تشفير نووي v6.5 (PBKDF2+Argon2+HKDF) مع AES-GCM و ChaCha20. تشفير محلي 100% على GitHub Pages.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",
@@ -11,7 +11,11 @@
   "orientation": "portrait-primary",
   "scope": "./",
   "id": "/advanced-encryption-system/",
-  "categories": ["security", "productivity", "utilities"],
+  "categories": [
+    "security",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22 fill=%22%232563eb%22>🔐</text></svg>",

@@ -7,37 +7,39 @@ class EncryptionApp {
     constructor() {
         // إعدادات التطبيق
         this.config = {
-            appName: 'نظام التشفير المتقدم',
-            version: '3.1.0',
-            algorithm: 'AES-256-GCM',
-            iterations: 310000,
-            maxAttempts: 10,
-            sessionTimeout: 15 * 60 * 1000, // 15 دقيقة
-            strengthLevels: {
-                weak: { min: 0, max: 30, color: '#ef4444', text: 'ضعيفة' },
-                medium: { min: 31, max: 60, color: '#f59e0b', text: 'متوسطة' },
-                strong: { min: 61, max: 80, color: '#10b981', text: 'قوية' },
-                veryStrong: { min: 81, max: 100, color: '#059669', text: 'قوية جداً' }
-            }
-        };
+            // إعدادات التطبيق
+            this.config = {
+                appName: 'نظام التشفير النووي',
+                version: '6.6.0',
+                algorithm: 'Nuclear Pipeline',
+                iterations: 2000000,
+                maxAttempts: 10,
+                sessionTimeout: 15 * 60 * 1000, // 15 دقيقة
+                strengthLevels: {
+                    weak: { min: 0, max: 30, color: '#ef4444', text: 'ضعيفة' },
+                    medium: { min: 31, max: 60, color: '#f59e0b', text: 'متوسطة' },
+                    strong: { min: 61, max: 80, color: '#10b981', text: 'قوية' },
+                    veryStrong: { min: 81, max: 100, color: '#059669', text: 'قوية جداً' }
+                }
+            };
 
-        // حالة التطبيق
-        this.state = {
-            isInitialized: false,
-            totalEncryptions: 0,
-            totalDecryptions: 0,
-            failedAttempts: 0,
-            sessionStart: null,
-            sessionTimer: null,
-            passwordAttempts: new Map(),
-            lastActivity: Date.now(),
-            encryptionHistory: [],
-            isOnline: navigator.onLine,
-            cryptoEngineReady: false
-        };
+            // حالة التطبيق
+            this.state = {
+                isInitialized: false,
+                totalEncryptions: 0,
+                totalDecryptions: 0,
+                failedAttempts: 0,
+                sessionStart: null,
+                sessionTimer: null,
+                passwordAttempts: new Map(),
+                lastActivity: Date.now(),
+                encryptionHistory: [],
+                isOnline: navigator.onLine,
+                cryptoEngineReady: false
+            };
 
-        // تهيئة التطبيق بطريقة آمنة
-        setTimeout(() => this.init(), 100);
+            // تهيئة التطبيق بطريقة آمنة
+            setTimeout(() => this.init(), 100);
     }
 
     async init() {
