@@ -481,7 +481,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('🛡️ جاري التشفير الثلاثي (3x Argon2)... يرجى الانتظار، هذا سيأخذ وقتاً!', 'info');
+            this.showNotification('🛡️ جاري التشفير السيادي (HKDF + AAD Binding)...', 'info');
 
             const startTime = performance.now();
 
@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Triple Argon2 v5.1 (GCM+ChaCha+CTR) بنجاح!', 'success');
+            this.showNotification('✅ تم التشفير بنظام Sovereign v6.0 (غير قابل للتلاعب)', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
