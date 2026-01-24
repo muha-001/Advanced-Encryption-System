@@ -62,7 +62,7 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "نظام التشفير المتقدم",
-        "description": "نظام تشفير AES-256-GCM مع PBKDF2 310,000 تكرار",
+        "description": "نظام تشفير نووي v6.5 (PBKDF2+Argon2+HKDF)",
         "applicationCategory": "SecurityApplication",
         "operatingSystem": "Web",
         "browserRequirements": "Requires JavaScript",
@@ -126,7 +126,7 @@
                     </div>
                     <div class="check-info">
                         <span class="check-title">Web Crypto API</span>
-                        <span class="check-desc">دعم تشفير AES-256-GCM</span>
+                        <span class="check-desc">دعم تشفير AES-GCM & ChaCha20</span>
                     </div>
                     <div class="check-status" id="cryptoStatus">
                         <span class="status-dot checking"></span>
@@ -172,6 +172,7 @@
                     <span>متوسط</span>
                     <span>قوي</span>
                     <span>عسكري</span>
+                    <span>سيادي</span>
                 </div>
             </div>
 
@@ -203,7 +204,7 @@
                     </span>
                     <span class="badge badge-secure">
                         <i class="fas fa-bolt"></i>
-                        AES-256-GCM
+                        Nuclear v6.5
                     </span>
                 </div>
             </div>
@@ -215,7 +216,7 @@
                 </div>
                 <div class="status-item">
                     <i class="fas fa-shield"></i>
-                    <span>المستوى: <span class="security-level-text">عسكري</span></span>
+                    <span>المستوى: <span class="security-level-text">سيادي</span></span>
                 </div>
                 <div class="status-item">
                     <i class="fas fa-lock"></i>
@@ -257,8 +258,8 @@
                     <div class="info-card">
                         <i class="fas fa-user-shield"></i>
                         <div>
-                            <strong>مستوى أمان عسكري</strong>
-                            <small>معتمد من NIST</small>
+                            <strong>مستوى أمان سيادي</strong>
+                            <small>Sovereign Grade</small>
                         </div>
                     </div>
                 </div>
@@ -472,11 +473,11 @@
                         <div class="result-info">
                             <div class="info-item">
                                 <i class="fas fa-shield-alt"></i>
-                                <span>الخوارزمية: <strong>AES-256-GCM</strong></span>
+                                <span>الخوارزمية: <strong>AES-GCM + ChaCha20</strong></span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-redo"></i>
-                                <span>التكرارات: <strong>310,000</strong></span>
+                                <span>التكرارات: <strong>2M + 1.5GB RAM</strong></span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-clock"></i>
@@ -744,7 +745,7 @@
         <footer class="main-footer">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h5>نظام التشفير المتقدم © 2024</h5>
+                    <h5>نظام التشفير المتقدم © 2026</h5>
                     <p>مُستضاف على GitHub Pages - تشفير محلي 100%</p>
                     <p class="version-info">الإصدار v6.5 Nuclear | آخر تحديث: <span id="currentDate">2026-01-24</span>
                     </p>
@@ -757,7 +758,7 @@
                         <span class="tech-item">Argon2id 1.5GB</span>
                         <span class="tech-item">Web Crypto API</span>
                         <span class="tech-item">Service Worker</span>
-                        <span class="tech-item">GitHub Pages</span>
+                        <span class="tech-item">Secure Static Host</span>
                     </div>
                 </div>
 
@@ -766,9 +767,7 @@
                     <div class="footer-links">
                         <a href="#" onclick="app.showAbout()"><i class="fas fa-info-circle"></i> عن النظام</a>
                         <a href="#" onclick="app.showPrivacy()"><i class="fas fa-user-shield"></i> الخصوصية</a>
-                        <a href="https://github.com/muha-001/advanced-encryption-system" target="_blank">
-                            <i class="fab fa-github"></i> مستودع GitHub
-                        </a>
+                        <!-- Link Removed for Security -->
                     </div>
                 </div>
             </div>
