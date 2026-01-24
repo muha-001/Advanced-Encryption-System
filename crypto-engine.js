@@ -42,7 +42,7 @@ class CryptoEngine {
         this.chachaSupported = false;
         this.supportCheckPromise = this.checkChaChaSupport();
 
-        console.log('🚀 محرك التشفير السيادي (Sovereign v6.0) جاهز للعمل');
+        console.log('🚀 محرك التشفير السيادي (Sovereign v6.0.1) جاهز للعمل');
         console.log('🔒 HKDF Key Separation | AAD Binding | Structure Hardening');
     }
 
