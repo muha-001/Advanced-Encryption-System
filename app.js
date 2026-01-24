@@ -481,7 +481,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('🛡️ جاري التشفير السيادي (HKDF + AAD Binding)...', 'info');
+            this.showNotification('☢️ جاري تنفيذ التشفير النووي (Pipeline v6.5)... قد يستغرق ~5 ثوانٍ', 'info');
 
             const startTime = performance.now();
 
@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Sovereign v6.0 (غير قابل للتلاعب)', 'success');
+            this.showNotification('✅ تم التشفير بنظام Nuclear Pipeline v6.5 بنجاح', 'success');
 
             // حفظ في السجل
             this.saveToHistory({

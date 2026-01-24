@@ -1,37 +1,40 @@
 // ============================================
-// محرك التشفير السيادي (Sovereign Grade Crypto Engine)
-// v6.0: AES-GCM + ChaCha20-Poly1305
-// HKDF Key Separation + AAD Binding + Header HMAC Signature
+// محرك التشفير النووي (Nuclear Pipeline Crypto Engine)
+// v6.5: PBKDF2 (CPU) -> Argon2id (RAM) -> HKDF
 // ============================================
 
 class CryptoEngine {
     constructor() {
         this.config = {
-            // المعلمات الرئيسية
-            master: {
-                algorithm: 'Argon2id',
-                memoryCost: 1572864, // 1.5 GB
-                parallelism: 1,
-                iterations: 2,
-                hashLength: 32, // 256-bit Master Secret
-                saltLength: 32
+            // المعلمات الرئيسية (The Pipeline Config)
+            pipeline: {
+                stage1: {
+                    type: 'PBKDF2-HMAC-SHA256',
+                    iterations: 2000000,
+                    desc: 'CPU-Hard (Pre-Computation)'
+                },
+                stage2: {
+                    type: 'Argon2id',
+                    memoryCost: 1572864, // 1.5 GB
+                    parallelism: 4,      // p=4
+                    iterations: 2,       // ops=2
+                    hashLength: 32,
+                    desc: 'Memory-Hard (Main Key Gen)'
+                }
             },
 
             // الطبقة الداخلية
             inner: {
                 algorithm: 'AES-GCM',
-                ivLength: 12,
-                keyLength: 256
+                ivLength: 12
             },
 
             // الطبقة الخارجية
             outer: {
                 algorithm: 'ChaCha20-Poly1305',
-                ivLength: 12,
-                keyLength: 256
+                ivLength: 12
             },
 
-            // نزاهة الهيكل
             integrity: {
                 algorithm: 'HMAC',
                 hash: 'SHA-256'
@@ -42,8 +45,8 @@ class CryptoEngine {
         this.chachaSupported = false;
         this.supportCheckPromise = this.checkChaChaSupport();
 
-        console.log('🚀 محرك التشفير السيادي (Sovereign v6.0.2) جاهز للعمل');
-        console.log('🔒 HKDF Key Separation | AAD Binding | Structure Hardening');
+        console.log('🚀 محرك التشفير النووي (Pipeline v6.5) جاهز للعمل');
+        console.log('🔥 2M PBKDF2 + 1.5GB Argon2id -> HKDF');
     }
 
     async checkChaChaSupport() {
@@ -54,43 +57,60 @@ class CryptoEngine {
             );
             this.chachaSupported = true;
             this.useExternalChaCha = false;
-            console.log('✅ ChaCha20-Poly1305 مدعوم محلياً (Native)');
         } catch (e) {
             if (typeof window.chacha20poly1305 !== 'undefined') {
                 this.chachaSupported = true;
                 this.useExternalChaCha = true;
-                console.log('✅ ChaCha20-Poly1305 مدعوم عبر المكتبة الخارجية (Polyfill)');
+                console.log('✅ استخدام Polyfill لطبقة ChaCha20');
             } else {
-                console.error('❌ ChaCha20 غير مدعوم نهائياً! النظام لا يمكنه العمل.');
                 this.chachaSupported = false;
             }
         }
     }
 
-    // ===== التشفير السيادي =====
+    // ===== التشفير النووي =====
     async encrypt(plainText, password, options = {}) {
         try {
+            /* 
+               Step 1: Check Pre-requisites 
+            */
             if (!plainText || !password) throw new Error('البيانات ناقصة');
-            if (typeof hashwasm === 'undefined') throw new Error('مكتبة Argon2id غير محملة');
-            await this.supportCheckPromise; // منع تعارض السباق
+            if (typeof hashwasm === 'undefined') throw new Error('Argon2id lib missing');
+            await this.supportCheckPromise;
 
             const startTime = performance.now();
+            let timer_pbkdf2 = 0;
+            let timer_argon2 = 0;
 
-            // 1. توليد الملح الرئيسي (Master Salt)
-            const masterSalt = this.generateRandomBytes(this.config.master.saltLength);
+            /* 
+               Step 2: The Pipeline (Key Derivation) 
+            */
+            const masterSalt = this.generateRandomBytes(32); // 32 bytes salt
 
-            // 2. اشتقاق السر الرئيسي (Master Secret) - الكلفة العالية هنا
-            console.log('🔨 جاري اشتقاق السر الرئيسي (Argon2id 1.5GB)...');
-            const masterSecret = await this.deriveMasterSecret(password, masterSalt);
+            // --- Stage 1: CPU Burn (PBKDF2) ---
+            console.log('🔥 المرحلة 1: حرق المعالج (PBKDF2 2M)...');
+            const t1 = performance.now();
+            const intermediateHash = await this.deriveStage1_PBKDF2(password, masterSalt);
+            timer_pbkdf2 = performance.now() - t1;
 
-            // 3. اشتقاق المفاتيح الفرعية (HKDF Separation)
-            console.log('🔑 جاري فصل المفاتيح (HKDF-SHA256)...');
-            const keys = await this.deriveSubKeys(masterSecret);
+            // --- Stage 2: RAM Burn (Argon2id) ---
+            console.log('🧠 المرحلة 2: حرق الذاكرة (Argon2id 1.5GB)...');
+            const t2 = performance.now();
+            const masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
+            timer_argon2 = performance.now() - t2;
 
-            // تنظيف السر الرئيسي من الذاكرة (محاولة)
-            masterSecret.fill(0);
+            // --- Stage 3: Distribution (HKDF) ---
+            console.log('🔑 المرحلة 3: توزيع المفاتيح (HKDF)...');
+            const keys = await this.deriveStage3_HKDF(masterKeyMaterial);
 
-            // 4. تجهيز البيانات والضغط
+            // Clean up secrets
+            intermediateHash.fill(0);
+            masterKeyMaterial.fill(0);
+
+            /* 
+               Step 3: Encryption Context 
+            */
+            // Prepare Payload
             let dataPayload;
             if (options.compression) {
                 dataPayload = new Uint8Array(await this.compressString(plainText));
@@ -98,10 +118,9 @@ class CryptoEngine {
                 dataPayload = new TextEncoder().encode(plainText);
             }
 
-            // 5. الطبقة الداخلية (AES-GCM) مع AAD
-            const innerIV = this.generateRandomBytes(this.config.inner.ivLength);
-            // Binding Context: v6.0 | Inner
-            const innerAAD = new TextEncoder().encode('v6.0|AES-GCM|Inner');
+            // --- Layer 1: Inner (AES-GCM) ---
+            const innerIV = this.generateRandomBytes(12);
+            const innerAAD = new TextEncoder().encode('v6.5|AES-GCM');
 
             const innerCipher = await this.crypto.encrypt(
                 { name: 'AES-GCM', iv: innerIV, additionalData: innerAAD },
@@ -109,19 +128,20 @@ class CryptoEngine {
                 dataPayload
             );
 
-            // 6. الطبقة الخارجية (ChaCha20-Poly1305) مع AAD
-            const outerIV = this.generateRandomBytes(this.config.outer.ivLength);
-            // Binding Context: v6.0 | Outer | Timestamp
+            // --- Layer 2: Outer (ChaCha20-Poly1305) ---
+            const outerIV = this.generateRandomBytes(12);
+            // Timestamp included in header
             const timestamp = Date.now();
-            const outerAAD = new TextEncoder().encode(`v6.0|ChaCha20|Outer|${timestamp}`);
+            const outerAAD = new TextEncoder().encode(`v6.5|ChaCha20|${timestamp}`);
 
             let finalCipher;
             if (this.useExternalChaCha) {
-                // Polyfill handling
+                // Polyfill
                 const keyBytes = new Uint8Array(await this.exportRawKey(keys.outerKey));
                 const chacha = window.chacha20poly1305(keyBytes, new Uint8Array(outerIV), outerAAD);
                 finalCipher = chacha.encrypt(new Uint8Array(innerCipher));
             } else {
+                // Native
                 finalCipher = await this.crypto.encrypt(
                     { name: 'ChaCha20-Poly1305', iv: outerIV, additionalData: outerAAD },
                     keys.outerKey,
@@ -129,100 +149,119 @@ class CryptoEngine {
                 );
             }
 
-            // 7. بناء الهيكل (Structure)
+            /* 
+               Step 4: Construct Header & Output 
+            */
+            const encTotalTime = Math.round(performance.now() - startTime);
+
             const header = {
-                v: '6.0',
+                v: "6.5",
                 ts: timestamp,
-                ms: this.arrayToBase64(masterSalt), // Master Salt
-                iiv: this.arrayToBase64(innerIV),   // Inner IV
-                oiv: this.arrayToBase64(outerIV),   // Outer IV
-                algo: 'Argon2id+HKDF|AES-GCM|ChaCha20'
+                algo: "PBKDF2->Argon2id->HKDF | AES-GCM+ChaCha20",
+
+                kdf_pipeline: [
+                    {
+                        step: 1,
+                        type: this.config.pipeline.stage1.type,
+                        iter: this.config.pipeline.stage1.iterations,
+                        desc: this.config.pipeline.stage1.desc
+                    },
+                    {
+                        step: 2,
+                        type: this.config.pipeline.stage2.type,
+                        mem: this.config.pipeline.stage2.memoryCost,
+                        ops: this.config.pipeline.stage2.iterations,
+                        p: this.config.pipeline.stage2.parallelism,
+                        desc: this.config.pipeline.stage2.desc
+                    }
+                ],
+
+                ms: this.arrayToBase64(masterSalt),
+                iiv: this.arrayToBase64(innerIV),
+                oiv: this.arrayToBase64(outerIV)
             };
 
-            // 8. توقيع الهيكل (HMAC Integrity)
-            const headerString = JSON.stringify(header);
-            const headerBytes = new TextEncoder().encode(headerString);
-            const signature = await this.crypto.sign(
-                'HMAC',
-                keys.integrityKey,
-                headerBytes
-            );
+            // Sign the header
+            const headerBytes = new TextEncoder().encode(JSON.stringify(header));
+            const signature = await this.crypto.sign('HMAC', keys.integrityKey, headerBytes);
 
-            // 9. الخرج النهائي
-            const result = {
+            return {
                 header: header,
                 sig: this.arrayToBase64(signature),
                 data: this.arrayToBase64(finalCipher),
                 performance: {
-                    time: Math.round(performance.now() - startTime),
-                    memory: '1.5GB (Argon2id)'
+                    time: encTotalTime,
+                    note: `Latency: ~${(timer_pbkdf2 / 1000).toFixed(1)}s (PBKDF2) + ~${(timer_argon2 / 1000).toFixed(1)}s (Argon2) = ~${(encTotalTime / 1000).toFixed(1)}s Total`
                 }
             };
 
-            return result;
-
         } catch (error) {
-            console.error('❌ خطأ في التشفير السيادي:', error);
+            console.error('Encryption Failed:', error);
             throw error;
         }
     }
 
-    // ===== فك التشفير السيادي =====
+    // ===== فك التشفير النووي =====
     async decrypt(encryptedData, password) {
         try {
-            // معالجة البيانات
             let data = encryptedData;
             if (typeof data === 'string') {
-                try { data = JSON.parse(data); } catch { throw new Error('تنسيق البيانات تالف'); }
+                try { data = JSON.parse(data); } catch { throw new Error('Invalid JSON'); }
             }
 
-            // التحقق من الإصدار
-            if (!data.header || data.header.v !== '6.0') {
-                // دعم v5.0 القديم إذا لزم الأمر، لكننا الآن "Sovereign Only"
-                throw new Error('إصدار غير مدعوم. هذا النظام يقبل فقط ملفات Sovereign v6.0');
+            if (!data.header || data.header.v !== '6.5') {
+                throw new Error('Unsupported Version. This engine requires v6.5 Nuclear Pipeline.');
             }
 
             const startTime = performance.now();
 
-            // 1. استخراج المتغيرات الأساسية
+            // 1. Extract Metadata
             const masterSalt = this.base64ToArray(data.header.ms);
-            const signature = this.base64ToArray(data.sig);
+            const innerIV = this.base64ToArray(data.header.iiv);
+            const outerIV = this.base64ToArray(data.header.oiv);
             const ciphertext = this.base64ToArray(data.data);
+            const signature = this.base64ToArray(data.sig);
 
-            // 2. اشتقاق المفاتيح مجدداً
-            console.log('🔓 جاري اشتقاق المفاتيح (Argon2id + HKDF)...');
-            const masterSecret = await this.deriveMasterSecret(password, masterSalt);
-            const keys = await this.deriveSubKeys(masterSecret);
-            masterSecret.fill(0); // Wipe
+            // 2. Re-run Pipeline (Derive Keys)
+            console.log('♻️ Re-running Key Pipeline...');
 
-            // 3. التحقق من سلامة الهيكل (Signature Verification)
-            const headerString = JSON.stringify(data.header);
-            const headerBytes = new TextEncoder().encode(headerString);
+            // Stage 1: PBKDF2
+            const intermediateHash = await this.deriveStage1_PBKDF2(password, masterSalt);
 
-            const isValid = await this.crypto.verify(
-                'HMAC',
-                keys.integrityKey,
-                signature,
-                headerBytes
+            // Stage 2: Argon2id
+            // Use params from header to ensure compatibility even if config changes slightly
+            const memCost = data.header.kdf_pipeline[1].mem || 1572864;
+            const ops = data.header.kdf_pipeline[1].ops || 2;
+            const p = data.header.kdf_pipeline[1].p || 4;
+
+            const masterKeyMaterial = await this.deriveStage2_Argon2id(
+                intermediateHash, masterSalt, memCost, ops, p
             );
 
-            if (!isValid) {
-                throw new Error('⛔ كشف محاولة تلاعب! توقيع الملف (HMAC) غير صحيح. قد يكون الملف معدلاً.');
-            }
-            console.log('✅ توقيع الهيكل سليم.');
+            // Stage 3: HKDF
+            const keys = await this.deriveStage3_HKDF(masterKeyMaterial);
 
-            // 4. فك الطبقة الخارجية (ChaCha20) مع التحقق من AAD
-            const outerIV = this.base64ToArray(data.header.oiv);
-            const timestamp = data.header.ts;
-            const outerAAD = new TextEncoder().encode(`v6.0|ChaCha20|Outer|${timestamp}`);
+            // Wipe secrets
+            intermediateHash.fill(0);
+            masterKeyMaterial.fill(0);
 
+            // 3. Verify Signature (Integrity)
+            const headerBytes = new TextEncoder().encode(JSON.stringify(data.header));
+            const isValid = await this.crypto.verify('HMAC', keys.integrityKey, signature, headerBytes);
+
+            if (!isValid) throw new Error('⛔ TAMPERING DETECTED! Header signature mismatch.');
+            console.log('✅ Integrity Check Passed.');
+
+            // 4. Decrypt Outer (ChaCha20)
+            const outerAAD = new TextEncoder().encode(`v6.5|ChaCha20|${data.header.ts}`);
             let innerCipher;
+
             if (this.useExternalChaCha) {
                 const keyBytes = new Uint8Array(await this.exportRawKey(keys.outerKey));
                 const chacha = window.chacha20poly1305(keyBytes, new Uint8Array(outerIV), outerAAD);
                 try {
                     innerCipher = chacha.decrypt(new Uint8Array(ciphertext));
-                } catch (e) { throw new Error('فشل فك الطبقة الخارجية (ChaCha20): ' + e.message); }
+                } catch (e) { throw new Error('Decryption Failed (Outer Layer).'); }
             } else {
                 try {
                     innerCipher = await this.crypto.decrypt(
@@ -230,13 +269,11 @@ class CryptoEngine {
                         keys.outerKey,
                         ciphertext
                     );
-                } catch (e) { throw new Error('فشل فك الطبقة الخارجية (Auth Tag Mismatch - AAD Error).'); }
+                } catch (e) { throw new Error('Decryption Failed (Outer Layer).'); }
             }
 
-            // 5. فك الطبقة الداخلية (AES-GCM) مع التحقق من AAD
-            const innerIV = this.base64ToArray(data.header.iiv);
-            const innerAAD = new TextEncoder().encode('v6.0|AES-GCM|Inner');
-
+            // 5. Decrypt Inner (AES-GCM)
+            const innerAAD = new TextEncoder().encode('v6.5|AES-GCM');
             let plainBuffer;
             try {
                 plainBuffer = await this.crypto.decrypt(
@@ -244,11 +281,11 @@ class CryptoEngine {
                     keys.innerKey,
                     innerCipher
                 );
-            } catch (e) { throw new Error('فشل فك الطبقة الداخلية (AES-GCM Integrity Fail - AAD Error).'); }
+            } catch (e) { throw new Error('Decryption Failed (Inner Layer).'); }
 
-            // 6. فك الضغط
-            let plainText;
+            // 6. Decompress
             const plainBytes = new Uint8Array(plainBuffer);
+            let plainText;
             if (plainBytes.length > 2 && plainBytes[0] === 0x1f && plainBytes[1] === 0x8b) {
                 try { plainText = await this.decompressString(plainBytes); }
                 catch { plainText = new TextDecoder().decode(plainBytes); }
@@ -260,110 +297,102 @@ class CryptoEngine {
                 text: plainText,
                 integrity: true,
                 metadata: {
-                    version: '6.0 (Sovereign)',
-                    timestamp: timestamp,
-                    security: 'Argon2id + HKDF + AAD'
+                    version: '6.5 (Nuclear Pipeline)',
+                    timestamp: data.header.ts,
+                    security: 'PBKDF2->Argon2->HKDF'
                 },
                 performance: { time: Math.round(performance.now() - startTime) }
             };
 
         } catch (error) {
-            console.error('❌ خطأ في فك التشفير:', error);
+            console.error('Decryption error:', error);
             throw error;
         }
     }
 
-    // ===== عمليات الاشتقاق (Key Derivation Functions) =====
+    // ===== PIPELINE FUNCTIONS =====
 
-    // 1. Argon2id: Password + Salt -> Master Secret
-    async deriveMasterSecret(password, salt) {
-        const result = await hashwasm.argon2id({
-            password: password,
-            salt: new Uint8Array(salt),
-            parallelism: this.config.master.parallelism,
-            iterations: this.config.master.iterations,
-            memorySize: this.config.master.memoryCost,
-            hashLength: this.config.master.hashLength,
-            outputType: 'binary'
-        });
-        return result; // Uint8Array
+    // Stage 1: CPU-Hard (PBKDF2) -> Returns Uint8Array (Intermediate Data)
+    async deriveStage1_PBKDF2(password, salt) {
+        const enc = new TextEncoder();
+        const keyMaterial = await this.crypto.importKey(
+            'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']
+        );
+
+        const bits = await this.crypto.deriveBits(
+            {
+                name: 'PBKDF2',
+                salt: new Uint8Array(salt),
+                iterations: this.config.pipeline.stage1.iterations,
+                hash: 'SHA-256'
+            },
+            keyMaterial,
+            256 // 32 bytes output
+        );
+        return new Uint8Array(bits);
     }
 
-    // 2. HKDF: Master Secret -> Sub-Keys
-    async deriveSubKeys(masterSecret) {
-        // استيراد السر الرئيسي كمفتاح أولي (IKM)
+    // Stage 2: Memory-Hard (Argon2id) -> Returns Uint8Array (Master Secret)
+    // Takes Intermediate Hash (bytes) as password input
+    async deriveStage2_Argon2id(intermediateHash, salt, mem, ops, p) {
+        // Warning: hash-wasm may expect Uint8Array for password
+        const result = await hashwasm.argon2id({
+            password: intermediateHash,
+            salt: new Uint8Array(salt),
+            parallelism: p || this.config.pipeline.stage2.parallelism,
+            iterations: ops || this.config.pipeline.stage2.iterations,
+            memorySize: mem || this.config.pipeline.stage2.memoryCost,
+            hashLength: 32,
+            outputType: 'binary'
+        });
+        return result;
+    }
+
+    // Stage 3: Distribution (HKDF) -> Returns Key Objects
+    async deriveStage3_HKDF(masterSecret) {
         const masterKey = await this.crypto.importKey(
             'raw', masterSecret, 'HKDF', false, ['deriveKey', 'deriveBits']
         );
 
-        // -- المفتاح الداخلي (Inner - AES-GCM) --
         const innerKey = await this.crypto.deriveKey(
-            {
-                name: 'HKDF',
-                hash: 'SHA-256',
-                salt: new Uint8Array(0),
-                info: new TextEncoder().encode('v6-inner-aes-gcm') // Context Binding
-            },
-            masterKey,
-            { name: 'AES-GCM', length: 256 },
-            false, ['encrypt', 'decrypt']
+            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v6.5-inner') },
+            masterKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
         );
 
-        // -- المفتاح الخارجي (Outer - ChaCha20) --
+        const integrityKey = await this.crypto.deriveKey(
+            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v6.5-integ') },
+            masterKey, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']
+        );
+
         let outerKey;
         if (this.useExternalChaCha) {
-            // اشتقاق كـ Raw Bits للـ Polyfill
             const bits = await this.crypto.deriveBits(
-                {
-                    name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0),
-                    info: new TextEncoder().encode('v6-outer-chacha20')
-                },
-                masterKey,
-                256
+                { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v6.5-outer') },
+                masterKey, 256
             );
-            outerKey = bits; // Return raw ArrayBuffer directly
+            outerKey = bits;
         } else {
             outerKey = await this.crypto.deriveKey(
-                {
-                    name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0),
-                    info: new TextEncoder().encode('v6-outer-chacha20')
-                },
-                masterKey,
-                { name: 'ChaCha20-Poly1305' },
-                false, ['encrypt', 'decrypt']
+                { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v6.5-outer') },
+                masterKey, { name: 'ChaCha20-Poly1305' }, false, ['encrypt', 'decrypt']
             );
         }
-
-        // -- مفتاح النزاهة (Integrity - HMAC) --
-        const integrityKey = await this.crypto.deriveKey(
-            {
-                name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0),
-                info: new TextEncoder().encode('v6-header-integrity')
-            },
-            masterKey,
-            { name: 'HMAC', hash: 'SHA-256' },
-            false, ['sign', 'verify']
-        );
 
         return { innerKey, outerKey, integrityKey };
     }
 
-    // ===== أدوات مساعدة =====
+    // ===== Helpers =====
     generateRandomBytes(len) { return window.crypto.getRandomValues(new Uint8Array(len)); }
     async exportRawKey(key) {
-        if (key instanceof CryptoKey) {
-            return await this.crypto.exportKey('raw', key);
-        }
-        return key; // Return transparently if already ArrayBuffer
+        if (key instanceof CryptoKey) return await this.crypto.exportKey('raw', key);
+        return key;
     }
-
     arrayToBase64(buffer) {
         let binary = '';
         const bytes = new Uint8Array(buffer);
         for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
         return btoa(binary);
     }
-
     base64ToArray(base64) {
         const binary = atob(base64);
         const len = binary.length;
@@ -371,7 +400,6 @@ class CryptoEngine {
         for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
         return bytes.buffer;
     }
-
     async compressString(str) {
         if ('CompressionStream' in window) {
             const stream = new Blob([str]).stream();
@@ -380,7 +408,6 @@ class CryptoEngine {
         }
         return new TextEncoder().encode(str);
     }
-
     async decompressString(data) {
         if ('DecompressionStream' in window) {
             const stream = new Blob([data]).stream();
@@ -391,5 +418,4 @@ class CryptoEngine {
     }
 }
 
-// تصدير
 window.CryptoEngine = CryptoEngine;
