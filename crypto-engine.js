@@ -42,7 +42,7 @@ class CryptoEngine {
         this.chachaSupported = false;
         this.supportCheckPromise = this.checkChaChaSupport();
 
-        console.log('🚀 محرك التشفير السيادي (Sovereign v6.0.1) جاهز للعمل');
+        console.log('🚀 محرك التشفير السيادي (Sovereign v6.0.2) جاهز للعمل');
         console.log('🔒 HKDF Key Separation | AAD Binding | Structure Hardening');
     }
 
@@ -321,7 +321,7 @@ class CryptoEngine {
                 masterKey,
                 256
             );
-            outerKey = await this.crypto.importKey('raw', bits, 'ChaCha20-Poly1305', true, ['encrypt', 'decrypt']);
+            outerKey = bits; // Return raw ArrayBuffer directly
         } else {
             outerKey = await this.crypto.deriveKey(
                 {
@@ -350,7 +350,12 @@ class CryptoEngine {
 
     // ===== أدوات مساعدة =====
     generateRandomBytes(len) { return window.crypto.getRandomValues(new Uint8Array(len)); }
-    async exportRawKey(key) { return await this.crypto.exportKey('raw', key); }
+    async exportRawKey(key) {
+        if (key instanceof CryptoKey) {
+            return await this.crypto.exportKey('raw', key);
+        }
+        return key; // Return transparently if already ArrayBuffer
+    }
 
     arrayToBase64(buffer) {
         let binary = '';
