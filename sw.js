@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'encryption-system-v6.6';
-const CACHE_VERSION = '6.6.0';
+const CACHE_NAME = 'encryption-system-v6.6.1';
+const CACHE_VERSION = '6.6.1';
 const APP_NAME = 'نظام التشفير المتقدم';
 
 // الملفات التي سيتم تخزينها مؤقتاً
@@ -13,6 +13,7 @@ const CORE_FILES = [
     './assets/css/style.css',
     './assets/js/app.js',
     './assets/js/crypto-engine.js',
+    './assets/js/security-guard.js',
     './manifest.json'
 ];
 
