@@ -6,7 +6,20 @@
 (function () {
     'use strict';
 
-    const GUARD_VERSION = 'v1.0 (Stealth)';
+    const GUARD_VERSION = 'v1.1 (Stealth)';
+
+    // فحص التجاوز للمالك (Backdoor للمالك فقط)
+    const isOwner = new URLSearchParams(window.location.search).get('admin') === 'true' ||
+        localStorage.getItem('ADMIN_BYPASS') === 'true';
+
+    if (isOwner) {
+        console.log(`🔓 تم تجاوز الحماية ${GUARD_VERSION} (وضع المالك)`);
+        if (new URLSearchParams(window.location.search).get('admin') === 'true') {
+            localStorage.setItem('ADMIN_BYPASS', 'true');
+        }
+        return;
+    }
+
     console.log(`🛡️ الحارس الأمني ${GUARD_VERSION} نشط`);
 
     // 1. منع الزر الأيمن (Context Menu)
