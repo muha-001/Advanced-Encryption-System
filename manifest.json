@@ -1,7 +1,7 @@
 {
-  "name": "نظام التشفير النووي - Nuclear Pipeline",
-  "short_name": "التشفير النووي",
-  "description": "نظام تشفير بمسار نووي v6.6.1 (PBKDF2+Argon2+HKDF) مع AES-GCM و ChaCha20. تشفير محلي 100% بدون إنترنت.",
+  "name": "نظام التشفير السيادي - Sovereign Cascade",
+  "short_name": "التشفير السيادي",
+  "description": "نظام تشفير سيادي v8.0 (XChaCha20 + AES-GCM) مع مسار اشتقاق محصن PBKDF2+Argon2+HKDF. تشفير محلي 100% بدون إنترنت.",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./index.html",

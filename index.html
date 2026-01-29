@@ -28,40 +28,38 @@
         content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
     <!-- Modern Ciphers Polyfill (XChaCha20 & ChaCha20-Poly1305) -->
     <script type="module">
-        // [التحديث النووي المطلق - v9.0.5]
-        const SYSTEM_VERSION = '9.0.5-ULTRA-BYPASS';
-        const currentForce = new URLSearchParams(window.location.search).get('force_v');
+        // [التحديث النووي v9.0.6]
+        const SYSTEM_VERSION = '9.0.6-FORCE-RESET';
+        const urlParams = new URLSearchParams(window.location.search);
 
-        if (localStorage.getItem('sys_ver') !== SYSTEM_VERSION && !currentForce) {
-            console.warn('☢️ نظام قديم مكتشف! جاري تجاوز الكاش بشكل كامل...');
+        if (localStorage.getItem('sys_ver') !== SYSTEM_VERSION && !urlParams.has('v')) {
+            console.warn('⚠️ نسخة قديمة! جاري الانتقال للنسخة السيادية 9.0.6...');
 
-            async function superNuclearReset() {
-                // 1. مسح الـ Service Workers
+            async function clearEverything() {
                 if ('serviceWorker' in navigator) {
                     const regs = await navigator.serviceWorker.getRegistrations();
-                    for (let reg of regs) await reg.unregister();
+                    for (const r of regs) await r.unregister();
                 }
-                // 2. مسح الكاش البرمجي
-                if ('caches' in window) {
-                    const names = await caches.keys();
-                    for (let name of names) await caches.delete(name);
-                }
-                // 3. تحديث الـ Version
+                const cacheNames = await caches.keys();
+                for (const name of cacheNames) await caches.delete(name);
+
                 localStorage.setItem('sys_ver', SYSTEM_VERSION);
-
-                // 4. إعادة تحميل مع URL جديد تماماً لتجاوز الـ CDN والبرمجيات القديمة
-                const newUrl = window.location.origin + window.location.pathname + '?force_v=' + Date.now();
-                console.log('🚀 إعادة تحميل النظام عبر: ' + newUrl);
-                window.location.href = newUrl;
+                // إعادة التوجيه للرابط الجديد مع تخطي الكاش
+                window.location.href = window.location.pathname + '?v=' + Date.now();
             }
-
-            superNuclearReset();
+            clearEverything();
         }
 
-        import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@0.5.3/chacha?bundle';
+        import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@1.1.5/chacha?bundle';
         window.xchacha20 = xchacha20;
         window.chacha20poly1305 = chacha20poly1305;
-        console.log('✅ تم تحميل مكتبات التشفير السيادية v9.0.5');
+        console.log('✅ Sovereign Ciphers v9.0.6 Loaded');
+    </script>
+
+    import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@0.5.3/chacha?bundle';
+    window.xchacha20 = xchacha20;
+    window.chacha20poly1305 = chacha20poly1305;
+    console.log('✅ تم تحميل مكتبات التشفير السيادية v9.0.5');
     </script>
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
 
