@@ -78,13 +78,12 @@ class CryptoEngine {
             // الطبقة 1: XChaCha20 (Inner)
             const xchachaKey = new Uint8Array(await this.exportRawKey(keys.innerKey));
             const xchachaNonce = new Uint8Array(innerIV);
-            const xchachaData = new Uint8Array(dataPayload);
 
             try {
                 if (typeof window.xchacha20 === 'function') {
-                    innerCipher = window.xchacha20(xchachaKey, xchachaNonce, xchachaData);
+                    innerCipher = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
                 } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
-                    innerCipher = noble.ciphers.xchacha20(xchachaKey, xchachaNonce, xchachaData);
+                    innerCipher = noble.ciphers.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
                 } else {
                     throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى التأكد من تحميل polyfill.');
                 }
@@ -186,12 +185,13 @@ class CryptoEngine {
             );
 
             // الطبقة 1 (Inner): XChaCha20
-            const xchachaKey = await this.exportRawKey(keys.innerKey);
+            const xchachaKey = new Uint8Array(await this.exportRawKey(keys.innerKey));
+            const xchachaNonce = new Uint8Array(innerIV);
             try {
                 if (typeof window.xchacha20 === 'function') {
-                    plainBuffer = window.xchacha20(xchachaKey, innerIV, new Uint8Array(innerCipher));
+                    plainBuffer = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
                 } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
-                    plainBuffer = noble.ciphers.xchacha20(xchachaKey, innerIV, new Uint8Array(innerCipher));
+                    plainBuffer = noble.ciphers.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
                 } else {
                     throw new Error('مكتبة XChaCha20 غير متوفرة');
                 }

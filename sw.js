@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'sovereign-v9.1.0-PURGE';
-const CACHE_VERSION = '9.1.0';
+const CACHE_NAME = 'sovereign-v9.2.0-ULTIMATE';
+const CACHE_VERSION = '9.2.0';
 const APP_NAME = 'نظام التشفير السيادي';
 
 // الملفات التي سيتم تخزينها مؤقتاً
