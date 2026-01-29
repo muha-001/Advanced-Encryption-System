@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'encryption-system-v9.0.0-ULTRA';
-const CACHE_VERSION = '9.0.0';
+const CACHE_NAME = 'encryption-system-v9.0.1-FINAL';
+const CACHE_VERSION = '9.0.1';
 const APP_NAME = 'نظام التشفير السيادي';
 
 // الملفات التي سيتم تخزينها مؤقتاً
