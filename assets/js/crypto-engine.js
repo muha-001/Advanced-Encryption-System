@@ -249,38 +249,28 @@ class CryptoEngine {
 
     async deriveStage3_HKDF(masterSecret) {
         const masterKey = await this.crypto.importKey(
-            'raw', masterSecret, 'HKDF', false, ['deriveKey', 'deriveBits', 'deriveKey']
+            'raw', masterSecret, 'HKDF', false, ['deriveKey', 'deriveBits']
         );
 
-        const innerKey = await this.crypto.deriveKey(
-            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v7.0-inner') },
+        // مفتاح الطبقة الخارجية: AES-256-GCM
+        const outerKey = await this.crypto.deriveKey(
+            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v8.0-outer') },
             masterKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
         );
 
+        // مفتاح الطبقة الداخلية: XChaCha20 (نقوم باشتقاق Bits لأنه لارجوع له في CryptoKey الأصلي غالباً)
+        const innerKey = await this.crypto.deriveBits(
+            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v8.0-inner') },
+            masterKey, 256
+        );
+
+        // مفتاح المصادقة والـ SIV
         const integrityKey = await this.crypto.deriveKey(
-            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v7.0-integ') },
+            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v8.0-integ') },
             masterKey, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']
         );
 
-        const sivKey = await this.crypto.deriveKey(
-            { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v7.0-siv') },
-            masterKey, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-        );
-
-        let outerKey;
-        if (this.useExternalChaCha) {
-            outerKey = await this.crypto.deriveBits(
-                { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v7.0-outer') },
-                masterKey, 256
-            );
-        } else {
-            outerKey = await this.crypto.deriveKey(
-                { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v7.0-outer') },
-                masterKey, { name: 'ChaCha20-Poly1305' }, false, ['encrypt', 'decrypt']
-            );
-        }
-
-        return { innerKey, outerKey, integrityKey, sivKey };
+        return { innerKey, outerKey, integrityKey };
     }
 
     generateRandomBytes(len) { return window.crypto.getRandomValues(new Uint8Array(len)); }
