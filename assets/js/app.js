@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Nuclear Pipeline v6.5 بنجاح', 'success');
+            this.showNotification('✅ تم التشفير بنظام Nuclear Pipeline v7.0 بنجاح', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
