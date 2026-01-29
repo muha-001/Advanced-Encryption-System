@@ -23,9 +23,15 @@
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
 
-    <title>☢️ نظام التشفير النووي - Nuclear Pipeline v7.0 | GitHub Pages</title>
+    <title>☢️ نظام التشفير السيادي - v8.0-SOVEREIGN | GitHub Pages</title>
     <meta name="description"
-        content="نظام تشفير نووي v7.0 (SIV Deterministic + RAM Hardening) مع AES-GCM و ChaCha20. تشفير محلي 100% على GitHub Pages.">
+        content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
+    <!-- XChaCha20 Polyfill -->
+    <script src="https://esm.sh/@noble/ciphers@0.5.3/xchacha.js" type="module"></script>
+    <script type="module">
+        import { xchacha20 } from 'https://esm.sh/@noble/ciphers@0.5.3/xchacha.js';
+        window.xchacha20 = xchacha20;
+    </script>
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
 
     <!-- روابط التصميم -->
@@ -63,7 +69,7 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "نظام التشفير المتقدم",
-        "description": "نظام تشفير نووي v7.0.0 (SIV-Deterministic + RAM Hardening)",
+        "description": "نظام تشفير سيادي v8.0-SOVEREIGN (XChaCha20 + AES-GCM Cascade)",
         "applicationCategory": "SecurityApplication",
         "operatingSystem": "Web",
         "browserRequirements": "Requires JavaScript",

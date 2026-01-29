@@ -8,7 +8,7 @@ class EncryptionApp {
         // إعدادات التطبيق
         this.config = {
             appName: 'نظام التشفير النووي',
-            version: '7.0.0',
+            version: '8.0-SOVEREIGN',
             algorithm: 'Nuclear Pipeline',
             iterations: 2000000,
             maxAttempts: 10,
@@ -481,7 +481,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('☢️ جاري تنفيذ التشفير النووي (Pipeline v7.0)... قد يستغرق ~5 ثوانٍ', 'info');
+            this.showNotification('☢️ جاري تنفيذ التشفير السيادي (v8.0-SOVEREIGN)... قد يستغرق ~5 ثوانٍ', 'info');
 
             const startTime = performance.now();
 
@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Nuclear Pipeline v7.0 بنجاح', 'success');
+            this.showNotification('✅ تم التشفير بنظام Sovereign Pipeline v8.0 بنجاح', 'success');
 
             // حفظ في السجل
             this.saveToHistory({

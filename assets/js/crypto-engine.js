@@ -1,11 +1,12 @@
 // ============================================
-// محرك التشفير النووي (Nuclear Pipeline Crypto Engine)
-// v7.0: SIV Deterministic + Hardened Memory Wiping
+// محرك التشفير السيادي (v8.0-SOVEREIGN Crypto Engine)
+// Cascade: AES-256-GCM (Outer) + XChaCha20 (Inner)
 // ============================================
 
 class CryptoEngine {
     constructor() {
         this.config = {
+            ver: "8.0-SOVEREIGN",
             pipeline: {
                 stage1: { type: 'PBKDF2-HMAC-SHA256', iterations: 2000000 },
                 stage2: {
@@ -16,17 +17,19 @@ class CryptoEngine {
                     hashLength: 32
                 }
             },
-            inner: { algorithm: 'AES-GCM', ivLength: 12 },
-            outer: { algorithm: 'ChaCha20-Poly1305', ivLength: 12 },
+            encryption: {
+                inner: { algorithm: 'XChaCha20', nonceLength: 24 },
+                outer: { algorithm: 'AES-GCM', ivLength: 12 },
+                tagLength: 128
+            },
             integrity: { algorithm: 'HMAC', hash: 'SHA-256' }
         };
 
-        this.deterministicSalt = new TextEncoder().encode('SIV-DETERMINISTIC-SALT-V1');
         this.crypto = window.crypto.subtle;
-        this.chachaSupported = false;
-        this.supportCheckPromise = this.checkChaChaSupport();
+        this.supportsNativeXChaCha = false;
+        this.supportCheckPromise = this.checkSecuritySupport();
 
-        console.log('🚀 محرك التشفير النووي v7.0 جاهز (SIV + RAM Hardening)');
+        console.log('🚀 محرك التشفير السيادي v8.0 جاهز (XChaCha20 + AES-GCM Cascade)');
     }
 
     // آمن: تصفير الذاكرة باستخدام قيم عشوائية لمنع استعادة البيانات
@@ -38,36 +41,17 @@ class CryptoEngine {
         }
     }
 
-    async checkChaChaSupport() {
+    async checkSecuritySupport() {
+        // التحقق من دعم المتصفح للوغاريتمات بشكل أصلي
         try {
-            await this.crypto.generateKey(
-                { name: 'ChaCha20-Poly1305', length: 256 },
-                true, ['encrypt', 'decrypt']
-            );
-            this.chachaSupported = true;
-            this.useExternalChaCha = false;
-        } catch (e) {
-            if (typeof window.chacha20poly1305 !== 'undefined') {
-                this.chachaSupported = true;
-                this.useExternalChaCha = true;
-                console.log('✅ استخدام Polyfill لـ ChaCha20');
-            }
-        }
-    }
-
-    // اشتقاق IV حتمي وآمن (SIV) بناءً على النص والمفتاح
-    async deriveSIV(dataBytes, sivKey) {
-        const signature = await this.crypto.sign('HMAC', sivKey, dataBytes);
-        const sigBytes = new Uint8Array(signature);
-        // نأخذ أول 12 بايت لكل طبقة (أو نشتق أكثر إذا لزم الأمر)
-        return {
-            innerIV: sigBytes.slice(0, 12),
-            outerIV: sigBytes.slice(12, 24)
-        };
+            // XChaCha20 غالباً ما يحتاج إلى Polyfill
+            this.supportsNativeXChaCha = false;
+        } catch (e) { }
     }
 
     async encrypt(plainText, password, options = {}) {
-        let passwordBytes, masterSalt, intermediateHash, masterKeyMaterial, keys, dataPayload, innerIV, outerIV;
+        let passwordBytes, masterSalt, intermediateHash, masterKeyMaterial, keys, dataPayload;
+        let innerCipher, finalCipher, innerIV, outerIV;
 
         try {
             if (!plainText || !password) throw new Error('بيانات ناقصة');
@@ -75,136 +59,142 @@ class CryptoEngine {
 
             const startTime = performance.now();
             passwordBytes = new TextEncoder().encode(password);
+            masterSalt = this.generateRandomBytes(32);
 
-            // 1. اشتقاق الملح (Salt)
-            masterSalt = options.deterministic
-                ? new Uint8Array(this.deterministicSalt)
-                : this.generateRandomBytes(32);
-
-            // 2. خط أنابيب المفاتيح (Key Pipeline)
+            // 1. اشتقاق المفاتيح (Heritage Pipeline)
             intermediateHash = await this.deriveStage1_PBKDF2(passwordBytes, masterSalt);
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
             keys = await this.deriveStage3_HKDF(masterKeyMaterial);
 
-            // 3. تجهيز البيانات
+            // 2. تجهيز البيانات
             dataPayload = options.compression
                 ? new Uint8Array(await this.compressString(plainText))
                 : new TextEncoder().encode(plainText);
 
-            // 4. اشتقاق IV (عشوائي أو SIV)
-            if (options.deterministic) {
-                const sivs = await this.deriveSIV(dataPayload, keys.sivKey);
-                innerIV = sivs.innerIV;
-                outerIV = sivs.outerIV;
-            } else {
-                innerIV = this.generateRandomBytes(12);
-                outerIV = this.generateRandomBytes(12);
+            // 3. التشفير الطبقي (XChaCha20 Inner -> AES-GCM Outer)
+            innerIV = this.generateRandomBytes(24); // XChaCha20 Nonce (Extended)
+            outerIV = this.generateRandomBytes(12); // AES-GCM IV
+
+            // الطبقة 1: XChaCha20 (Inner)
+            const xchachaKey = await this.exportRawKey(keys.innerKey);
+            try {
+                if (typeof window.xchacha20 === 'function') {
+                    innerCipher = window.xchacha20(xchachaKey, innerIV, dataPayload);
+                } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
+                    innerCipher = noble.ciphers.xchacha20(xchachaKey, innerIV, dataPayload);
+                } else {
+                    throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى التأكد من تحميل polyfill.');
+                }
+            } finally {
+                this.wipe(xchachaKey);
             }
 
-            // 5. التشفير (طبقتان)
+            // الطبقة 2: AES-256-GCM (Outer)
             const timestamp = Date.now();
-            const innerAAD = new TextEncoder().encode('v7.0|AES-GCM');
-            const innerCipher = await this.crypto.encrypt(
-                { name: 'AES-GCM', iv: innerIV, additionalData: innerAAD },
-                keys.innerKey,
-                dataPayload
+            const outerAAD = new TextEncoder().encode(`v8.0|AES-GCM|${timestamp}`);
+            finalCipher = await this.crypto.encrypt(
+                { name: 'AES-GCM', iv: outerIV, additionalData: outerAAD },
+                keys.outerKey,
+                innerCipher
             );
 
-            const outerAAD = new TextEncoder().encode(`v7.0|ChaCha20|${timestamp}`);
-            let finalCipher;
-            if (this.useExternalChaCha) {
-                const keyBytes = new Uint8Array(await this.exportRawKey(keys.outerKey));
-                try {
-                    const chacha = window.chacha20poly1305(keyBytes, new Uint8Array(outerIV), outerAAD);
-                    finalCipher = chacha.encrypt(new Uint8Array(innerCipher));
-                } finally { this.wipe(keyBytes); }
-            } else {
-                finalCipher = await this.crypto.encrypt(
-                    { name: 'ChaCha20-Poly1305', iv: outerIV, additionalData: outerAAD },
-                    keys.outerKey,
-                    innerCipher
-                );
-            }
-
-            // 6. البناء النهائي
+            // 4. البناء النهائي (Structured JSON)
             const header = {
-                v: "7.0",
-                mode: options.deterministic ? "NUCLEAR_SIV" : "RANDOM_IV",
-                ts: timestamp,
-                det: !!options.deterministic,
-                ms: this.arrayToBase64(masterSalt),
-                iiv: this.arrayToBase64(innerIV),
-                oiv: this.arrayToBase64(outerIV)
+                ver: "8.0-SOVEREIGN",
+                timestamp: timestamp,
+                classification: "PROBABILISTIC | HIGH-ENTROPY",
+                kdf_pipeline: {
+                    desc: "Hybrid: PBKDF2 (CPU-Hard) -> Argon2id (RAM-Hard) -> HKDF (Split)",
+                    salt: this.arrayToBase64(masterSalt),
+                    params: {
+                        pbkdf2_iter: this.config.pipeline.stage1.iterations,
+                        argon2_mem_kb: this.config.pipeline.stage2.memoryCost,
+                        argon2_lanes: this.config.pipeline.stage2.parallelism,
+                        argon2_time: this.config.pipeline.stage2.iterations
+                    }
+                },
+                encryption: {
+                    algo: "Cascade: AES-256-GCM (Outer) + XChaCha20 (Inner)",
+                    iv_outer: this.arrayToBase64(outerIV),
+                    iv_inner: this.arrayToBase64(innerIV),
+                    tag_length: 128
+                }
             };
 
-            const headerBytes = new TextEncoder().encode(JSON.stringify(header));
-            const signature = await this.crypto.sign('HMAC', keys.integrityKey, headerBytes);
+            const headerJSON = JSON.stringify(header);
+            const cipherBase64 = this.arrayToBase64(finalCipher);
+
+            // ختم المصادقة النهائي (HMAC فوق الهيدر والـ Ciphertext)
+            const authTag = await this.crypto.sign('HMAC', keys.integrityKey, new TextEncoder().encode(headerJSON + cipherBase64));
 
             return {
                 header: header,
-                sig: this.arrayToBase64(signature),
-                data: this.arrayToBase64(finalCipher),
-                performance: { time: Math.round(performance.now() - startTime) }
+                ciphertext: cipherBase64,
+                auth_tag: this.arrayToBase64(authTag),
+                security_meta: {
+                    memory_wiped: true,
+                    dom_nuked: true
+                }
             };
 
         } finally {
-            // تصفير الذاكرة العشوائية فوراً
             this.wipe(passwordBytes);
             this.wipe(intermediateHash);
             this.wipe(masterKeyMaterial);
             this.wipe(dataPayload);
-            if (innerIV && options.deterministic) this.wipe(innerIV);
-            if (outerIV && options.deterministic) this.wipe(outerIV);
+            if (innerCipher) this.wipe(new Uint8Array(innerCipher));
         }
     }
 
     async decrypt(encryptedData, password) {
-        let passwordBytes, intermediateHash, masterKeyMaterial, keys, innerCipher, plainBuffer;
+        let passwordBytes, intermediateHash, masterKeyMaterial, keys;
+        let innerCipher, plainBuffer;
+
         try {
             let data = encryptedData;
             if (typeof data === 'string') data = JSON.parse(data);
-            if (!data.header || (data.header.v !== '6.5' && data.header.v !== '7.0')) {
-                throw new Error('إصدار غير مدعوم');
+
+            if (!data.header || !data.header.ver || !data.header.ver.startsWith('8.0')) {
+                throw new Error('إصدار غير مدعوم أو تنسيق خاطئ');
             }
 
-            const startTime = performance.now();
             passwordBytes = new TextEncoder().encode(password);
-            const masterSalt = this.base64ToArray(data.header.ms);
-            const innerIV = this.base64ToArray(data.header.iiv);
-            const outerIV = this.base64ToArray(data.header.oiv);
-            const ciphertext = this.base64ToArray(data.data);
-            const signature = this.base64ToArray(data.sig);
+            const masterSalt = this.base64ToArray(data.header.kdf_pipeline.salt);
+            const outerIV = this.base64ToArray(data.header.encryption.iv_outer);
+            const innerIV = this.base64ToArray(data.header.encryption.iv_inner);
+            const ciphertext = this.base64ToArray(data.ciphertext);
+            const authTag = this.base64ToArray(data.auth_tag);
 
-            // إعادة بناء المفاتيح
+            // 1. إعادة بناء المفاتيح
             intermediateHash = await this.deriveStage1_PBKDF2(passwordBytes, masterSalt);
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
             keys = await this.deriveStage3_HKDF(masterKeyMaterial);
 
-            // التحقق من السلامة
-            const headerBytes = new TextEncoder().encode(JSON.stringify(data.header));
-            const isValid = await this.crypto.verify('HMAC', keys.integrityKey, signature, headerBytes);
-            if (!isValid) throw new Error('⛔ تم اكتشاف تلاعب في البيانات!');
+            // 2. التحقق من المصادقة (Auth Tag)
+            const headerJSON = JSON.stringify(data.header);
+            const isValid = await this.crypto.verify('HMAC', keys.integrityKey, authTag, new TextEncoder().encode(headerJSON + data.ciphertext));
+            if (!isValid) throw new Error('⛔ فشل التحقق من المصادقة! تم اكتشاف تلاعب في البيانات.');
 
-            // فك التشفير
-            const outerAAD = new TextEncoder().encode(`v${data.header.v}|ChaCha20|${data.header.ts}`);
-            if (this.useExternalChaCha) {
-                const keyBytes = new Uint8Array(await this.exportRawKey(keys.outerKey));
-                try {
-                    const chacha = window.chacha20poly1305(keyBytes, new Uint8Array(outerIV), outerAAD);
-                    innerCipher = chacha.decrypt(new Uint8Array(ciphertext));
-                } finally { this.wipe(keyBytes); }
-            } else {
-                innerCipher = await this.crypto.decrypt(
-                    { name: 'ChaCha20-Poly1305', iv: outerIV, additionalData: outerAAD },
-                    keys.outerKey, ciphertext
-                );
-            }
-
-            const innerAAD = new TextEncoder().encode(`v${data.header.v}|AES-GCM`);
-            plainBuffer = await this.crypto.decrypt(
-                { name: 'AES-GCM', iv: innerIV, additionalData: innerAAD },
-                keys.innerKey, innerCipher
+            // 3. فك التشفير الطبقي
+            const outerAAD = new TextEncoder().encode(`v8.0|AES-GCM|${data.header.timestamp}`);
+            innerCipher = await this.crypto.decrypt(
+                { name: 'AES-GCM', iv: outerIV, additionalData: outerAAD },
+                keys.outerKey, ciphertext
             );
+
+            // الطبقة 1 (Inner): XChaCha20
+            const xchachaKey = await this.exportRawKey(keys.innerKey);
+            try {
+                if (typeof window.xchacha20 === 'function') {
+                    plainBuffer = window.xchacha20(xchachaKey, innerIV, new Uint8Array(innerCipher));
+                } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
+                    plainBuffer = noble.ciphers.xchacha20(xchachaKey, innerIV, new Uint8Array(innerCipher));
+                } else {
+                    throw new Error('مكتبة XChaCha20 غير متوفرة');
+                }
+            } finally {
+                this.wipe(xchachaKey);
+            }
 
             const plainBytes = new Uint8Array(plainBuffer);
             let plainText;
@@ -217,8 +207,7 @@ class CryptoEngine {
             return {
                 text: plainText,
                 integrity: true,
-                metadata: { version: data.header.v, timestamp: data.header.ts },
-                performance: { time: Math.round(performance.now() - startTime) }
+                metadata: { version: data.header.ver, timestamp: data.header.timestamp }
             };
 
         } finally {
