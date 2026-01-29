@@ -258,11 +258,12 @@ class CryptoEngine {
             masterKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
         );
 
-        // مفتاح الطبقة الداخلية: XChaCha20 (نقوم باشتقاق Bits لأنه لارجوع له في CryptoKey الأصلي غالباً)
-        const innerKey = await this.crypto.deriveBits(
+        // مفتاح الطبقة الداخلية: XChaCha20 (نقوم باشتقاق Bits)
+        const innerKeyBits = await this.crypto.deriveBits(
             { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: new TextEncoder().encode('v8.0-inner') },
             masterKey, 256
         );
+        const innerKey = new Uint8Array(innerKeyBits);
 
         // مفتاح المصادقة والـ SIV
         const integrityKey = await this.crypto.deriveKey(
