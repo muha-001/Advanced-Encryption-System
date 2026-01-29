@@ -28,28 +28,32 @@
         content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
     <!-- Modern Ciphers Polyfill (XChaCha20 & ChaCha20-Poly1305) -->
     <script type="module">
-        // [التحديث النووي] - إجبار المتصفح على نسيان النسخ القديمة فوراً
-        const SYSTEM_VERSION = '9.0.1-SOVEREIGN-FIX';
+        // [التحديث النووي النهائي] - إجبار المتصفح على التحميل الفريش
+        const SYSTEM_VERSION = '9.0.4-SOVEREIGN-FINAL';
         if (localStorage.getItem('sys_ver') !== SYSTEM_VERSION) {
-            console.warn('🔄 اكتشاف نسخة قديمة... جاري مسح التخزين المؤقت...');
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) registration.unregister();
-                });
+            console.warn('🔄 اكتشاف نسخة قديمة... جاري التطهير الشامل للذاكرة...');
+
+            async function nuclearReset() {
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (let reg of regs) await reg.unregister();
+                }
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    for (let name of names) await caches.delete(name);
+                }
+                localStorage.setItem('sys_ver', SYSTEM_VERSION);
+                console.log('✅ تم التطهير. جاري إعادة تحميل النظام...');
+                window.location.reload(true);
             }
-            if ('caches' in window) {
-                caches.keys().then(names => {
-                    for (let name of names) caches.delete(name);
-                });
-            }
-            localStorage.setItem('sys_ver', SYSTEM_VERSION);
-            // إجبار المتصفح على إعادة التحميل بعد المسح (اختياري، لكن هنا سنعتمد على التحديث القسري للسكربتات)
+
+            nuclearReset();
         }
 
         import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@0.5.3/chacha?bundle';
         window.xchacha20 = xchacha20;
         window.chacha20poly1305 = chacha20poly1305;
-        console.log('✅ تم تحميل مكتبات التشفير السيادية v9.0.1');
+        console.log('✅ تم تحميل مكتبات التشفير السيادية v9.0.4');
     </script>
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
 
@@ -949,10 +953,10 @@
     <!-- مكتبة Argon2id -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
 
-    <!-- تحميل crypto-engine.js أولاً (v9.0.3 Cache Buster) -->
-    <script src="assets/js/crypto-engine.js?v=903"></script>
+    <!-- تحميل crypto-engine.js أولاً (v9.0.4 Cache Buster) -->
+    <script src="assets/js/crypto-engine.js?v=904"></script>
     <!-- ثم تحميل app.js -->
-    <script src="assets/js/app.js?v=903"></script>
+    <script src="assets/js/app.js?v=904"></script>
 
     <script>
         // تهيئة التطبيق بعد تحميل الصفحة بالكامل
