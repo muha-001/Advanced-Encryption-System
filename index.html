@@ -28,32 +28,34 @@
         content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
     <!-- Modern Ciphers Polyfill (XChaCha20 & ChaCha20-Poly1305) -->
     <script type="module">
-        // [التحديث النووي v9.0.6]
-        const SYSTEM_VERSION = '9.0.6-FORCE-RESET';
+        // [التحديث النووي v9.0.7]
+        const SYSTEM_VERSION = '9.0.7-SOVEREIGN-MASTER';
         const urlParams = new URLSearchParams(window.location.search);
 
-        if (localStorage.getItem('sys_ver') !== SYSTEM_VERSION && !urlParams.has('v')) {
-            console.warn('⚠️ نسخة قديمة! جاري الانتقال للنسخة السيادية 9.0.6...');
-
-            async function clearEverything() {
-                if ('serviceWorker' in navigator) {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    for (const r of regs) await r.unregister();
-                }
+        async function clearEverything() {
+            console.warn('☢️ جاري التطهير الشامل للذاكرة...');
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (const r of regs) await r.unregister();
+            }
+            if ('caches' in window) {
                 const cacheNames = await caches.keys();
                 for (const name of cacheNames) await caches.delete(name);
-
-                localStorage.setItem('sys_ver', SYSTEM_VERSION);
-                // إعادة التوجيه للرابط الجديد مع تخطي الكاش
-                window.location.href = window.location.pathname + '?v=' + Date.now();
             }
+            localStorage.setItem('sys_ver', SYSTEM_VERSION);
+            window.location.href = window.location.pathname + '?v=' + Date.now();
+        }
+
+        if (localStorage.getItem('sys_ver') !== SYSTEM_VERSION && !urlParams.has('v')) {
             clearEverything();
         }
+
+        window.nuclearReset = clearEverything; // إتاحة الوصول اليدوي من الكونسول
 
         import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@1.1.5/chacha?bundle';
         window.xchacha20 = xchacha20;
         window.chacha20poly1305 = chacha20poly1305;
-        console.log('✅ Sovereign Ciphers v9.0.6 Loaded');
+        console.log('✅ Sovereign Ciphers v9.0.7 Loaded. Use nuclearReset() if issues persist.');
     </script>
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
 
