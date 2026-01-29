@@ -481,7 +481,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('☢️ جاري تنفيذ التشفير النووي (Pipeline v6.5)... قد يستغرق ~5 ثوانٍ', 'info');
+            this.showNotification('☢️ جاري تنفيذ التشفير النووي (Pipeline v7.0)... قد يستغرق ~5 ثوانٍ', 'info');
 
             const startTime = performance.now();
 
