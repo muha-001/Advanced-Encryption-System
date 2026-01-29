@@ -489,7 +489,7 @@ class EncryptionApp {
             const options = {
                 timestamp: document.getElementById('optionTimestamp')?.checked || false,
                 compression: document.getElementById('optionCompress')?.checked || true,
-                randomSalt: document.getElementById('optionRandomSalt')?.checked || true
+                deterministic: !(document.getElementById('optionRandomSalt')?.checked ?? true)
             };
 
             // التحقق من وجود محرك التشفير
@@ -531,7 +531,40 @@ class EncryptionApp {
             this.updateStatistics();
 
             this.showNotification('❌ فشل التشفير: ' + error.message, 'error');
+        } finally {
+            // تصفير مدخلات الواجهة فوراً
+            this.wipeUI('plainText', 'encryptionPassword');
         }
+    }
+
+    // تصفير واجهة المستخدم وإجبار المتصفح على تنظيف الذاكرة
+    wipeUI(...ids) {
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            // 1. مسح القيمة برمجياً
+            el.value = '';
+
+            // 2. تدمير وإعادة إنشاء العنصر (لإجبار المتصفح على تنظيف Render Tree)
+            const parent = el.parentNode;
+            const next = el.nextSibling;
+            const clone = el.cloneNode(true);
+
+            parent.removeChild(el);
+            parent.insertBefore(clone, next);
+
+            // إعادة ربط أحداث الإدخال إذا لزم الأمر
+            if (id === 'plainText') {
+                clone.addEventListener('input', () => {
+                    const text = clone.value;
+                    document.getElementById('charCount').textContent = `${text.length} حرف`;
+                    document.getElementById('lineCount').textContent = `${text.split('\n').length} سطر`;
+                    document.getElementById('wordCount').textContent = `${text.trim() ? text.trim().split(/\s+/).length : 0} كلمة`;
+                });
+            }
+        });
+        console.log('🛡️ تم تنظيف الـ DOM والحقول الحساسة');
     }
 
     showEncryptionResult(result, encryptionTime) {
@@ -632,6 +665,8 @@ class EncryptionApp {
             this.updateStatistics();
 
             this.showNotification('❌ فشل فك التشفير: تأكد من صحة البيانات وكلمة المرور', 'error');
+        } finally {
+            this.wipeUI('encryptedInput', 'decryptionPassword');
         }
     }
 
