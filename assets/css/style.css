@@ -507,6 +507,25 @@ body {
     flex-wrap: wrap;
 }
 
+.btn-purge {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-purge:hover {
+    background: var(--danger);
+    color: white;
+}
+
 .separator {
     color: var(--dark-4);
 }
