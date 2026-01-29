@@ -128,7 +128,10 @@ class CryptoEngine {
 
             // 6. البناء النهائي
             const header = {
-                v: "7.0", ts: timestamp, det: !!options.deterministic,
+                v: "7.0",
+                mode: options.deterministic ? "NUCLEAR_SIV" : "RANDOM_IV",
+                ts: timestamp,
+                det: !!options.deterministic,
                 ms: this.arrayToBase64(masterSalt),
                 iiv: this.arrayToBase64(innerIV),
                 oiv: this.arrayToBase64(outerIV)
