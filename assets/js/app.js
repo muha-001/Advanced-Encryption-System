@@ -8,7 +8,7 @@ class EncryptionApp {
         // إعدادات التطبيق
         this.config = {
             appName: 'نظام التشفير النووي',
-            version: '6.6.0',
+            version: '7.0.0',
             algorithm: 'Nuclear Pipeline',
             iterations: 2000000,
             maxAttempts: 10,
