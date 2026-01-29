@@ -76,17 +76,15 @@ class CryptoEngine {
             outerIV = this.generateRandomBytes(12); // AES-GCM IV
 
             // الطبقة 1: XChaCha20 (Inner)
-            let xchachaKeyRaw = await this.exportRawKey(keys.innerKey);
-            // التأكد 100% من نوع البيانات للمكتبة الخارجية
-            const xchachaKey = xchachaKeyRaw instanceof Uint8Array ? xchachaKeyRaw : new Uint8Array(xchachaKeyRaw);
-            const nonce = innerIV instanceof Uint8Array ? innerIV : new Uint8Array(innerIV);
-            const payload = dataPayload instanceof Uint8Array ? dataPayload : new Uint8Array(dataPayload);
+            const xchachaKey = new Uint8Array(await this.exportRawKey(keys.innerKey));
+            const xchachaNonce = new Uint8Array(innerIV);
+            const xchachaData = new Uint8Array(dataPayload);
 
             try {
                 if (typeof window.xchacha20 === 'function') {
-                    innerCipher = window.xchacha20(xchachaKey, nonce, payload);
+                    innerCipher = window.xchacha20(xchachaKey, xchachaNonce, xchachaData);
                 } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
-                    innerCipher = noble.ciphers.xchacha20(xchachaKey, nonce, payload);
+                    innerCipher = noble.ciphers.xchacha20(xchachaKey, xchachaNonce, xchachaData);
                 } else {
                     throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى التأكد من تحميل polyfill.');
                 }
