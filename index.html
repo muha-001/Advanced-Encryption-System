@@ -26,36 +26,46 @@
     <title>☢️ نظام التشفير السيادي - v8.0-SOVEREIGN | GitHub Pages</title>
     <meta name="description"
         content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
-    <!-- Modern Ciphers Polyfill (XChaCha20 & ChaCha20-Poly1305) -->
-    <script type="module">
-        // [التحديث النووي v9.0.7]
-        const SYSTEM_VERSION = '9.0.7-SOVEREIGN-MASTER';
+    <!-- Essential Global Scripts (Cache Purge & Reset) -->
+    <script>
+        const SYSTEM_VERSION = '9.2.1-SOVEREIGN-RELOAD';
         const urlParams = new URLSearchParams(window.location.search);
 
-        async function clearEverything() {
-            console.warn('☢️ جاري التطهير الشامل للذاكرة...');
-            if ('serviceWorker' in navigator) {
-                const regs = await navigator.serviceWorker.getRegistrations();
-                for (const r of regs) await r.unregister();
+        async function nuclearReset() {
+            console.warn('☢️ جاري التطهير الشامل للذاكرة والخدمات...');
+            try {
+                if ('serviceWorker' in navigator) {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    for (const r of regs) await r.unregister();
+                }
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (const name of cacheNames) await caches.delete(name);
+                }
+                localStorage.setItem('sys_ver', SYSTEM_VERSION);
+                localStorage.setItem('last_reset', new Date().toISOString());
+                window.location.href = window.location.pathname + '?v=' + Date.now();
+            } catch (e) {
+                console.error('❌ فشل التطهير:', e);
             }
-            if ('caches' in window) {
-                const cacheNames = await caches.keys();
-                for (const name of cacheNames) await caches.delete(name);
-            }
-            localStorage.setItem('sys_ver', SYSTEM_VERSION);
-            window.location.href = window.location.pathname + '?v=' + Date.now();
         }
 
         if (localStorage.getItem('sys_ver') !== SYSTEM_VERSION && !urlParams.has('v')) {
-            clearEverything();
+            nuclearReset();
         }
+    </script>
 
-        window.nuclearReset = clearEverything; // إتاحة الوصول اليدوي من الكونسول
-
-        import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@1.1.5/chacha?bundle';
-        window.xchacha20 = xchacha20;
-        window.chacha20poly1305 = chacha20poly1305;
-        console.log('✅ Sovereign Ciphers v9.0.7 Loaded. Use nuclearReset() if issues persist.');
+    <!-- Modern Ciphers Polyfill -->
+    <script type="module">
+        try {
+            const { xchacha20, chacha20poly1305 } = await import('https://esm.sh/@noble/ciphers/chacha');
+            window.xchacha20 = xchacha20;
+            window.chacha20poly1305 = chacha20poly1305;
+            console.log('✅ Sovereign Ciphers v9.2.1 Loaded.');
+        } catch (e) {
+            console.error('❌ فشل تحميل مكتبة التشفير:', e);
+            alert('🚨 فشل تحميل مكتبة التشفير السيادية. يرجى الضغط على "تطهير الكاش" أو التحقق من الاتصال.');
+        }
     </script>
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
 
@@ -958,10 +968,10 @@
     <!-- مكتبة Argon2id -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
 
-    <!-- تحميل crypto-engine.js أولاً (v9.2.0 Cache Buster) -->
-    <script src="assets/js/crypto-engine.js?v=920"></script>
+    <!-- تحميل crypto-engine.js أولاً (v9.2.1 Cache Buster) -->
+    <script src="assets/js/crypto-engine.js?v=921"></script>
     <!-- ثم تحميل app.js -->
-    <script src="assets/js/app.js?v=920"></script>
+    <script src="assets/js/app.js?v=921"></script>
 
     <script>
         // تهيئة التطبيق بعد تحميل الصفحة بالكامل
