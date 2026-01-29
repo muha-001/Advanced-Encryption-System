@@ -26,10 +26,12 @@
     <title>☢️ نظام التشفير السيادي - v8.0-SOVEREIGN | GitHub Pages</title>
     <meta name="description"
         content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
-    <!-- XChaCha20 Polyfill -->
+    <!-- Modern Ciphers Polyfill (XChaCha20 & ChaCha20-Poly1305) -->
     <script type="module">
-        import { xchacha20 } from 'https://esm.sh/@noble/ciphers@0.5.3/chacha';
+        import { xchacha20, chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@0.5.3/chacha';
         window.xchacha20 = xchacha20;
+        window.chacha20poly1305 = chacha20poly1305;
+        console.log('✅ تم تحميل مكتبات التشفير السيادية');
     </script>
     <meta name="keywords" content="تشفير, تشفير عسكري, AES-256, PBKDF2, GitHub Pages, أمان, تشفير نص, فك تشفير">
 
@@ -929,17 +931,12 @@
     <!-- مكتبة Argon2id -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
 
-    <!-- مكتبة ChaCha20-Poly1305 (Polyfill) -->
-    <script type="module">
-        import { chacha20poly1305 } from 'https://esm.sh/@noble/ciphers@2.1.1/chacha.js';
-        window.chacha20poly1305 = chacha20poly1305;
-        console.log('✅ تم تحميل مكتبة ChaCha20-Poly1305 الخارجية');
-    </script>
+    <!-- تم نقل تحميل المكتبات إلى رأس الصفحة (Head) لأمان أفضل -->
 
     <!-- تحميل crypto-engine.js أولاً -->
-    <script src="assets/js/crypto-engine.js"></script>
+    <script src="assets/js/crypto-engine.js?v=8.0.2"></script>
     <!-- ثم تحميل app.js -->
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=8.0.2"></script>
 
     <script>
         // تهيئة التطبيق بعد تحميل الصفحة بالكامل
