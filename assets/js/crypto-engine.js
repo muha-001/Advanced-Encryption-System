@@ -6,7 +6,7 @@
 class CryptoEngine {
     constructor() {
         this.config = {
-            ver: "9.2.4-XCHACHA-FIX",
+            ver: "9.2.5-LIBRARY-FIX",
             pipeline: {
                 stage1: { type: 'PBKDF2-HMAC-SHA256', iterations: 2000000 },
                 stage2: {
