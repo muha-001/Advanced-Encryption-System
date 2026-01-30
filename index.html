@@ -28,7 +28,7 @@
         content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
     <!-- Essential Global Scripts (Cache Purge & Reset) -->
     <script>
-        const SYSTEM_VERSION = '9.2.3-XCHACHA-FIX';
+        const SYSTEM_VERSION = '9.2.4-XCHACHA-FIX';
         const urlParams = new URLSearchParams(window.location.search);
 
         async function nuclearReset() {
@@ -62,11 +62,30 @@
         window.xchachaLibraryError = null;
 
         try {
-            const { xchacha20, chacha20poly1305 } = await import('https://esm.sh/@noble/ciphers@1.1.5/chacha');
-            window.xchacha20 = xchacha20;
-            window.chacha20poly1305 = chacha20poly1305;
+            // Import stream cipher (xchacha20) and AEAD cipher (xchacha20poly1305)
+            const chachaModule = await import('https://esm.sh/@noble/ciphers@1.1.5/chacha');
+
+            // xchacha20 is for stream cipher (unauthenticated)
+            if (chachaModule.xchacha20) {
+                window.xchacha20 = chachaModule.xchacha20;
+            }
+
+            // xchacha20poly1305 is for authenticated encryption
+            if (chachaModule.xchacha20poly1305) {
+                window.xchacha20poly1305 = chachaModule.xchacha20poly1305;
+            }
+
+            // Verify that at least one cipher is available
+            if (!window.xchacha20 && !window.xchacha20poly1305) {
+                throw new Error('No XChaCha20 ciphers found in module');
+            }
+
             window.xchachaLibraryLoaded = true;
-            console.log('✅ Sovereign Ciphers v9.2.3 Loaded.');
+            console.log('✅ Sovereign Ciphers v9.2.4 Loaded.');
+            console.log('📦 Available ciphers:', {
+                xchacha20: !!window.xchacha20,
+                xchacha20poly1305: !!window.xchacha20poly1305
+            });
 
             // Dispatch event to notify that library is ready
             window.dispatchEvent(new Event('xchacha-loaded'));
@@ -980,10 +999,10 @@
     <!-- مكتبة Argon2id -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
 
-    <!-- تحميل crypto-engine.js أولاً (v9.2.3 Cache Buster) -->
-    <script src="assets/js/crypto-engine.js?v=923"></script>
+    <!-- تحميل crypto-engine.js أولاً (v9.2.4 Cache Buster) -->
+    <script src="assets/js/crypto-engine.js?v=924"></script>
     <!-- ثم تحميل app.js -->
-    <script src="assets/js/app.js?v=923"></script>
+    <script src="assets/js/app.js?v=924"></script>
 
     <script>
         // تهيئة التطبيق بعد تحميل الصفحة بالكامل

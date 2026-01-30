@@ -6,7 +6,7 @@
 class CryptoEngine {
     constructor() {
         this.config = {
-            ver: "8.0-SOVEREIGN",
+            ver: "9.2.4-XCHACHA-FIX",
             pipeline: {
                 stage1: { type: 'PBKDF2-HMAC-SHA256', iterations: 2000000 },
                 stage2: {
@@ -56,8 +56,13 @@ class CryptoEngine {
     }
 
     async waitForXChaChaLibrary(timeout = 10000) {
+        const isLibraryAvailable = () => {
+            return window.xchachaLibraryLoaded &&
+                (typeof window.xchacha20 === 'function' || typeof window.xchacha20poly1305 === 'function');
+        };
+
         // If already loaded, return immediately
-        if (window.xchachaLibraryLoaded && typeof window.xchacha20 === 'function') {
+        if (isLibraryAvailable()) {
             return Promise.resolve();
         }
 
@@ -73,7 +78,7 @@ class CryptoEngine {
             }, timeout);
 
             const checkLibrary = () => {
-                if (window.xchachaLibraryLoaded && typeof window.xchacha20 === 'function') {
+                if (isLibraryAvailable()) {
                     clearTimeout(timeoutId);
                     resolve();
                 }
@@ -128,12 +133,21 @@ class CryptoEngine {
 
             try {
                 // Ensure library is loaded
-                if (!this.xchachaReady || typeof window.xchacha20 !== 'function') {
+                if (!this.xchachaReady) {
                     throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى تحديث الصفحة أو الضغط على "تطهير الكاش".');
                 }
 
-                // Use the loaded library
-                innerCipher = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
+                // Use xchacha20 stream cipher (unauthenticated) - compatible with the original implementation
+                if (typeof window.xchacha20 === 'function') {
+                    // xchacha20(key, nonce, data) returns encrypted data directly
+                    innerCipher = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
+                } else if (typeof window.xchacha20poly1305 === 'function') {
+                    // Fallback to xchacha20poly1305 AEAD (authenticated encryption)
+                    const cipher = window.xchacha20poly1305(xchachaKey, xchachaNonce);
+                    innerCipher = cipher.encrypt(new Uint8Array(dataPayload));
+                } else {
+                    throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى تحديث الصفحة أو الضغط على "تطهير الكاش".');
+                }
 
                 if (!innerCipher) {
                     throw new Error('فشل تشفير XChaCha20. النتيجة فارغة.');
@@ -240,12 +254,21 @@ class CryptoEngine {
             const xchachaNonce = new Uint8Array(innerIV);
             try {
                 // Ensure library is loaded
-                if (!this.xchachaReady || typeof window.xchacha20 !== 'function') {
+                if (!this.xchachaReady) {
                     throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى تحديث الصفحة أو الضغط على "تطهير الكاش".');
                 }
 
-                // Use the loaded library
-                plainBuffer = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
+                // Use xchacha20 stream cipher (unauthenticated) - compatible with the original implementation
+                if (typeof window.xchacha20 === 'function') {
+                    // xchacha20(key, nonce, data) returns decrypted data directly (XOR cipher)
+                    plainBuffer = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
+                } else if (typeof window.xchacha20poly1305 === 'function') {
+                    // Fallback to xchacha20poly1305 AEAD (authenticated decryption)
+                    const cipher = window.xchacha20poly1305(xchachaKey, xchachaNonce);
+                    plainBuffer = cipher.decrypt(new Uint8Array(innerCipher));
+                } else {
+                    throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى تحديث الصفحة أو الضغط على "تطهير الكاش".');
+                }
 
                 if (!plainBuffer) {
                     throw new Error('فشل فك تشفير XChaCha20. النتيجة فارغة.');
