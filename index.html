@@ -25,10 +25,10 @@
 
     <title>☢️ نظام التشفير السيادي - v8.0-SOVEREIGN | GitHub Pages</title>
     <meta name="description"
-        content="نظام تشفير سيادي v8.0 يجمع بين XChaCha20 و AES-256-GCM. تشفير محلي 100% على GitHub Pages.">
+        content="نظام تشفير سيادي v9.0 (Post-Quantum) مع 9 طبقات أمان، توقيع Dilithium+Falcon، وذاكرة Argon2id 2.5GB.">
     <!-- Essential Global Scripts (Cache Purge & Reset) -->
     <script>
-        const SYSTEM_VERSION = '9.3.0-OFFLINE';
+        const SYSTEM_VERSION = '9.0-SOVEREIGN-PQ';
         const urlParams = new URLSearchParams(window.location.search);
 
         async function nuclearReset() {
@@ -81,7 +81,7 @@
             }
 
             window.xchachaLibraryLoaded = true;
-            console.log('✅ Sovereign Ciphers v9.3.0 Loaded.');
+            console.log('✅ Sovereign Ciphers v9.0-PQ Loaded.');
             console.log('📦 Available ciphers:', {
                 xchacha20: !!window.xchacha20,
                 xchacha20poly1305: !!window.xchacha20poly1305

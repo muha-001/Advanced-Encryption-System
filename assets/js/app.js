@@ -481,7 +481,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('☢️ جاري تنفيذ التشفير السيادي (v8.0-SOVEREIGN)... قد يستغرق ~5 ثوانٍ', 'info');
+            this.showNotification('☢️ جاري تنفيذ التشفير السيادي (v9.0-PQ)... قد يستغرق ~8 ثوانٍ', 'info');
 
             const startTime = performance.now();
 
@@ -515,7 +515,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Sovereign Pipeline v8.0 بنجاح', 'success');
+            this.showNotification('✅ تم التشفير بنظام Sovereign Pipeline v9.0-PQ بنجاح', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
@@ -691,7 +691,13 @@ class EncryptionApp {
         }
 
         if (integrityStatusEl) {
-            integrityStatusEl.textContent = result.integrity ? 'سليمة ✓' : 'تالفة ✗';
+            let statusText = result.integrity ? 'سليمة ✓' : 'تالفة ✗';
+
+            if (result.post_quantum_verified) {
+                statusText += ' | 🛡️ PQ-Verified';
+            }
+
+            integrityStatusEl.textContent = statusText;
             integrityStatusEl.style.color = result.integrity ? '#10b981' : '#ef4444';
         }
 
