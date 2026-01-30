@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'sovereign-v9.2.5-LIBRARY-FIX';
-const CACHE_VERSION = '9.2.5';
+const CACHE_NAME = 'sovereign-v9.3.0-OFFLINE';
+const CACHE_VERSION = '9.3.0';
 const APP_NAME = 'نظام التشفير السيادي';
 
 // الملفات التي سيتم تخزينها مؤقتاً
@@ -42,23 +42,31 @@ self.addEventListener('install', (event) => {
                 await cache.addAll(CORE_FILES);
                 console.log('✅ تم تخزين الملفات الأساسية');
 
-                // تخزين الملفات الخارجية
+                // تخزين الملفات الخارجية بشكل دائم
                 for (const url of EXTERNAL_FILES) {
                     try {
-                        await cache.add(url);
-                        console.log(`✅ تم تخزين: ${url}`);
+                        const response = await fetch(url, {
+                            cache: 'reload',
+                            mode: 'cors'
+                        });
+
+                        if (response.ok) {
+                            await cache.put(url, response);
+                            console.log(`✅ تم تخزين بشكل دائم: ${url}`);
+                        }
                     } catch (error) {
                         console.warn(`⚠️ فشل تخزين ${url}:`, error);
+                        // المتابعة حتى لو فشل تخزين ملف واحد
                     }
                 }
 
                 // تفعيل Service Worker فوراً
                 await self.skipWaiting();
-                console.log('⚡ Service Worker مفعل وجاهز للعمل');
+                console.log('⚡ Service Worker مفعل وجاهز للعمل - الآن يعمل بدون إنترنت!');
 
             } catch (error) {
                 console.error('❌ فشل التثبيت:', error);
-                throw error;
+                // لا نرمي الخطأ - نسمح للـ SW بالتثبيت حتى لو فشل بعض التخزين
             }
         })()
     );
@@ -129,15 +137,39 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         (async () => {
             try {
-                // محاولة جلب من التخزين المؤقت أولاً
+                // استراتيجية Cache First للمكتبات الخارجية (للعمل بدون إنترنت)
+                const isExternalLib = EXTERNAL_FILES.some(libUrl => event.request.url.includes(new URL(libUrl).pathname));
+
+                if (isExternalLib) {
+                    // Cache First: جرب الكاش أولاً، ثم الشبكة
+                    const cachedResponse = await caches.match(event.request);
+                    if (cachedResponse) {
+                        console.log(`📦 من الكاش (offline-ready): ${url.pathname}`);
+                        return cachedResponse;
+                    }
+
+                    // إذا لم يوجد في الكاش، جلب من الشبكة وتخزينه
+                    try {
+                        const networkResponse = await fetch(event.request);
+                        if (networkResponse && networkResponse.status === 200) {
+                            const cache = await caches.open(CACHE_NAME);
+                            await cache.put(event.request, networkResponse.clone());
+                            console.log(`💾 تم تخزين المكتبة: ${url.pathname}`);
+                        }
+                        return networkResponse;
+                    } catch (fetchError) {
+                        console.error(`❌ فشل جلب المكتبة ${url.pathname} - وغير موجودة في الكاش!`);
+                        throw fetchError;
+                    }
+                }
+
+                // للملفات الأساسية: محاولة جلب من التخزين المؤقت أولاً
                 const cachedResponse = await caches.match(event.request);
 
                 if (cachedResponse) {
                     console.log(`🔍 وجد في التخزين المؤقت: ${url.pathname}`);
-
                     // تحديث التخزين المؤقت في الخلفية
-                    this.updateCacheInBackground(event.request);
-
+                    updateCacheInBackground(event.request);
                     return cachedResponse;
                 }
 
@@ -206,11 +238,6 @@ self.addEventListener('fetch', (event) => {
                                 margin-bottom: 30px;
                                 color: #cbd5e1;
                             }
-                            .features {
-                                text-align: right;
-                                margin: 30px 0;
-                            }
-                            .feature {
                                 display: flex;
                                 align-items: center;
                                 gap: 10px;
