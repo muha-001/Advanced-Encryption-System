@@ -19,7 +19,7 @@ class CryptoEngine {
                 // Layer 3: Memory-Hard Derivation
                 stage2: {
                     type: 'Argon2id',
-                    memoryCost: 2097152, // 2GB (High Security)
+                    memoryCost: 1887436, // ~1.8GB (Optimized High Security)
                     parallelism: 4,
                     iterations: 2,
                     hashLength: 64
@@ -150,9 +150,9 @@ class CryptoEngine {
             intermediateHash = await this.deriveStage1_PBKDF2(passwordBytes, masterSalt);
 
             // ============================================
-            // Layer 3: Memory-Hard Derivation (Argon2id 2.5GB)
+            // Layer 3: Memory-Hard Derivation (Argon2id 1.8GB)
             // ============================================
-            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (2GB)...');
+            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (1.8GB)...');
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
 
             // ============================================

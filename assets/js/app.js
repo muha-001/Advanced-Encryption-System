@@ -844,65 +844,99 @@ class EncryptionApp {
     }
 
     generateNewPassword() {
-        const length = document.getElementById('passwordLength')?.value || 16;
+        // High-Security Password Generation (CSPRNG + Fisher-Yates)
+        const length = parseInt(document.getElementById('passwordLength')?.value || 16);
         const includeUpper = document.getElementById('includeUpper')?.checked || true;
         const includeLower = document.getElementById('includeLower')?.checked || true;
         const includeNumbers = document.getElementById('includeNumbers')?.checked || true;
         const includeSpecial = document.getElementById('includeSpecial')?.checked || true;
 
-        const upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const lowerChars = 'abcdefghijklmnopqrstuvwxyz';
-        const numberChars = '0123456789';
-        const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const charSets = {
+            upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lower: 'abcdefghijklmnopqrstuvwxyz',
+            number: '0123456789',
+            special: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+        };
 
-        let chars = '';
-        if (includeUpper) chars += upperChars;
-        if (includeLower) chars += lowerChars;
-        if (includeNumbers) chars += numberChars;
-        if (includeSpecial) chars += specialChars;
+        let availableChars = '';
+        let guaranteedChars = [];
 
-        if (!chars) {
-            chars = upperChars + lowerChars + numberChars;
+        // Build character pool and guaranteed characters
+        if (includeUpper) {
+            availableChars += charSets.upper;
+            guaranteedChars.push(this.getSecureRandomChar(charSets.upper));
+        }
+        if (includeLower) {
+            availableChars += charSets.lower;
+            guaranteedChars.push(this.getSecureRandomChar(charSets.lower));
+        }
+        if (includeNumbers) {
+            availableChars += charSets.number;
+            guaranteedChars.push(this.getSecureRandomChar(charSets.number));
+        }
+        if (includeSpecial) {
+            availableChars += charSets.special;
+            guaranteedChars.push(this.getSecureRandomChar(charSets.special));
         }
 
-        let password = '';
-        const array = new Uint8Array(length);
-        window.crypto.getRandomValues(array);
-
-        for (let i = 0; i < length; i++) {
-            password += chars[array[i] % chars.length];
+        // Fallback if nothing selected
+        if (!availableChars) {
+            availableChars = charSets.upper + charSets.lower + charSets.number;
+            guaranteedChars.push(this.getSecureRandomChar(charSets.upper));
         }
 
-        // التأكد من وجود جميع الأنواع المطلوبة
-        if (includeUpper && !/[A-Z]/.test(password)) {
-            password = password.substring(0, length - 1) + upperChars[Math.floor(Math.random() * upperChars.length)];
+        // Fill remaining slots
+        let passwordArray = [...guaranteedChars];
+        const remainingLength = length - guaranteedChars.length;
+
+        for (let i = 0; i < remainingLength; i++) {
+            passwordArray.push(this.getSecureRandomChar(availableChars));
         }
 
-        if (includeLower && !/[a-z]/.test(password)) {
-            password = password.substring(0, length - 2) + lowerChars[Math.floor(Math.random() * lowerChars.length)] + password[length - 1];
+        // Fisher-Yates Shuffle using CSPRNG
+        for (let i = passwordArray.length - 1; i > 0; i--) {
+            const j = this.getSecureRandomInt(i + 1);
+            [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
         }
 
-        if (includeNumbers && !/[0-9]/.test(password)) {
-            password = numberChars[Math.floor(Math.random() * numberChars.length)] + password.substring(1);
-        }
-
-        if (includeSpecial && !/[^A-Za-z0-9]/.test(password)) {
-            password = password.substring(0, length - 3) + specialChars[Math.floor(Math.random() * specialChars.length)] + password.substring(length - 2);
-        }
+        const password = passwordArray.join('');
 
         const passwordInput = document.getElementById('generatedPassword');
         if (passwordInput) {
             passwordInput.value = password;
         }
 
-        // تحديث طول كلمة المرور
+        // Update length label
         const lengthValue = document.getElementById('lengthValue');
         if (lengthValue) {
             lengthValue.textContent = `${length} حرفاً`;
         }
 
-        // التحقق من قوة كلمة المرور
+        // Check strength
         this.checkPasswordStrength(password);
+    }
+
+    // Helper: Get secure random character from string
+    getSecureRandomChar(charString) {
+        const randomIndex = this.getSecureRandomInt(charString.length);
+        return charString[randomIndex];
+    }
+
+    // Helper: Get secure random integer [0, max)
+    getSecureRandomInt(max) {
+        if (max === 0) return 0;
+        const array = new Uint32Array(1);
+        let randomValue;
+
+        // Rejection sampling to avoid modulo bias
+        const limit = 4294967296 - (4294967296 % max);
+
+        do {
+            window.crypto.getRandomValues(array);
+            randomValue = array[0];
+        } while (randomValue >= limit);
+
+        return randomValue % max;
     }
 
     useGeneratedPassword() {
