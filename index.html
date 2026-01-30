@@ -61,6 +61,15 @@
         window.xchachaLibraryLoaded = false;
         window.xchachaLibraryError = null;
 
+        // Import SHA3-512 from @noble/hashes
+        try {
+            const { sha3_512 } = await import('https://esm.sh/@noble/hashes@1.5.0/sha3');
+            window.sha3_512 = sha3_512;
+            console.log('✅ SHA3-512 Library Loaded.');
+        } catch (e) {
+            console.error('❌ Failed to load SHA3-512:', e);
+        }
+
         try {
             // Import stream cipher (xchacha20) and AEAD cipher (xchacha20poly1305)
             const chachaModule = await import('https://esm.sh/@noble/ciphers@2.1.1/chacha');
@@ -553,7 +562,7 @@
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-redo"></i>
-                                <span>التكرارات: <strong>2M + 1.5GB RAM</strong></span>
+                                <span>التكرارات: <strong>2M + 2GB RAM</strong></span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-clock"></i>

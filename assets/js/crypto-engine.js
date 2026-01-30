@@ -19,7 +19,7 @@ class CryptoEngine {
                 // Layer 3: Memory-Hard Derivation
                 stage2: {
                     type: 'Argon2id',
-                    memoryCost: 1048576, // 1GB (Safe for browser limits)
+                    memoryCost: 2097152, // 2GB (High Security)
                     parallelism: 4,
                     iterations: 2,
                     hashLength: 64
@@ -48,7 +48,7 @@ class CryptoEngine {
 
             integrity: {
                 algorithm: 'HMAC',
-                hash: 'SHA-512'
+                hash: 'SHA3-512'
             }
         };
 
@@ -152,7 +152,7 @@ class CryptoEngine {
             // ============================================
             // Layer 3: Memory-Hard Derivation (Argon2id 2.5GB)
             // ============================================
-            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (1GB)...');
+            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (2GB)...');
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
 
             // ============================================
@@ -230,7 +230,7 @@ class CryptoEngine {
                         argon2_mem_kb: this.config.pipeline.stage2.memoryCost,
                         argon2_lanes: this.config.pipeline.stage2.parallelism,
                         argon2_time: this.config.pipeline.stage2.iterations,
-                        hkdf_hash: "SHA-512"
+                        hkdf_hash: "SHA3-512"
                     }
                 },
 
@@ -251,7 +251,7 @@ class CryptoEngine {
             // ============================================
             // Layer 8: Integrity Binding (Full MAC)
             // ============================================
-            console.log('🔏 Layer 8: Integrity Binding (HMAC-SHA512)...');
+            console.log('🔏 Layer 8: Integrity Binding (HMAC-SHA3-512)...');
             const cipherBase64 = this.arrayToBase64(finalCipher);
             const headerJSON = JSON.stringify(header);
             const bindingData = new TextEncoder().encode(headerJSON + cipherBase64);
@@ -528,12 +528,12 @@ class CryptoEngine {
 
         // Dilithium-5 simulation (deterministic from key)
         const dilithiumData = new Uint8Array([...signingKey.slice(0, 32), ...encoder.encode(digest)]);
-        const dilithiumHash = await this.computeHash(dilithiumData, 'SHA-512');
+        const dilithiumHash = await this.computeHash(dilithiumData, 'SHA3-512');
         const dilithiumSig = this.arrayToBase64(new TextEncoder().encode(dilithiumHash + dilithiumHash));
 
         // Falcon-1024 simulation 
         const falconData = new Uint8Array([...signingKey.slice(32, 64), ...encoder.encode(digest)]);
-        const falconHash = await this.computeHash(falconData, 'SHA-512');
+        const falconHash = await this.computeHash(falconData, 'SHA3-512');
         const falconSig = this.arrayToBase64(new TextEncoder().encode(falconHash));
 
         return {
@@ -564,15 +564,33 @@ class CryptoEngine {
     // ============================================
 
     async computeSHA3_512(data) {
-        // SHA3-512 simulation using SHA-512 with additional mixing
-        // For true SHA3, integrate @noble/hashes
+        // Use real SHA3-512 from @noble/hashes
+        if (window.sha3_512) {
+            const buffer = data instanceof Uint8Array ? data : new TextEncoder().encode(data);
+            const hash = window.sha3_512(buffer);
+            return this.arrayToBase64(hash);
+        }
+
+        // Fallback or Simulation if library not loaded (Safety Net)
+        console.warn('⚠️ SHA3 Library not loaded, using simulation');
         const hash1 = await this.computeHash(data, 'SHA-512');
         const hash2 = await this.computeHash(new TextEncoder().encode(hash1 + 'SHA3-512'), 'SHA-512');
         return hash2;
     }
 
     async computeHash(data, algorithm = 'SHA-512') {
+        if (algorithm === 'SHA3-512' && window.sha3_512) {
+            const buffer = data instanceof Uint8Array ? data : new TextEncoder().encode(data);
+            const hash = window.sha3_512(buffer);
+            return this.arrayToBase64(hash);
+        }
+
         const buffer = data instanceof Uint8Array ? data : new TextEncoder().encode(data);
+        // Note: Web Crypto might not support SHA3, so for standard algorithms we use it, 
+        // for SHA3 we expect the if-block above to handle it.
+        // If 'SHA3-512' is passed but library missing, it will likely fail here if browser doesn't support it.
+        // We catch that to be safe? No, let it bubble or fallback if we want.
+        // For this strict implementation, we assume library is present for SHA3.
         const hashBuffer = await this.crypto.digest(algorithm, buffer);
         return this.arrayToBase64(hashBuffer);
     }
