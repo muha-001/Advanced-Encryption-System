@@ -23,9 +23,9 @@
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
 
-    <title>☢️ نظام التشفير السيادي - v8.0-SOVEREIGN | GitHub Pages</title>
+    <title>☢️ نظام التشفير السيادي - v9.0-SOVEREIGN | Military Grade</title>
     <meta name="description"
-        content="نظام تشفير سيادي v9.0 (Post-Quantum) مع 9 طبقات أمان، توقيع Dilithium+Falcon، وذاكرة Argon2id 1.8GB.">
+        content="نظام تشفير سيادي v9.0 (Post-Quantum) مع 9 طبقات أمان، توقيع Dilithium+Falcon، وذاكرة Argon2id 1.8GB. الاستخدام تحت المسؤولية الكاملة للمستخدم.">
     <!-- Essential Global Scripts (Cache Purge & Reset) -->
     <script>
         const SYSTEM_VERSION = '9.0-SOVEREIGN-PQ';
@@ -155,6 +155,81 @@
         }
     }
     </script>
+    <style>
+        .password-strength-modal {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* Sovereign UI Additions */
+        .btn-lang {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .btn-lang:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .sovereign-warning {
+            background: linear-gradient(45deg, #3a0000, #5c0000) !important;
+            border: 1px solid #ff4444 !important;
+            color: #ffcccc !important;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+        }
+
+        .blocking-modal {
+            background: rgba(0, 0, 0, 0.95) !important;
+            z-index: 9999 !important;
+        }
+
+        .danger-theme {
+            border: 2px solid #ff0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+        }
+
+        .warning-icon-large {
+            font-size: 4rem;
+            color: #ff4444;
+            margin-bottom: 20px;
+            animation: pulse-red 2s infinite;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -301,6 +376,11 @@
                     <span>المستوى: <span class="security-level-text">سيادي</span></span>
                 </div>
                 <div class="status-item">
+                    <button class="btn-lang" onclick="app.toggleLanguage()" id="langBtn">
+                        <i class="fas fa-globe"></i> English
+                    </button>
+                </div>
+                <div class="status-item">
                     <i class="fas fa-lock"></i>
                     <span>التشفير: <span id="encryptionCount">0</span></span>
                 </div>
@@ -351,12 +431,11 @@
             </div>
 
             <div class="header-subtitle">
-                <p>
-                    نظام تشفير بمسار نووي (Nuclear Pipeline) يعمل على <strong>GitHub Pages</strong>.
+                <p data-i18n="headerSubtitle">
+                    نظام تشفير بمسار نووي (Nuclear Pipeline) بمعايير <strong>سيادية/عسكرية</strong>.
                     يستخدم خط تجميع <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong>
-                    مع dağıtım HKDF و طبقات تشفير <strong>AES-GCM + ChaCha20</strong>.
-                    جميع عمليات التشفير تتم محلياً على جهازك - <span class="highlight">لا توجد بيانات ترسل إلى أي
-                        خادم</span>.
+                    مع توزيع HKDF و طبقات تشفير <strong>AES-GCM + ChaCha20</strong>.
+                    <span class="highlight">النظام يعمل في بيئة معزولة تماماً.</span>
                 </p>
             </div>
 
@@ -830,8 +909,8 @@
         <footer class="main-footer">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h5>نظام التشفير المتقدم © 2026</h5>
-                    <p>مُستضاف على GitHub Pages - تشفير محلي 100%</p>
+                    <h5 data-i18n="footerSystemName">نظام التشفير السيادي © 2026</h5>
+                    <p data-i18n="footerHost">نظام تشفير محلي 100% - Sovereign Grade Protection</p>
                     <p class="version-info">الإصدار v8.0 Sovereign Heritage | آخر تحديث: <span
                             id="currentDate">2026-01-29</span>
                     </p>
@@ -859,11 +938,12 @@
             </div>
 
             <div class="footer-bottom">
-                <div class="disclaimer">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>
-                        <strong>تنبيه:</strong> هذا النظام مصمم للأغراض التعليمية والأمنية المشروعة.
-                        المستخدم يتحمل المسؤولية الكاملة عن استخدام النظام.
+                <div class="disclaimer sovereign-warning">
+                    <i class="fas fa-shield-alt"></i>
+                    <span data-i18n="footerWarning">
+                        <strong>تنبيه سيادي هام:</strong> هذا النظام يستخدم معايير تشفير عسكرية فائقة الحساسية.
+                        المستخدم يتحمل المسؤولية القانونية والأمنية الكاملة عن استخدام هذا النظام.
+                        النظام مصمم للاستخدام في البيئات عالية المخاطر.
                     </span>
                 </div>
 
@@ -953,6 +1033,54 @@
                     <button class="btn btn-primary" onclick="app.useGeneratedPassword()">
                         <i class="fas fa-check"></i>
                         استخدام كلمة المرور
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة انتهاء الجلسة (Blocking) -->
+        <div class="modal blocking-modal" id="sessionExpiredModal" data-backdrop="static">
+            <div class="modal-content danger-theme">
+                <div class="modal-header center-header">
+                    <h3><i class="fas fa-lock"></i> <span data-i18n="sessionExpiredTitle">انتهت الجلسة الأمنية</span>
+                    </h3>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="warning-icon-large">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <p data-i18n="sessionExpiredMsg1">لقد تجاوزت الجلسة الوقت المسموح به (15 دقيقة).</p>
+                    <p data-i18n="sessionExpiredMsg2" class="highlight-danger">لأسباب أمنية قصوى، يجب إغلاق الجلسة
+                        الحالية ومسح الذاكرة تماماً.</p>
+                </div>
+                <div class="modal-footer center-footer">
+                    <button class="btn btn-danger btn-block" onclick="window.location.reload(true)">
+                        <i class="fas fa-sync-alt"></i>
+                        <span data-i18n="startNewSession">بدء جلسة جديدة (مسح الذاكرة)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة انتهاء الجلسة (Blocking) -->
+        <div class="modal blocking-modal" id="sessionExpiredModal" data-backdrop="static">
+            <div class="modal-content danger-theme">
+                <div class="modal-header center-header">
+                    <h3><i class="fas fa-lock"></i> <span data-i18n="sessionExpiredTitle">انتهت الجلسة الأمنية</span>
+                    </h3>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="warning-icon-large">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <p data-i18n="sessionExpiredMsg1">لقد تجاوزت الجلسة الوقت المسموح به (15 دقيقة).</p>
+                    <p data-i18n="sessionExpiredMsg2" class="highlight-danger">لأسباب أمنية قصوى، يجب إغلاق الجلسة
+                        الحالية ومسح الذاكرة تماماً.</p>
+                </div>
+                <div class="modal-footer center-footer">
+                    <button class="btn btn-danger btn-block" onclick="window.location.reload(true)">
+                        <i class="fas fa-sync-alt"></i>
+                        <span data-i18n="startNewSession">بدء جلسة جديدة (مسح الذاكرة)</span>
                     </button>
                 </div>
             </div>

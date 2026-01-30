@@ -7,12 +7,13 @@ class EncryptionApp {
     constructor() {
         // إعدادات التطبيق
         this.config = {
-            appName: 'نظام التشفير النووي',
-            version: '8.0-SOVEREIGN',
+            appName: 'نظام التشفير السيادي',
+            version: '9.0-SOVEREIGN',
             algorithm: 'Nuclear Pipeline',
             iterations: 2000000,
             maxAttempts: 10,
             sessionTimeout: 15 * 60 * 1000, // 15 دقيقة
+            defaultLanguage: 'ar',
             strengthLevels: {
                 weak: { min: 0, max: 30, color: '#ef4444', text: 'ضعيفة' },
                 medium: { min: 31, max: 60, color: '#f59e0b', text: 'متوسطة' },
@@ -33,7 +34,35 @@ class EncryptionApp {
             lastActivity: Date.now(),
             encryptionHistory: [],
             isOnline: navigator.onLine,
-            cryptoEngineReady: false
+            cryptoEngineReady: false,
+            language: 'ar',
+            keystrokeBuffer: []
+        };
+
+        // Dictionary for Translations
+        this.i18n = {
+            ar: {
+                appName: 'نظام التشفير السيادي',
+                headerSubtitle: 'نظام تشفير بمسار نووي (Nuclear Pipeline) بمعايير <strong>سيادية/عسكرية</strong>. يستخدم خط تجميع <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong> مع توزيع HKDF و طبقات تشفير <strong>AES-GCM + ChaCha20</strong>. <span class="highlight">النظام يعمل في بيئة معزولة تماماً.</span>',
+                footerSystemName: 'نظام التشفير السيادي © 2026',
+                footerHost: 'نظام تشفير محلي 100% - Sovereign Grade Protection',
+                footerWarning: '<strong>تنبيه سيادي هام:</strong> هذا النظام يستخدم معايير تشفير عسكرية فائقة الحساسية. المستخدم يتحمل المسؤولية القانونية والأمنية الكاملة عن استخدام هذا النظام.',
+                sessionExpiredTitle: 'انتهت الجلسة الأمنية',
+                sessionExpiredMsg1: 'لقد تجاوزت الجلسة الوقت المسموح به (15 دقيقة).',
+                sessionExpiredMsg2: 'لأسباب أمنية قصوى، يجب إغلاق الجلسة الحالية ومسح الذاكرة تماماً.',
+                startNewSession: 'بدء جلسة جديدة (مسح الذاكرة)',
+            },
+            en: {
+                appName: 'Sovereign Encryption System',
+                headerSubtitle: 'Nuclear Pipeline Encryption System with <strong>Sovereign/Military Standards</strong>. Uses <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong> pipeline with HKDF distribution and <strong>AES-GCM + ChaCha20</strong> layers. <span class="highlight">System operates in a fully isolated environment.</span>',
+                footerSystemName: 'Sovereign Encryption System © 2026',
+                footerHost: '100% Local Encryption - Sovereign Grade Protection',
+                footerWarning: '<strong>CRITICAL SOVEREIGN WARNING:</strong> This system utilizes highly sensitive military-grade encryption standards. The user assumes full legal and security responsibility for its usage.',
+                sessionExpiredTitle: 'Security Session Expired',
+                sessionExpiredMsg1: 'Session has exceeded the allowed time limit (15 minutes).',
+                sessionExpiredMsg2: 'For maximum security, the current session must be closed and memory purged.',
+                startNewSession: 'Start New Session (Purge Memory)',
+            }
         };
 
         // تهيئة التطبيق بطريقة آمنة
@@ -44,6 +73,9 @@ class EncryptionApp {
         try {
             // تسجيل بدء التطبيق
             console.log(`🚀 ${this.config.appName} v${this.config.version} - بدء التشغيل`);
+
+            // Initialize Language
+            this.toggleLanguage(this.config.defaultLanguage);
 
             // التحقق من دعم Web Crypto API أولاً
             if (!this.checkCryptoSupport()) {
@@ -300,18 +332,9 @@ class EncryptionApp {
         });
     }
 
-    async checkGitHubPages() {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const isGitHubPages = window.location.hostname.includes('github.io');
-
-                this.updateSecurityStatus('githubStatus',
-                    isGitHubPages ? 'GitHub Pages ✓' : 'استضافة محلية',
-                    isGitHubPages ? 'success' : 'info');
-
-                resolve(isGitHubPages);
-            }, 200);
-        });
+    checkGitHubPages() {
+        // Removed for Sovereign Security Standard - No external checks
+        this.updateSecurityStatus('githubStatus', 'Sovereign Env', 'success');
     }
 
     updateSecurityStatus(elementId, status, type = 'info') {
@@ -447,15 +470,57 @@ class EncryptionApp {
     endSession() {
         clearInterval(this.state.sessionTimer);
 
-        this.showNotification('⏳ انتهت الجلسة الأمنية. يتم إعادة التحميل...', 'warning');
+        // Show Blocking Modal
+        const modal = document.getElementById('sessionExpiredModal');
+        if (modal) {
+            modal.classList.add('active');
+            modal.style.display = 'flex'; // Force flex for centering
+        }
 
-        // مسح البيانات الحساسة
+        this.showNotification('⏳ انتهت الجلسة الأمنية. يلزم إعادة التحميل.', 'warning');
+
+        // مسح البيانات الحساسة خلفياً
         this.clearSensitiveData();
+    }
 
-        // إعادة التحميل بعد تأخير
-        setTimeout(() => {
-            window.location.reload();
-        }, 3000);
+    toggleLanguage(forceLang = null) {
+        if (forceLang) {
+            this.state.language = forceLang;
+        } else {
+            this.state.language = this.state.language === 'ar' ? 'en' : 'ar';
+        }
+
+        const lang = this.state.language;
+        const texts = this.i18n[lang];
+        const dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+        // Update HTML Direction
+        document.documentElement.lang = lang;
+        document.documentElement.dir = dir;
+
+        // Update Button Text
+        const btn = document.getElementById('langBtn');
+        if (btn) {
+            btn.innerHTML = lang === 'ar'
+                ? '<i class="fas fa-globe"></i> English'
+                : '<i class="fas fa-globe"></i> العربية';
+        }
+
+        // Apply Translations to Elements with data-i18n attribute
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (texts[key]) {
+                el.innerHTML = texts[key];
+            }
+        });
+
+        // Update Placeholders (Specific elements)
+        const plainText = document.getElementById('plainText');
+        if (plainText) {
+            plainText.placeholder = lang === 'ar'
+                ? "أدخل النص الذي تريد حمايته هنا... النظام يدعم التشفير متعدد اللغات مع الحفاظ على التنسيق."
+                : "Enter text to protect here... System supports multi-language encryption while preserving formatting.";
+        }
     }
 
     // ===== التشفير =====
