@@ -27,6 +27,7 @@ class CryptoEngine {
 
         this.crypto = window.crypto.subtle;
         this.supportsNativeXChaCha = false;
+        this.xchachaReady = false;
         this.supportCheckPromise = this.checkSecuritySupport();
 
         console.log('🚀 محرك التشفير السيادي v8.0 جاهز (XChaCha20 + AES-GCM Cascade)');
@@ -44,9 +45,55 @@ class CryptoEngine {
     async checkSecuritySupport() {
         // التحقق من دعم المتصفح للوغاريتمات بشكل أصلي
         try {
-            // XChaCha20 غالباً ما يحتاج إلى Polyfill
-            this.supportsNativeXChaCha = false;
-        } catch (e) { }
+            // Wait for XChaCha20 library to load (with timeout)
+            await this.waitForXChaChaLibrary();
+            this.xchachaReady = true;
+            console.log('✅ XChaCha20 library verified and ready');
+        } catch (e) {
+            console.error('⚠️ XChaCha20 library not available:', e);
+            this.xchachaReady = false;
+        }
+    }
+
+    async waitForXChaChaLibrary(timeout = 10000) {
+        // If already loaded, return immediately
+        if (window.xchachaLibraryLoaded && typeof window.xchacha20 === 'function') {
+            return Promise.resolve();
+        }
+
+        // If there was an error loading, reject immediately
+        if (window.xchachaLibraryError) {
+            return Promise.reject(window.xchachaLibraryError);
+        }
+
+        // Wait for the library to load with timeout
+        return new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+                reject(new Error('Timeout waiting for XChaCha20 library to load'));
+            }, timeout);
+
+            const checkLibrary = () => {
+                if (window.xchachaLibraryLoaded && typeof window.xchacha20 === 'function') {
+                    clearTimeout(timeoutId);
+                    resolve();
+                }
+            };
+
+            // Listen for the loaded event
+            window.addEventListener('xchacha-loaded', () => {
+                clearTimeout(timeoutId);
+                resolve();
+            }, { once: true });
+
+            // Listen for error event
+            window.addEventListener('xchacha-error', (e) => {
+                clearTimeout(timeoutId);
+                reject(e.detail);
+            }, { once: true });
+
+            // Check immediately in case it's already loaded
+            checkLibrary();
+        });
     }
 
     async encrypt(plainText, password, options = {}) {
@@ -80,12 +127,16 @@ class CryptoEngine {
             const xchachaNonce = new Uint8Array(innerIV);
 
             try {
-                if (typeof window.xchacha20 === 'function') {
-                    innerCipher = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
-                } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
-                    innerCipher = noble.ciphers.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
-                } else {
-                    throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى التأكد من تحميل polyfill.');
+                // Ensure library is loaded
+                if (!this.xchachaReady || typeof window.xchacha20 !== 'function') {
+                    throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى تحديث الصفحة أو الضغط على "تطهير الكاش".');
+                }
+
+                // Use the loaded library
+                innerCipher = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(dataPayload));
+
+                if (!innerCipher) {
+                    throw new Error('فشل تشفير XChaCha20. النتيجة فارغة.');
                 }
             } finally {
                 this.wipe(xchachaKey);
@@ -188,12 +239,16 @@ class CryptoEngine {
             const xchachaKey = new Uint8Array(await this.exportRawKey(keys.innerKey));
             const xchachaNonce = new Uint8Array(innerIV);
             try {
-                if (typeof window.xchacha20 === 'function') {
-                    plainBuffer = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
-                } else if (typeof noble !== 'undefined' && noble.ciphers && noble.ciphers.xchacha20) {
-                    plainBuffer = noble.ciphers.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
-                } else {
-                    throw new Error('مكتبة XChaCha20 غير متوفرة');
+                // Ensure library is loaded
+                if (!this.xchachaReady || typeof window.xchacha20 !== 'function') {
+                    throw new Error('مكتبة XChaCha20 غير متوفرة. يرجى تحديث الصفحة أو الضغط على "تطهير الكاش".');
+                }
+
+                // Use the loaded library
+                plainBuffer = window.xchacha20(xchachaKey, xchachaNonce, new Uint8Array(innerCipher));
+
+                if (!plainBuffer) {
+                    throw new Error('فشل فك تشفير XChaCha20. النتيجة فارغة.');
                 }
             } finally {
                 this.wipe(xchachaKey);
