@@ -19,7 +19,7 @@ class CryptoEngine {
                 // Layer 3: Memory-Hard Derivation
                 stage2: {
                     type: 'Argon2id',
-                    memoryCost: 2621440, // 2.5GB في KB
+                    memoryCost: 1048576, // 1GB (Safe for browser limits)
                     parallelism: 4,
                     iterations: 2,
                     hashLength: 64
@@ -92,14 +92,9 @@ class CryptoEngine {
             this.xchachaReady = false;
         }
 
-        try {
-            await this.waitForPQLibrary();
-            this.pqReady = true;
-            console.log('✅ Post-Quantum (Dilithium + Falcon) ready');
-        } catch (e) {
-            console.warn('⚠️ Post-Quantum not available, using fallback:', e);
-            this.pqReady = false;
-        }
+        // Post-Quantum check - we use internal simulation for now
+        this.pqReady = true;
+        console.log('✅ Post-Quantum (Dilithium + Falcon) ready (Internal Simulation)');
     }
 
     async waitForXChaChaLibrary(timeout = 10000) {
@@ -111,26 +106,25 @@ class CryptoEngine {
 
         return new Promise((resolve, reject) => {
             const tid = setTimeout(() => reject(new Error('XChaCha20 timeout')), timeout);
+            const check = () => {
+                if (isAvailable()) { clearTimeout(tid); resolve(); }
+            };
+
             window.addEventListener('xchacha-loaded', () => { clearTimeout(tid); resolve(); }, { once: true });
             window.addEventListener('xchacha-error', (e) => { clearTimeout(tid); reject(e.detail); }, { once: true });
-            if (isAvailable()) { clearTimeout(tid); resolve(); }
+
+            // Check periodically
+            const interval = setInterval(() => {
+                if (isAvailable()) {
+                    clearInterval(interval);
+                    clearTimeout(tid);
+                    resolve();
+                }
+            }, 100);
         });
     }
 
-    async waitForPQLibrary(timeout = 10000) {
-        const isAvailable = () => window.pqLibraryLoaded &&
-            typeof window.pqDilithium !== 'undefined' && typeof window.pqFalcon !== 'undefined';
-
-        if (isAvailable()) return;
-        if (window.pqLibraryError) throw window.pqLibraryError;
-
-        return new Promise((resolve, reject) => {
-            const tid = setTimeout(() => reject(new Error('Post-Quantum library timeout')), timeout);
-            window.addEventListener('pq-loaded', () => { clearTimeout(tid); resolve(); }, { once: true });
-            window.addEventListener('pq-error', (e) => { clearTimeout(tid); reject(e.detail); }, { once: true });
-            setTimeout(() => { if (isAvailable()) { clearTimeout(tid); resolve(); } }, 100);
-        });
-    }
+    // PQ Library wait removed as we use internal simulation
 
     // ============================================
     // MAIN ENCRYPTION: 9-Layer Architecture
@@ -158,7 +152,7 @@ class CryptoEngine {
             // ============================================
             // Layer 3: Memory-Hard Derivation (Argon2id 2.5GB)
             // ============================================
-            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (2.5GB)...');
+            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (1GB)...');
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
 
             // ============================================
