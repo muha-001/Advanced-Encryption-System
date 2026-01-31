@@ -460,17 +460,14 @@ class EncryptionApp {
     }
 
     checkSessionTimeout() {
-        if (!this.state.lastActivity) {
-            this.state.lastActivity = Date.now();
-        }
+        // Strict Hard Limit: 15 Minutes from Session Start (Activity Ignored)
+        // Hard limit ensures memory is purged regardless of user presence
+        if (!this.state.sessionStart) return;
 
-        const idleTime = Date.now() - this.state.lastActivity;
+        const elapsedTime = Date.now() - this.state.sessionStart;
 
-        // Debug logging (can be removed in prod, keeping for verification)
-        // console.log(`Session Check: Idle ${Math.floor(idleTime/1000)}s / Limit ${Math.floor(this.config.sessionTimeout/1000)}s`);
-
-        if (idleTime > this.config.sessionTimeout) {
-            console.warn('⚠️ Session Timeout Triggered via Activity Check');
+        if (elapsedTime > this.config.sessionTimeout) {
+            console.warn('⚠️ Session Hard Limit Reached. Purging Memory...');
             this.endSession();
         }
     }
@@ -478,17 +475,21 @@ class EncryptionApp {
     endSession() {
         clearInterval(this.state.sessionTimer);
 
-        // Show Blocking Modal
+        // 1. Immediate Deep Clean
+        this.clearSensitiveData();
+
+        // 2. Show Blocking Modal
         const modal = document.getElementById('sessionExpiredModal');
         if (modal) {
             modal.classList.add('active');
             modal.style.display = 'flex'; // Force flex for centering
+
+            // Lock Scrolling
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
         }
 
-        this.showNotification('⏳ انتهت الجلسة الأمنية. يلزم إعادة التحميل.', 'warning');
-
-        // مسح البيانات الحساسة خلفياً
-        this.clearSensitiveData();
+        this.showNotification('⏳ انتهت الجلسة الأمنية (Hard Limit). تم مسح الذاكرة.', 'warning');
     }
 
     toggleLanguage(forceLang = null) {
@@ -1383,27 +1384,37 @@ class EncryptionApp {
     }
 
     clearSensitiveData() {
-        // مسح كلمات المرور من الذاكرة
-        const passwordFields = document.querySelectorAll('input[type="password"]');
-        passwordFields.forEach(field => {
-            field.value = '';
+        // 1. Purge Application State
+        this.state.keystrokeBuffer = [];
+        this.state.encryptionHistory = [];
+        this.state.passwordAttempts.clear();
+        this.config.strengthLevels = null;
+
+        // 2. Overwrite & Clear Clipboard (Attempt)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('Memory Purged').catch(() => { });
+        }
+
+        // 3. Scrub DOM Inputs (Passwords, Text, Textareas)
+        const inputs = document.querySelectorAll('input, textarea, [contenteditable]');
+        inputs.forEach(el => {
+            el.value = '';
+            el.innerHTML = '';
+            el.setAttribute('value', ''); // Anti-restoration
         });
 
-        // مسح محاولات كلمات المرور
-        this.state.passwordAttempts.clear();
+        // 4. Scrub Result Display Containers
+        const resultContainers = document.querySelectorAll('.result-box, #encryptedOutput, #decryptedOutput');
+        resultContainers.forEach(el => el.innerHTML = 'MEMORY_PURGED');
 
-        // مسح التخزين المؤقت
+        // 5. Clear Storage (Session & Local related to current session)
         sessionStorage.clear();
 
-        // تجاوز القيم في الذاكرة
-        const sensitiveData = ['encryptionPassword', 'decryptionPassword', 'plainText', 'encryptedText'];
-        sensitiveData.forEach(key => {
-            const element = document.getElementById(key);
-            if (element) {
-                element.value = '0'.repeat(element.value.length);
-                element.value = '';
-            }
-        });
+        console.clear();
+        console.log('☢️ MEMORY DEEPLY PURGED');
+
+        // مسح الذاكرة
+        if (window.gc) window.gc();
     }
 
     saveToHistory(entry) {
