@@ -43,21 +43,21 @@ class EncryptionApp {
         this.i18n = {
             ar: {
                 appName: 'نظام التشفير السيادي',
-                headerSubtitle: 'نظام تشفير بمسار نووي (Nuclear Pipeline) بمعايير <strong>سيادية/عسكرية</strong>. يستخدم خط تجميع <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong> مع توزيع HKDF و طبقات تشفير <strong>AES-GCM + ChaCha20</strong>. <span class="highlight">النظام يعمل في بيئة معزولة تماماً.</span>',
+                headerSubtitle: 'نظام تشفير سيادي (Post-Quantum) يستخدم طبقات <strong>Dilithium + Falcon</strong> للتوقيع، و <strong>Kyber</strong> للتغليف. معالج <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong>. <span class="highlight">بيئة معزولة تماماً (Air-Gapped Logic).</span>',
                 footerSystemName: 'نظام التشفير السيادي © 2026',
-                footerHost: 'نظام تشفير محلي 100% - Sovereign Grade Protection',
-                footerWarning: '<strong>تنبيه سيادي هام:</strong> هذا النظام يستخدم معايير تشفير عسكرية فائقة الحساسية. المستخدم يتحمل المسؤولية القانونية والأمنية الكاملة عن استخدام هذا النظام.',
+                footerHost: 'نظام Sovereign Grade - حماية ضد الحوسبة الكمومية (PQ)',
+                footerWarning: '<strong>تنبيه سيادي هام:</strong> هذا النظام يستخدم معايير تشفير عسكرية (Post-Quantum) فائقة الحساسية. المستخدم يتحمل المسؤولية القانونية والأمنية الكاملة عن استخدام هذا النظام.',
                 sessionExpiredTitle: 'انتهت الجلسة الأمنية',
                 sessionExpiredMsg1: 'لقد تجاوزت الجلسة الوقت المسموح به (15 دقيقة).',
-                sessionExpiredMsg2: 'لأسباب أمنية قصوى، يجب إغلاق الجلسة الحالية ومسح الذاكرة تماماً.',
-                startNewSession: 'بدء جلسة جديدة (مسح الذاكرة)',
+                sessionExpiredMsg2: 'لأسباب أمنية قصوى، يجب إغلاق الجلسة الحالية ومسح الذاكرة (RAM Purge).',
+                startNewSession: 'بدء جلسة جديدة (تطهير الذاكرة)',
             },
             en: {
                 appName: 'Sovereign Encryption System',
-                headerSubtitle: 'Nuclear Pipeline Encryption System with <strong>Sovereign/Military Standards</strong>. Uses <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong> pipeline with HKDF distribution and <strong>AES-GCM + ChaCha20</strong> layers. <span class="highlight">System operates in a fully isolated environment.</span>',
+                headerSubtitle: 'Sovereign Encryption (Post-Quantum) using <strong>Dilithium + Falcon</strong> signatures and <strong>Kyber</strong> encapsulation. <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong> pipeline. <span class="highlight">Fully Isolated Environment (Air-Gapped Logic).</span>',
                 footerSystemName: 'Sovereign Encryption System © 2026',
-                footerHost: '100% Local Encryption - Sovereign Grade Protection',
-                footerWarning: '<strong>CRITICAL SOVEREIGN WARNING:</strong> This system utilizes highly sensitive military-grade encryption standards. The user assumes full legal and security responsibility for its usage.',
+                footerHost: 'Sovereign Grade - Post-Quantum Protection (PQ)',
+                footerWarning: '<strong>CRITICAL SOVEREIGN WARNING:</strong> This system utilizes military-grade Post-Quantum encryption. The user assumes full legal and security responsibility for its usage.',
                 sessionExpiredTitle: 'Security Session Expired',
                 sessionExpiredMsg1: 'Session has exceeded the allowed time limit (15 minutes).',
                 sessionExpiredMsg2: 'For maximum security, the current session must be closed and memory purged.',
@@ -460,9 +460,17 @@ class EncryptionApp {
     }
 
     checkSessionTimeout() {
+        if (!this.state.lastActivity) {
+            this.state.lastActivity = Date.now();
+        }
+
         const idleTime = Date.now() - this.state.lastActivity;
 
+        // Debug logging (can be removed in prod, keeping for verification)
+        // console.log(`Session Check: Idle ${Math.floor(idleTime/1000)}s / Limit ${Math.floor(this.config.sessionTimeout/1000)}s`);
+
         if (idleTime > this.config.sessionTimeout) {
+            console.warn('⚠️ Session Timeout Triggered via Activity Check');
             this.endSession();
         }
     }
