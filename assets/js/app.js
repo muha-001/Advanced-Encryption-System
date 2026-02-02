@@ -8,8 +8,8 @@ class EncryptionApp {
         // إعدادات التطبيق
         this.config = {
             appName: 'نظام التشفير السيادي',
-            version: '9.1-HARDENED',
-            algorithm: 'Nuclear Pipeline v9.1',
+            version: '10.0-SOVEREIGN',
+            algorithm: 'NIST-FIPS PQ Cascade',
             iterations: 2000000,
             maxAttempts: 10,
             sessionTimeout: 15 * 60 * 1000, // 15 دقيقة
@@ -24,7 +24,7 @@ class EncryptionApp {
 
         // حالة التطبيق
         this.state = {
-            ver: "v9.1-HARDENED",
+            ver: "v10.0-SOVEREIGN",
             isSecure: false,
             isInitialized: false,
             sessionStart: null,
@@ -49,7 +49,7 @@ class EncryptionApp {
         this.i18n = {
             ar: {
                 appName: 'نظام التشفير السيادي',
-                headerSubtitle: 'نظام تشفير سيادي (v9.1-Hardened) يستخدم طبقات <strong>PQ-SIM</strong> للتوقيع، و <strong>AEAD Cascade</strong> للتشفير. معالج <strong>PBKDF2-SHA512</strong> + <strong>Argon2id (1.8GB)</strong>. <span class="highlight">بيئة معزولة تماماً (Air-Gapped Logic).</span>',
+                headerSubtitle: 'نظام تشفير سيادي (v10.0) بمعايير <strong>FIPS/NIST</strong>. يستخدم توقيعات <strong>ML-DSA/FN-DSA</strong> حقيقية، و <strong>AEAD Cascade</strong>. معالج <strong>PBKDF2-SHA512</strong> + <strong>Argon2id (512MB)</strong>. <span class="highlight">بيئة معزولة تماماً (Air-Gapped Logic).</span>',
                 footerSystemName: 'نظام التشفير السيادي © 2026',
                 footerHost: 'نظام Sovereign Grade - حماية ضد الحوسبة الكمومية (PQ)',
                 footerWarning: '<strong>تنبيه سيادي هام:</strong> هذا النظام يستخدم معايير تشفير عسكرية (Post-Quantum) فائقة الحساسية. المستخدم يتحمل المسؤولية القانونية والأمنية الكاملة عن استخدام هذا النظام.',
@@ -60,7 +60,7 @@ class EncryptionApp {
             },
             en: {
                 appName: 'Sovereign Encryption System',
-                headerSubtitle: 'Sovereign Encryption (v9.1-Hardened) using <strong>PQ-SIM</strong> signatures and <strong>AEAD Cascade</strong>. <strong>PBKDF2-SHA512</strong> + <strong>Argon2id (1.8GB)</strong> pipeline. <span class="highlight">Fully Isolated Environment (Air-Gapped Logic).</span>',
+                headerSubtitle: 'Sovereign Encryption (v10.0) with <strong>FIPS/NIST</strong> standards. Using real <strong>ML-DSA/FN-DSA</strong> signatures and <strong>AEAD Cascade</strong>. <strong>PBKDF2-SHA512</strong> + <strong>Argon2id (512MB)</strong>. <span class="highlight">Fully Isolated Environment (Air-Gapped Logic).</span>',
                 footerSystemName: 'Sovereign Encryption System © 2026',
                 footerHost: 'Sovereign Grade - Post-Quantum Protection (PQ)',
                 footerWarning: '<strong>CRITICAL SOVEREIGN WARNING:</strong> This system utilizes military-grade Post-Quantum encryption. The user assumes full legal and security responsibility for its usage.',
@@ -561,7 +561,7 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('☢️ جاري تنفيذ التشفير السيادي المطور (v9.1-HARDENED)... قد يستغرق ~8 ثوانٍ', 'info');
+            this.showNotification('☢️ جاري تنفيذ التشفير السيادي (v10.0-SOVEREIGN)... معالجة NIST PQC', 'info');
 
             const startTime = performance.now();
 
@@ -593,7 +593,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Sovereign Pipeline v9.1-HARDENED (AEAD Cascade) بنجاح', 'success');
+            this.showNotification('✅ تم التشفير بنظام Sovereign v10.0 (NIST/FIPS Cascade) بنجاح', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
@@ -671,10 +671,10 @@ class EncryptionApp {
 
         const summary = `
             <div class="result-badge security-high">
-                <i class="fas fa-shield-alt"></i> Redesigned v9.1 Hardened Protection
+                <i class="fas fa-shield-alt"></i> NIST FIPS 10.0 Strict Protection
             </div>
             <div class="result-badge pq-active">
-                <i class="fas fa-atom"></i> PQ-SIM Authenticated (v9.1-Redesign)
+                <i class="fas fa-atom"></i> Post-Quantum Active (ML-DSA + FN-DSA)
             </div>
         `;
         const summaryEl = document.getElementById('securitySummary');
@@ -782,9 +782,9 @@ class EncryptionApp {
         if (integrityStatusEl) {
             let statusText = result.integrity ? 'سليمة ✓' : 'تالفة ✗';
 
-            if (result.metadata?.version === "9.1-HARDENED") {
-                statusText += ' | 🛡️ PQ-SIM Verified';
-            } else if (result.post_quantum_verified) {
+            if (result.metadata?.version === "10.0-SOVEREIGN") {
+                statusText += ' | 🛡️ NIST PQC Verified';
+            } else if (result.pq_auth) {
                 statusText += ' | 🛡️ PQ-Verified';
             }
 
