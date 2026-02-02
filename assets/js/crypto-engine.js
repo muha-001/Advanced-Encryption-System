@@ -48,8 +48,8 @@ class CryptoEngine {
         this.pqReady = false;
         this.supportCheckPromise = this.checkSecuritySupport();
 
-        console.log('🚀 محرك التشفير السيادي v9.0-SOVEREIGN-PQ جاهز');
-        console.log('🛡️ 9-Layer Security | Post-Quantum Authentication');
+        console.log(`🚀 محرك التشفير السيادي v${this.config.ver} جاهز`);
+        console.log('🛡️ 9-Layer Security | PQ-SIM Authenticated Redesign');
     }
 
     // ============================================

@@ -26,10 +26,13 @@ class EncryptionApp {
         this.state = {
             ver: "v9.1-HARDENED",
             isSecure: false,
+            isInitialized: false,
             sessionStart: null,
-            lastActivity: null,
+            lastActivity: Date.now(),
             sessionTimer: null,
             maxSession: 15 * 60 * 1000, // 15 Minutes
+            passwordAttempts: new Map(),
+            encryptionHistory: [],
             stats: {
                 totalEncrypted: 0,
                 totalDecrypted: 0,
