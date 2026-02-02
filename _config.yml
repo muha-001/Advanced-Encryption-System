@@ -1,7 +1,7 @@
 # إعدادات GitHub Pages لنظام التشفير
 title: "نظام التشفير المتقدم"
 name: "نظام التشفير المتقدم"
-description: "نظام تشفير AES-256-GCM مع PBKDF2 310,000 تكرار على GitHub Pages"
+description: "v9.1-HARDENED: AEAD Cascade with PBKDF2-SHA512 + Argon2id on GitHub Pages"
 baseurl: "" # اترك فارغاً إذا كان في root
 url: "https://muha-001.github.io" # رابط موقعك
 
@@ -62,8 +62,8 @@ sitemap:
 
 # معلومات التشفير
 encryption:
-  algorithm: "AES-256-GCM"
-  key_derivation: "PBKDF2 with 310,000 iterations"
+  algorithm: "AES-256-GCM + XChaCha20-Poly1305"
+  key_derivation: "PBKDF2-SHA512 (2M) + Argon2id (1.8GB)"
   key_length: 256
   iv_length: 96
   salt_length: 128

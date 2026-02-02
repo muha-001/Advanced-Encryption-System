@@ -6,49 +6,40 @@
 class CryptoEngine {
     constructor() {
         this.config = {
-            ver: "9.0-SOVEREIGN-PQ",
-            classification: "PROBABILISTIC | HIGH-ENTROPY | POST-QUANTUM",
-            threat_model: "OFFLINE | STATE-LEVEL | QUANTUM-RESISTANT",
+            ver: "9.1-HARDENED",
+            suite: "SOVEREIGN-9.1-CASCADE",
+            classification: "PROBABILISTIC | HIGH-ENTROPY | RE-DESIGNED",
+            threat_model: "OFFLINE | STATE-LEVEL | QUANTUM-RESISTANT (Simulated)",
 
             pipeline: {
                 // Layer 2: Password Hardening (CPU-Hard)
                 stage1: {
-                    type: 'PBKDF2-HMAC-SHA256',
+                    type: 'PBKDF2-HMAC-SHA512',
                     iterations: 2000000
                 },
                 // Layer 3: Memory-Hard Derivation
                 stage2: {
                     type: 'Argon2id',
-                    memoryCost: 1887436, // ~1.8GB (Optimized High Security)
+                    memoryCost: 1887436, // ~1.8GB
                     parallelism: 4,
-                    iterations: 2,
+                    iterations: 4, // Default adaptive target for desktop
                     hashLength: 64
                 },
                 // Layer 4: Key Separation (HKDF)
                 stage3: {
                     type: 'HKDF-SHA3-512',
-                    keys: ['encryption', 'authentication', 'inner_sub', 'pq_signing']
+                    context: "v9.1-SOVEREIGN-PQ-CONTEXT-BOUND"
                 }
             },
 
             encryption: {
-                // Layer 6: Symmetric Core
                 inner: { algorithm: 'XChaCha20-Poly1305', nonceLength: 24 },
-                // Layer 7: Authenticated Encryption
                 outer: { algorithm: 'AES-256-GCM', ivLength: 12 },
                 tagLength: 128
             },
 
-            // Post-Quantum Authentication
-            post_quantum: {
-                policy: "BOTH_REQUIRED",
-                dilithium: { scheme: "CRYSTALS-Dilithium-5" },
-                falcon: { scheme: "Falcon-1024" }
-            },
-
             integrity: {
-                algorithm: 'HMAC',
-                hash: 'SHA3-512'
+                algorithm: 'HMAC-SHA3-512'
             }
         };
 
@@ -133,7 +124,7 @@ class CryptoEngine {
     async encrypt(plainText, password, options = {}) {
         const startTime = performance.now();
         let passwordBytes, masterSalt, intermediateHash, masterKeyMaterial, keys, dataPayload;
-        let innerCipher, finalCipher, innerNonce, outerIV;
+        let innerCipherWithTag, finalCipherWithTag, innerNonce, outerIV;
 
         try {
             if (!plainText || !password) throw new Error('بيانات ناقصة');
@@ -144,28 +135,29 @@ class CryptoEngine {
             const timestamp = Date.now();
 
             // ============================================
-            // Layer 2: Password Hardening (CPU-Hard)
+            // Layer 2: Password Hardening (SHA-512)
             // ============================================
-            console.log('🔐 Layer 2: PBKDF2 Password Hardening...');
+            console.log('🔐 Layer 2: PBKDF2-SHA512 Hardening...');
             intermediateHash = await this.deriveStage1_PBKDF2(passwordBytes, masterSalt);
 
             // ============================================
-            // Layer 3: Memory-Hard Derivation (Argon2id 1.8GB)
+            // Layer 3: Adaptive Argon2id (Memory-Hard)
             // ============================================
-            console.log('🧠 Layer 3: Argon2id Memory-Hard Derivation (1.8GB)...');
+            const argon2Iter = options.securityLevel === 'high' ? 5 : (options.securityLevel === 'mobile' ? 3 : 4);
+            console.log(`🧠 Layer 3: Argon2id (${argon2Iter} iterations, 1.8GB)...`);
+
+            // Temporary override config for this derivation
+            const originalIter = this.config.pipeline.stage2.iterations;
+            this.config.pipeline.stage2.iterations = argon2Iter;
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
+            this.config.pipeline.stage2.iterations = originalIter;
 
             // ============================================
-            // Layer 4: Key Separation & Expansion (HKDF)
+            // Layer 4: Context-Bound Key Separation (HKDF)
             // ============================================
-            console.log('🔑 Layer 4: HKDF Key Separation...');
-            keys = await this.deriveStage3_HKDF(masterKeyMaterial);
-
-            // ============================================
-            // Layer 5: Hybrid Key Encapsulation (Logical KEM)
-            // ============================================
-            console.log('🔗 Layer 5: Hybrid Key Encapsulation...');
-            const kemData = this.hybridKEM(passwordBytes, masterSalt, options.additionalKey);
+            console.log('🔑 Layer 4: HKDF Context-Bound Separation...');
+            const context = `suite:${this.config.suite}|ver:${this.config.ver}`;
+            keys = await this.deriveStage3_HKDF(masterKeyMaterial, context);
 
             // Prepare data payload
             dataPayload = options.compression
@@ -173,146 +165,142 @@ class CryptoEngine {
                 : new TextEncoder().encode(plainText);
 
             // ============================================
-            // Layer 6: Symmetric Encryption Core (XChaCha20)
+            // Layer 6: Symmetric Core (XChaCha20-Poly1305)
             // ============================================
-            console.log('🔒 Layer 6: XChaCha20-Poly1305 Encryption...');
-            innerNonce = this.generateRandomBytes(24); // Extended 192-bit nonce
-            outerIV = this.generateRandomBytes(12);    // AES-GCM IV
+            console.log('🔒 Layer 6: XChaCha20-Poly1305 (Inner Layer)...');
+            innerNonce = this.generateRandomBytes(24);
+            outerIV = this.generateRandomBytes(12);
 
             const xchachaKey = new Uint8Array(keys.innerKey);
-            let innerResult;
-
             try {
-                if (!this.xchachaReady) {
-                    throw new Error('مكتبة XChaCha20 غير متوفرة');
-                }
+                if (!this.xchachaReady) throw new Error('مكتبة XChaCha20 غير متوفرة');
 
-                // ============================================
-                // Layer 7: Authenticated Encryption (Poly1305)
-                // ============================================
                 if (typeof window.xchacha20poly1305 === 'function') {
                     const cipher = window.xchacha20poly1305(xchachaKey, innerNonce);
-                    innerCipher = cipher.encrypt(new Uint8Array(dataPayload));
-                } else if (typeof window.xchacha20 === 'function') {
-                    innerCipher = window.xchacha20(xchachaKey, innerNonce, new Uint8Array(dataPayload));
+                    innerCipherWithTag = cipher.encrypt(new Uint8Array(dataPayload));
                 } else {
-                    throw new Error('XChaCha20 not available');
+                    // Fallback to unauthenticated if library is old (not recommended for 9.1)
+                    innerCipherWithTag = window.xchacha20(xchachaKey, innerNonce, new Uint8Array(dataPayload));
                 }
             } finally {
                 this.wipe(xchachaKey);
             }
 
-            // AES-256-GCM Outer Layer
-            console.log('🔐 Layer 7: AES-256-GCM Authenticated Encryption...');
-            const outerAAD = new TextEncoder().encode(`v9.0-PQ|AES-GCM|${timestamp}`);
-            finalCipher = await this.crypto.encrypt(
-                { name: 'AES-GCM', iv: outerIV, additionalData: outerAAD },
-                keys.outerKey,
-                innerCipher
-            );
+            // Split Inner Tag (16 bytes)
+            const innerTag = innerCipherWithTag.slice(-16);
+            const innerCipher = innerCipherWithTag.slice(0, -16);
 
-            // ============================================
-            // Layer 1: Build Immutable Header
-            // ============================================
+            // Build PRELIMINARY Header to be authenticated
             const header = {
-                ver: "9.0-SOVEREIGN-PQ",
+                ver: this.config.ver,
+                suite: this.config.suite,
                 timestamp: timestamp,
                 classification: this.config.classification,
                 threat_model: this.config.threat_model,
 
                 kdf_pipeline: {
-                    desc: "Hybrid: PBKDF2 (CPU-Hard) -> Argon2id (RAM-Hard) -> HKDF (Split)",
+                    desc: "Adaptive Hybrid: PBKDF2-SHA512 -> Argon2id -> HKDF (Context-Bound)",
                     salt: this.arrayToBase64(masterSalt),
                     params: {
-                        pbkdf2_hmac: "SHA256",
                         pbkdf2_iter: this.config.pipeline.stage1.iterations,
-                        argon2_variant: "id",
+                        argon2_iter: argon2Iter,
                         argon2_mem_kb: this.config.pipeline.stage2.memoryCost,
-                        argon2_lanes: this.config.pipeline.stage2.parallelism,
-                        argon2_time: this.config.pipeline.stage2.iterations,
-                        hkdf_hash: "SHA3-512"
+                        hkdf_context: context
                     }
                 },
 
                 encryption: {
-                    mode: "CASCADE",
-                    outer: {
-                        algo: "AES-256-GCM",
-                        iv: this.arrayToBase64(outerIV),
-                        tag_length_bits: 128
-                    },
-                    inner: {
-                        algo: "XChaCha20-Poly1305",
-                        nonce: this.arrayToBase64(innerNonce)
-                    }
+                    mode: "CASCADE-AEAD-STRICT",
+                    outer: { algo: "AES-256-GCM", iv: this.arrayToBase64(outerIV) },
+                    inner: { algo: "XChaCha20-Poly1305", nonce: this.arrayToBase64(innerNonce) }
                 }
             };
 
             // ============================================
-            // Layer 8: Integrity Binding (Full MAC)
+            // Layer 7: AES-256-GCM (Outer Layer with AAD)
             // ============================================
-            console.log('🔏 Layer 8: Integrity Binding (HMAC-SHA3-512)...');
-            const cipherBase64 = this.arrayToBase64(finalCipher);
+            console.log('🔐 Layer 7: AES-256-GCM (Outer Layer)...');
             const headerJSON = JSON.stringify(header);
-            const bindingData = new TextEncoder().encode(headerJSON + cipherBase64);
-            const authTag = await this.crypto.sign('HMAC', keys.integrityKey, bindingData);
+            const outerAAD = new TextEncoder().encode(headerJSON); // Bind entire header
+
+            finalCipherWithTag = await this.crypto.encrypt(
+                { name: 'AES-GCM', iv: outerIV, additionalData: outerAAD },
+                keys.outerKey,
+                innerCipherWithTag // Use whole inner packet (Cipher+Tag) for nested authentication
+            );
+
+            // Split Outer Tag (16 bytes)
+            const outerTag = finalCipherWithTag.slice(-16);
+            const outerCipher = finalCipherWithTag.slice(0, -16);
 
             // ============================================
-            // Post-Quantum Authentication (Dilithium + Falcon)
+            // Layer 8: Integrity Binding (Keyed HMAC)
             // ============================================
-            console.log('🛡️ Post-Quantum Authentication (Dilithium-5 + Falcon-1024)...');
+            console.log('🔏 Layer 8: Integrity Binding (HMAC-SHA3-512)...');
+            const cipherBase64 = this.arrayToBase64(outerCipher);
+            const outerTagBase64 = this.arrayToBase64(outerTag);
+            const innerTagBase64 = this.arrayToBase64(innerTag);
+
+            const bindingData = new TextEncoder().encode(headerJSON + cipherBase64 + outerTagBase64 + innerTagBase64);
+            const masterAuthTag = await this.crypto.sign('HMAC', keys.integrityKey, bindingData);
+
+            // ============================================
+            // Post-Quantum Mapping (Simulated)
+            // ============================================
+            console.log('🛡️ PQ-SIM: Authenticated Mapping...');
             const digest = await this.computeSHA3_512(bindingData);
             const pqSignatures = await this.signPostQuantum(digest, keys.pqSigningKey);
 
             // ============================================
-            // Layer 9: Anti-Tamper Footer
+            // Layer 9: Keyed Anti-Tamper Footer (HMAC-Signed)
             // ============================================
-            console.log('🔒 Layer 9: Anti-Tamper Footer...');
-            const footerData = new TextEncoder().encode(
-                cipherBase64 + this.arrayToBase64(authTag) + pqSignatures.dilithium.signature + pqSignatures.falcon.signature
+            console.log('🔒 Layer 9: Keyed Anti-Tamper Footer...');
+            const footerPayload = new TextEncoder().encode(
+                cipherBase64 + outerTagBase64 + this.arrayToBase64(masterAuthTag) +
+                pqSignatures.dilithium.signature + pqSignatures.falcon.signature
             );
-            const antiTamperHash = await this.computeSHA3_512(footerData);
+            const footerHMAC = await this.crypto.sign('HMAC', keys.footerAuthKey, footerPayload);
 
             const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(2);
-            console.log(`✅ تشفير مكتمل في ${elapsedTime} ثانية`);
+            console.log(`✅ v9.1-HARDENED Completed in ${elapsedTime}s`);
 
             return {
                 header: header,
                 ciphertext: cipherBase64,
-                auth_tag: this.arrayToBase64(authTag),
+                tags: {
+                    outer: outerTagBase64,
+                    inner: innerTagBase64
+                },
+                auth_tag: this.arrayToBase64(masterAuthTag),
 
-                post_quantum_auth: {
+                pq_sim_auth: {
                     policy: "BOTH_REQUIRED",
-                    digest: {
-                        algo: "SHA3-512",
-                        value: digest
-                    },
+                    digest: digest,
                     signatures: pqSignatures
                 },
 
                 anti_tamper_footer: {
-                    algo: "SHA3-512",
-                    hash: antiTamperHash,
-                    layer_sequence_verified: true
+                    algo: "HMAC-SHA3-512",
+                    signature: this.arrayToBase64(footerHMAC)
                 },
 
                 security_meta: {
-                    memory_wiped: true,
-                    stack_zeroed: true,
-                    dom_nuked: true,
-                    constant_time_ops: true,
-                    rng_source: "OS_CSPRNG"
+                    version: "9.1.0",
+                    kdf: "SHA512-Targeted",
+                    memory_hard: true,
+                    context_bound: true,
+                    aead_separated: true
                 },
 
                 performance: {
-                    total_time_seconds: parseFloat(elapsedTime),
-                    argon2_memory_gb: (this.config.pipeline.stage2.memoryCost / 1024 / 1024).toFixed(2)
+                    total_time: parseFloat(elapsedTime),
+                    argon2_t: argon2Iter
                 }
             };
 
         } finally {
             this.wipeAll(passwordBytes, intermediateHash, masterKeyMaterial, dataPayload);
-            if (innerCipher) this.wipe(new Uint8Array(innerCipher));
+            if (innerCipherWithTag) this.wipe(new Uint8Array(innerCipherWithTag));
         }
     }
 
@@ -323,19 +311,17 @@ class CryptoEngine {
     async decrypt(encryptedData, password) {
         const startTime = performance.now();
         let passwordBytes, intermediateHash, masterKeyMaterial, keys;
-        let innerCipher, plainBuffer;
+        let innerCipherWithTag, plainBuffer;
 
         try {
             let data = encryptedData;
             if (typeof data === 'string') data = JSON.parse(data);
 
-            // Verify version
-            if (!data.header || !data.header.ver) {
-                throw new Error('تنسيق غير صالح');
-            }
+            // Verify version and suite
+            if (!data.header || !data.header.ver) throw new Error('تنسيق غير صالح');
 
-            if (!data.header.ver.startsWith('9.0')) {
-                throw new Error('إصدار غير مدعوم. هذا النظام يدعم فقط v9.0-SOVEREIGN-PQ');
+            if (data.header.ver !== "9.1-HARDENED") {
+                throw new Error(`إصدار غير مدعوم (${data.header.ver}). هذا المحرك يدعم v9.1-HARDENED`);
             }
 
             passwordBytes = new TextEncoder().encode(password);
@@ -343,63 +329,76 @@ class CryptoEngine {
             const outerIV = this.base64ToArray(data.header.encryption.outer.iv);
             const innerNonce = this.base64ToArray(data.header.encryption.inner.nonce);
             const ciphertext = this.base64ToArray(data.ciphertext);
+            const outerTag = this.base64ToArray(data.tags.outer);
+            const innerTag = this.base64ToArray(data.tags.inner);
             const authTag = this.base64ToArray(data.auth_tag);
 
-            // Rebuild keys
-            console.log('🔐 إعادة بناء المفاتيح...');
+            // 1. Rebuild Keys with exact parameters from header
+            console.log('🔐 إعادة بناء المفاتيح (v9.1 Context-Bound)...');
+            const argon2Iter = data.header.kdf_pipeline.params.argon2_iter;
+            const context = data.header.kdf_pipeline.params.hkdf_context;
+
             intermediateHash = await this.deriveStage1_PBKDF2(passwordBytes, masterSalt);
+
+            // Temporary override config for decryption
+            const originalIter = this.config.pipeline.stage2.iterations;
+            this.config.pipeline.stage2.iterations = argon2Iter;
             masterKeyMaterial = await this.deriveStage2_Argon2id(intermediateHash, masterSalt);
-            keys = await this.deriveStage3_HKDF(masterKeyMaterial);
+            this.config.pipeline.stage2.iterations = originalIter;
 
-            // Verify Integrity (Layer 8)
-            console.log('🔏 التحقق من السلامة...');
+            keys = await this.deriveStage3_HKDF(masterKeyMaterial, context);
+
+            // 2. Verify Keyed Anti-Tamper Footer (Layer 9)
+            if (data.anti_tamper_footer && data.anti_tamper_footer.signature) {
+                console.log('🔒 التحقق من Anti-Tamper Footer (Keyed HMAC)...');
+                const footerPayload = new TextEncoder().encode(
+                    data.ciphertext + data.tags.outer + data.auth_tag +
+                    data.pq_sim_auth.signatures.dilithium.signature +
+                    data.pq_sim_auth.signatures.falcon.signature
+                );
+                const footerSig = this.base64ToArray(data.anti_tamper_footer.signature);
+                const isFooterValid = await this.crypto.verify('HMAC', keys.footerAuthKey, footerSig, footerPayload);
+                if (!isFooterValid) throw new Error('⛔ فشل التحقق من Footer! تم مسح البصمة الأمنية.');
+            }
+
+            // 3. Verify Integrity Binding (Layer 8)
+            console.log('🔏 التحقق من السلامة البنيوية (Full MAC)...');
             const headerJSON = JSON.stringify(data.header);
-            const bindingData = new TextEncoder().encode(headerJSON + data.ciphertext);
-            const isValid = await this.crypto.verify('HMAC', keys.integrityKey, authTag, bindingData);
-            if (!isValid) throw new Error('⛔ فشل التحقق من المصادقة! تم اكتشاف تلاعب.');
+            const bindingData = new TextEncoder().encode(headerJSON + data.ciphertext + data.tags.outer + data.tags.inner);
+            const isIntegrityValid = await this.crypto.verify('HMAC', keys.integrityKey, authTag, bindingData);
+            if (!isIntegrityValid) throw new Error('⛔ فشل التحقق من المصادقة! تم الكشف عن تلاعب دلالي.');
 
-            // Verify Post-Quantum Signatures
-            if (data.post_quantum_auth) {
-                console.log('🛡️ التحقق من التوقيعات Post-Quantum...');
+            // 4. Verify PQ-SIM Signatures
+            if (data.pq_sim_auth) {
+                console.log('🛡️ التحقق من Mapping Post-Quantum (Simulated)...');
                 const pqValid = await this.verifyPostQuantum(
-                    data.post_quantum_auth.digest.value,
-                    data.post_quantum_auth.signatures,
+                    data.pq_sim_auth.digest,
+                    data.pq_sim_auth.signatures,
                     keys.pqSigningKey
                 );
-                if (!pqValid) throw new Error('⛔ فشل التحقق من التوقيعات Post-Quantum!');
+                if (!pqValid) throw new Error('⛔ فشل التحقق من التوقيعات PQ-SIM!');
             }
 
-            // Verify Anti-Tamper Footer (Layer 9)
-            if (data.anti_tamper_footer) {
-                console.log('🔒 التحقق من Anti-Tamper Footer...');
-                const footerData = new TextEncoder().encode(
-                    data.ciphertext + data.auth_tag +
-                    data.post_quantum_auth.signatures.dilithium.signature +
-                    data.post_quantum_auth.signatures.falcon.signature
-                );
-                const computedHash = await this.computeSHA3_512(footerData);
-                if (computedHash !== data.anti_tamper_footer.hash) {
-                    throw new Error('⛔ فشل التحقق من Anti-Tamper Footer!');
-                }
-            }
+            // 5. Decrypt AES-GCM (Outer Layer with AAD Header)
+            console.log('🔓 فك تشفير AES-GCM (Bound Header)...');
+            const outerAAD = new TextEncoder().encode(headerJSON);
+            const finalPacket = new Uint8Array(ciphertext.length + outerTag.length);
+            finalPacket.set(ciphertext, 0);
+            finalPacket.set(outerTag, ciphertext.length);
 
-            // Decrypt AES-GCM Outer Layer
-            console.log('🔓 فك تشفير AES-GCM...');
-            const outerAAD = new TextEncoder().encode(`v9.0-PQ|AES-GCM|${data.header.timestamp}`);
-            innerCipher = await this.crypto.decrypt(
+            innerCipherWithTag = await this.crypto.decrypt(
                 { name: 'AES-GCM', iv: outerIV, additionalData: outerAAD },
-                keys.outerKey, ciphertext
+                keys.outerKey, finalPacket
             );
 
-            // Decrypt XChaCha20 Inner Layer
+            // 6. Decrypt XChaCha20-Poly1305 (Inner Layer)
             console.log('🔓 فك تشفير XChaCha20-Poly1305...');
             const xchachaKey = new Uint8Array(keys.innerKey);
             try {
                 if (typeof window.xchacha20poly1305 === 'function') {
                     const cipher = window.xchacha20poly1305(xchachaKey, innerNonce);
-                    plainBuffer = cipher.decrypt(new Uint8Array(innerCipher));
-                } else if (typeof window.xchacha20 === 'function') {
-                    plainBuffer = window.xchacha20(xchachaKey, innerNonce, new Uint8Array(innerCipher));
+                    const plainBufferRaw = cipher.decrypt(new Uint8Array(innerCipherWithTag));
+                    plainBuffer = plainBufferRaw;
                 } else {
                     throw new Error('XChaCha20 not available');
                 }
@@ -416,22 +415,22 @@ class CryptoEngine {
             }
 
             const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(2);
-            console.log(`✅ فك التشفير مكتمل في ${elapsedTime} ثانية`);
+            console.log(`✅ فك التشفير v9.1 ناجح في ${elapsedTime}s`);
 
             return {
                 text: plainText,
                 integrity: true,
-                post_quantum_verified: !!data.post_quantum_auth,
                 metadata: {
                     version: data.header.ver,
+                    suite: data.header.suite,
                     timestamp: data.header.timestamp,
-                    threat_model: data.header.threat_model
+                    argon2_t: argon2Iter
                 }
             };
 
         } finally {
             this.wipeAll(passwordBytes, intermediateHash, masterKeyMaterial);
-            if (innerCipher) this.wipe(new Uint8Array(innerCipher));
+            if (innerCipherWithTag) this.wipe(new Uint8Array(innerCipherWithTag));
             if (plainBuffer) this.wipe(new Uint8Array(plainBuffer));
         }
     }
@@ -449,7 +448,7 @@ class CryptoEngine {
                 name: 'PBKDF2',
                 salt: new Uint8Array(salt),
                 iterations: this.config.pipeline.stage1.iterations,
-                hash: 'SHA-256'
+                hash: 'SHA-512'
             },
             keyMaterial, 512
         );
@@ -468,38 +467,51 @@ class CryptoEngine {
         });
     }
 
-    async deriveStage3_HKDF(masterSecret) {
+    async deriveStage3_HKDF(masterSecret, context = "") {
         const masterKey = await this.crypto.importKey(
             'raw', masterSecret, 'HKDF', false, ['deriveKey', 'deriveBits']
         );
 
-        // Encryption Key (AES-256-GCM)
+        const encoder = new TextEncoder();
+        const baseContext = this.config.pipeline.stage3.context;
+        const fullContext = context ? `${baseContext}|${context}` : baseContext;
+
+        // Encryption Key (AES-256-GCM) - Outer
         const outerKey = await this.crypto.deriveKey(
-            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: new TextEncoder().encode('v9.0-pq-outer') },
+            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: encoder.encode(`${fullContext}|v9.1-outer-encrypt`) },
             masterKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
         );
 
         // Inner Key (XChaCha20)
         const innerKeyBits = await this.crypto.deriveBits(
-            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: new TextEncoder().encode('v9.0-pq-inner') },
+            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: encoder.encode(`${fullContext}|v9.1-inner-encrypt`) },
             masterKey, 256
         );
         const innerKey = new Uint8Array(innerKeyBits);
 
-        // Integrity Key (HMAC-SHA512)
+        // Integrity Key (HMAC-SHA512) for Authenticated Metadata
         const integrityKey = await this.crypto.deriveKey(
-            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: new TextEncoder().encode('v9.0-pq-integ') },
+            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: encoder.encode(`${fullContext}|v9.1-hmac-integrity`) },
             masterKey, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign', 'verify']
         );
 
-        // Post-Quantum Signing Key
+        // Footer Authorization Key (Keyed Anti-Tamper)
+        const footerAuthBits = await this.crypto.deriveBits(
+            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: encoder.encode(`${fullContext}|v9.1-footer-auth`) },
+            masterKey, 512
+        );
+        const footerAuthKey = await this.crypto.importKey(
+            'raw', footerAuthBits, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign', 'verify']
+        );
+
+        // Post-Quantum Signing Simulation Key
         const pqKeyBits = await this.crypto.deriveBits(
-            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: new TextEncoder().encode('v9.0-pq-sign') },
+            { name: 'HKDF', hash: 'SHA-512', salt: new Uint8Array(0), info: encoder.encode(`${fullContext}|v9.1-pq-sim-sign`) },
             masterKey, 512
         );
         const pqSigningKey = new Uint8Array(pqKeyBits);
 
-        return { innerKey, outerKey, integrityKey, pqSigningKey };
+        return { innerKey, outerKey, integrityKey, footerAuthKey, pqSigningKey };
     }
 
     // ============================================

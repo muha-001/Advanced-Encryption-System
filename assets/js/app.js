@@ -8,8 +8,8 @@ class EncryptionApp {
         // إعدادات التطبيق
         this.config = {
             appName: 'نظام التشفير السيادي',
-            version: '9.0-SOVEREIGN',
-            algorithm: 'Nuclear Pipeline',
+            version: '9.1-HARDENED',
+            algorithm: 'Nuclear Pipeline v9.1',
             iterations: 2000000,
             maxAttempts: 10,
             sessionTimeout: 15 * 60 * 1000, // 15 دقيقة
@@ -24,15 +24,18 @@ class EncryptionApp {
 
         // حالة التطبيق
         this.state = {
-            isInitialized: false,
-            totalEncryptions: 0,
-            totalDecryptions: 0,
-            failedAttempts: 0,
+            ver: "v9.1-HARDENED",
+            isSecure: false,
             sessionStart: null,
+            lastActivity: null,
             sessionTimer: null,
-            passwordAttempts: new Map(),
-            lastActivity: Date.now(),
-            encryptionHistory: [],
+            maxSession: 15 * 60 * 1000, // 15 Minutes
+            stats: {
+                totalEncrypted: 0,
+                totalDecrypted: 0,
+                failedAttempts: 0
+            },
+            securityLevel: 'desktop', // Default
             isOnline: navigator.onLine,
             cryptoEngineReady: false,
             language: 'ar',
@@ -43,7 +46,7 @@ class EncryptionApp {
         this.i18n = {
             ar: {
                 appName: 'نظام التشفير السيادي',
-                headerSubtitle: 'نظام تشفير سيادي (Post-Quantum) يستخدم طبقات <strong>Dilithium + Falcon</strong> للتوقيع، و <strong>Kyber</strong> للتغليف. معالج <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong>. <span class="highlight">بيئة معزولة تماماً (Air-Gapped Logic).</span>',
+                headerSubtitle: 'نظام تشفير سيادي (v9.1-Hardened) يستخدم طبقات <strong>PQ-SIM</strong> للتوقيع، و <strong>AEAD Cascade</strong> للتشفير. معالج <strong>PBKDF2-SHA512</strong> + <strong>Argon2id (1.8GB)</strong>. <span class="highlight">بيئة معزولة تماماً (Air-Gapped Logic).</span>',
                 footerSystemName: 'نظام التشفير السيادي © 2026',
                 footerHost: 'نظام Sovereign Grade - حماية ضد الحوسبة الكمومية (PQ)',
                 footerWarning: '<strong>تنبيه سيادي هام:</strong> هذا النظام يستخدم معايير تشفير عسكرية (Post-Quantum) فائقة الحساسية. المستخدم يتحمل المسؤولية القانونية والأمنية الكاملة عن استخدام هذا النظام.',
@@ -54,7 +57,7 @@ class EncryptionApp {
             },
             en: {
                 appName: 'Sovereign Encryption System',
-                headerSubtitle: 'Sovereign Encryption (Post-Quantum) using <strong>Dilithium + Falcon</strong> signatures and <strong>Kyber</strong> encapsulation. <strong>PBKDF2 (2M)</strong> + <strong>Argon2id (1.8GB)</strong> pipeline. <span class="highlight">Fully Isolated Environment (Air-Gapped Logic).</span>',
+                headerSubtitle: 'Sovereign Encryption (v9.1-Hardened) using <strong>PQ-SIM</strong> signatures and <strong>AEAD Cascade</strong>. <strong>PBKDF2-SHA512</strong> + <strong>Argon2id (1.8GB)</strong> pipeline. <span class="highlight">Fully Isolated Environment (Air-Gapped Logic).</span>',
                 footerSystemName: 'Sovereign Encryption System © 2026',
                 footerHost: 'Sovereign Grade - Post-Quantum Protection (PQ)',
                 footerWarning: '<strong>CRITICAL SOVEREIGN WARNING:</strong> This system utilizes military-grade Post-Quantum encryption. The user assumes full legal and security responsibility for its usage.',
@@ -555,15 +558,14 @@ class EncryptionApp {
                 return;
             }
 
-            this.showNotification('☢️ جاري تنفيذ التشفير السيادي (v9.0-PQ)... قد يستغرق ~8 ثوانٍ', 'info');
+            this.showNotification('☢️ جاري تنفيذ التشفير السيادي المطور (v9.1-HARDENED)... قد يستغرق ~8 ثوانٍ', 'info');
 
             const startTime = performance.now();
 
             // خيارات التشفير المتقدمة
             const options = {
-                timestamp: document.getElementById('optionTimestamp')?.checked || false,
-                compression: document.getElementById('optionCompress')?.checked || true,
-                deterministic: !(document.getElementById('optionRandomSalt')?.checked ?? true)
+                compression: true,
+                securityLevel: this.state.securityLevel
             };
 
             // التحقق من وجود محرك التشفير
@@ -578,9 +580,8 @@ class EncryptionApp {
 
             // تنفيذ التشفير
             const result = await window.cryptoEngine.encrypt(plainText, password, options);
-
             const endTime = performance.now();
-            const encryptionTime = Math.round(endTime - startTime);
+            const encryptionTime = ((endTime - startTime) / 1000).toFixed(2);
 
             // عرض النتيجة
             this.showEncryptionResult(result, encryptionTime);
@@ -589,7 +590,7 @@ class EncryptionApp {
             this.state.totalEncryptions++;
             this.updateStatistics();
 
-            this.showNotification('✅ تم التشفير بنظام Sovereign Pipeline v9.0-PQ بنجاح', 'success');
+            this.showNotification('✅ تم التشفير بنظام Sovereign Pipeline v9.1-HARDENED (AEAD Cascade) بنجاح', 'success');
 
             // حفظ في السجل
             this.saveToHistory({
@@ -664,6 +665,17 @@ class EncryptionApp {
             const size = new Blob([JSON.stringify(result)]).size;
             encryptionSizeEl.textContent = size;
         }
+
+        const summary = `
+            <div class="result-badge security-high">
+                <i class="fas fa-shield-alt"></i> Redesigned v9.1 Hardened Protection
+            </div>
+            <div class="result-badge pq-active">
+                <i class="fas fa-atom"></i> PQ-SIM Authenticated (v9.1-Redesign)
+            </div>
+        `;
+        const summaryEl = document.getElementById('securitySummary');
+        if (summaryEl) summaryEl.innerHTML = summary;
     }
 
     // ===== فك التشفير =====
@@ -767,7 +779,9 @@ class EncryptionApp {
         if (integrityStatusEl) {
             let statusText = result.integrity ? 'سليمة ✓' : 'تالفة ✗';
 
-            if (result.post_quantum_verified) {
+            if (result.metadata?.version === "9.1-HARDENED") {
+                statusText += ' | 🛡️ PQ-SIM Verified';
+            } else if (result.post_quantum_verified) {
                 statusText += ' | 🛡️ PQ-Verified';
             }
 
@@ -1374,7 +1388,6 @@ class EncryptionApp {
             });
         });
     }
-
     updateOnlineStatus() {
         const statusElement = document.querySelector('.status-online');
         if (statusElement) {

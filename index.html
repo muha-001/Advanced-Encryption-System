@@ -400,14 +400,14 @@
                             <span class="title-gradient">☢️ نظام التشفير السيادي</span>
                         </h1>
                         <div class="title-sub">
-                            <span class="version">v9.0-SOVEREIGN-PQ</span>
+                            <span class="version">v9.1-HARDENED</span>
                             <button onclick="nuclearReset()" class="btn btn-purge" title="تطهير الكاش وإصلاح الأخطاء">
                                 <i class="fas fa-sync"></i> تطهير الكاش
                             </button>
                             <span class="separator">•</span>
-                            <span class="algorithm">Dilithium + Falcon + Kyber</span>
+                            <span class="algorithm">PQ-SIM + AEAD Cascade</span>
                             <span class="separator">•</span>
-                            <span class="iterations">2M PBKDF2 + 1.8GB Argon2id</span>
+                            <span class="iterations">Adaptive KDF: PBKDF2-SHA512 + Argon2id</span>
                         </div>
                     </div>
                 </div>
@@ -594,6 +594,15 @@
                                         <span>ملح عشوائي</span>
                                     </label>
                                     <small>ملح مختلف لكل تشفير</small>
+                                </div>
+                                <div class="option">
+                                    <label for="securityLevelSelect">المستوى الأمني (Argon2):</label>
+                                    <select id="securityLevelSelect" onchange="app.state.securityLevel = this.value">
+                                        <option value="mobile">متوازن (Mobile/t=3)</option>
+                                        <option value="desktop" selected>عالي (Desktop/t=4)</option>
+                                        <option value="high">فائق (Secure/t=5)</option>
+                                    </select>
+                                    <small>يحدد شدة اشتقاق المفتاح</small>
                                 </div>
                             </div>
                         </div>
