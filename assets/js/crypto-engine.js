@@ -204,7 +204,7 @@ class CryptoEngine {
                         pbkdf2_iter: this.config.pipeline.stage1.iterations,
                         argon2_iter: argon2Iter,
                         argon2_mem_kb: this.config.pipeline.stage2.memoryCost,
-                        hkdf_context: context
+                        hkdf_context: this.config.pipeline.stage3.context
                     }
                 },
 
@@ -333,6 +333,9 @@ class CryptoEngine {
             const authTag = this.base64ToArray(data.auth_tag);
 
             intermediateHash = await this.deriveStage1_PBKDF2(passwordBytes, masterSalt);
+
+            // Extract Argon2 iterations from header
+            const argon2Iter = data.header.kdf_pipeline.params.argon2_iter;
 
             // Temporary override config for decryption
             const originalIter = this.config.pipeline.stage2.iterations;
