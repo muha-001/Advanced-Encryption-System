@@ -2,8 +2,8 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'sovereign-cache-v10.1-FIX';
-const CACHE_VERSION = '10.1.0-FIX';
+const CACHE_NAME = 'sovereign-cache-v10.2-OFFLINE';
+const CACHE_VERSION = '10.2.0-OFFLINE';
 const APP_NAME = 'نظام التشفير السيادي';
 
 // الملفات التي سيتم تخزينها مؤقتاً
@@ -144,7 +144,13 @@ self.addEventListener('fetch', (event) => {
                 // استراتيجية Cache First للمكتبات الخارجية (للعمل بدون إنترنت)
                 const isExternalLib = EXTERNAL_FILES.some(libUrl => event.request.url.includes(new URL(libUrl).pathname));
 
-                if (isExternalLib) {
+                // تحديد ما إذا كان الطلب من CDN (للتخزين التلقائي)
+                const isCDN = url.hostname.includes('cdn.jsdelivr.net') ||
+                    url.hostname.includes('cdnjs.cloudflare.com') ||
+                    url.hostname.includes('esm.sh') ||
+                    url.hostname.includes('unpkg.com');
+
+                if (isExternalLib || isCDN) {
                     // Cache First: جرب الكاش أولاً، ثم الشبكة
                     const cachedResponse = await caches.match(event.request);
                     if (cachedResponse) {
@@ -157,8 +163,9 @@ self.addEventListener('fetch', (event) => {
                         const networkResponse = await fetch(event.request);
                         if (networkResponse && networkResponse.status === 200) {
                             const cache = await caches.open(CACHE_NAME);
+                            // تخزين نسخة من الاستجابة
                             await cache.put(event.request, networkResponse.clone());
-                            console.log(`💾 تم تخزين المكتبة: ${url.pathname}`);
+                            console.log(`💾 تم تخزين المكتبة تلقائياً: ${url.pathname}`);
                         }
                         return networkResponse;
                     } catch (fetchError) {
