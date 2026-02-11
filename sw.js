@@ -2,26 +2,25 @@
 // Service Worker لنظام التشفير المتقدم
 // ============================================
 
-const CACHE_NAME = 'sovereign-v9.0-PQ';
+const CACHE_NAME = 'sovereign-cache-v9.0';
 const CACHE_VERSION = '9.0.0';
 const APP_NAME = 'نظام التشفير السيادي';
 
 // الملفات التي سيتم تخزينها مؤقتاً
-const CORE_FILES = [
+const FILES_TO_CACHE = [
     './',
     './index.html',
     './assets/css/style.css',
     './assets/js/app.js',
     './assets/js/crypto-engine.js',
     './assets/js/security-guard.js',
-    './manifest.json'
-];
-
-// الملفات الخارجية
-const EXTERNAL_FILES = [
+    './manifest.json',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    'https://cdn.jsdelivr.net/npm/hash-wasm@4',
-    'https://esm.sh/@noble/ciphers@2.1.1/chacha.js'
+    'https://esm.sh/@noble/ciphers@0.2.0/xchacha20poly1305',
+    'https://esm.sh/@noble/ciphers@0.2.0/webcrypto/utils',
+    'https://esm.sh/@noble/post-quantum@0.2.0/ml-dsa', // NEW: Real PQ Lib
+    'https://cdn.jsdelivr.net/npm/hash-wasm@4.9.0/dist/argon2.wasm',
+    'https://cdn.jsdelivr.net/npm/hash-wasm@4.9.0/dist/hash-wasm.min.js'
 ];
 
 // ============================================
