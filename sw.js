@@ -7,14 +7,19 @@ const CACHE_VERSION = '9.0.0';
 const APP_NAME = 'نظام التشفير السيادي';
 
 // الملفات التي سيتم تخزينها مؤقتاً
-const FILES_TO_CACHE = [
+// الملفات الأساسية
+const CORE_FILES = [
     './',
     './index.html',
     './assets/css/style.css',
     './assets/js/app.js',
     './assets/js/crypto-engine.js',
     './assets/js/security-guard.js',
-    './manifest.json',
+    './manifest.json'
+];
+
+// الملفات الخارجية
+const EXTERNAL_FILES = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
     'https://esm.sh/@noble/ciphers@0.2.0/xchacha20poly1305',
     'https://esm.sh/@noble/ciphers@0.2.0/webcrypto/utils',
