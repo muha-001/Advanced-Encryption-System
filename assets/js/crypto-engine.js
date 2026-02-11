@@ -319,8 +319,9 @@ class CryptoEngine {
             // Verify version and suite
             if (!data.header || !data.header.ver) throw new Error('تنسيق غير صالح');
 
-            if (data.header.ver !== "9.1-HARDENED") {
-                throw new Error(`إصدار غير مدعوم (${data.header.ver}). هذا المحرك يدعم v9.1-HARDENED`);
+            const supportedVersions = ["9.1-HARDENED", "10.0-SOVEREIGN"];
+            if (!supportedVersions.includes(data.header.ver)) {
+                throw new Error(`إصدار غير مدعوم (${data.header.ver}). هذا المحرك يدعم ${supportedVersions.join(' و ')}`);
             }
 
             passwordBytes = new TextEncoder().encode(password);
