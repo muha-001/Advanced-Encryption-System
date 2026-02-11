@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +15,7 @@
             --warn: #f59e0b;
             --info: #3b82f6;
         }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background: var(--bg);
@@ -25,35 +27,57 @@
             align-items: center;
             min-height: 100vh;
         }
+
         .container {
             width: 100%;
             max-width: 800px;
             background: var(--panel);
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             height: 90vh;
         }
+
         header {
             padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        h1 { margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .status {
             font-size: 0.9rem;
             padding: 5px 12px;
             border-radius: 20px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
-        .status.running { color: var(--warn); border: 1px solid var(--warn); }
-        .status.success { color: var(--success); border: 1px solid var(--success); }
-        .status.error { color: var(--error); border: 1px solid var(--error); }
+
+        .status.running {
+            color: var(--warn);
+            border: 1px solid var(--warn);
+        }
+
+        .status.success {
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status.error {
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
 
         #test-logs {
             flex: 1;
@@ -63,19 +87,53 @@
             font-size: 0.9rem;
             line-height: 1.6;
         }
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 2px; }
-        .timestamp { color: rgba(255,255,255,0.4); margin-left: 10px; font-size: 0.8rem; }
-        .info { color: var(--text); }
-        .success { color: var(--success); }
-        .error { color: var(--error); font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 5px; border-radius: 4px; }
-        .warning { color: var(--warn); }
-        .header { color: var(--info); font-weight: bold; margin-top: 15px; border-bottom: 1px dashed var(--info); display: inline-block; }
+
+        .log-entry {
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 2px;
+        }
+
+        .timestamp {
+            color: rgba(255, 255, 255, 0.4);
+            margin-left: 10px;
+            font-size: 0.8rem;
+        }
+
+        .info {
+            color: var(--text);
+        }
+
+        .success {
+            color: var(--success);
+        }
+
+        .error {
+            color: var(--error);
+            font-weight: bold;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .warning {
+            color: var(--warn);
+        }
+
+        .header {
+            color: var(--info);
+            font-weight: bold;
+            margin-top: 15px;
+            border-bottom: 1px dashed var(--info);
+            display: inline-block;
+        }
 
         .controls {
             padding: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
         }
+
         button {
             background: var(--info);
             color: white;
@@ -87,10 +145,18 @@
             font-weight: bold;
             transition: all 0.2s;
         }
-        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        button:active { transform: translateY(0); }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -98,7 +164,7 @@
             <h1>🛡️ غرفة اختبار التشفير السيادي</h1>
             <div id="test-status" class="status">جاهز</div>
         </header>
-        
+
         <div id="test-logs">
             <div class="log-entry info">اضغط على زر "بدء الاختبارات" للتحقق من النظام...</div>
         </div>
@@ -108,7 +174,11 @@
         </div>
     </div>
 
+    <!-- Load Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
+
     <!-- Load scripts as module -->
     <script type="module" src="./test-runner.js"></script>
 </body>
+
 </html>
