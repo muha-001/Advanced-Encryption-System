@@ -73,8 +73,6 @@ class EncryptionApp {
             }
         };
 
-        // تهيئة التطبيق بطريقة آمنة
-        setTimeout(() => this.init(), 100);
     }
 
     async init() {
@@ -1335,9 +1333,6 @@ class EncryptionApp {
     // ===== أخرى =====
     bindEvents() {
         // تهيئة النظام
-        document.addEventListener('DOMContentLoaded', () => {
-            window.app.init();
-        });
         // تحديث حالة الاتصال
         window.addEventListener('online', () => {
             this.state.isOnline = true;
@@ -1479,4 +1474,15 @@ class EncryptionApp {
 // تصدير الفئة للاستخدام العام
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = EncryptionApp;
+}
+
+// تهيئة النظام الآمن
+window.app = new EncryptionApp();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.app.init();
+    });
+} else {
+    window.app.init();
 }
