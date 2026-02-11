@@ -181,10 +181,9 @@ class TestRunner {
     async testFullEncryptionCycle() {
         const password = "TestPasswordStrong123!";
         const content = "سر للغاية - Top Secret Data";
-        const file = new File([content], "secret.txt", { type: "text/plain" });
 
         this.log('بدء دورة تشفير كاملة...');
-        const encrypted = await this.engine.encrypt(file, password);
+        const encrypted = await this.engine.encrypt(content, password);
         this.log('✅ التشفير تم بنجاح.');
 
         // Verify Metadata
@@ -194,8 +193,7 @@ class TestRunner {
         this.log('بدء فك التشفير...');
         const decrypted = await this.engine.decrypt(encrypted, password);
 
-        const decText = new TextDecoder().decode(decrypted.data);
-        if (decText !== content) throw new Error('النص المفكوك غير مطابق للنص الأصلي!');
+        if (decrypted.text !== content) throw new Error('النص المفكوك غير مطابق للنص الأصلي!');
         this.log('✅ النص مطابق تماماً.');
     }
 
