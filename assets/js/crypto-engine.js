@@ -346,14 +346,27 @@ class CryptoEngine {
 
             keys = await this.deriveStage3_HKDF(masterKeyMaterial);
 
+            // Helper to get PQ Auth Data (New v10.0 uses pq_auth, Old v9.1 used pq_sim_auth)
+            const pqAuthData = data.pq_auth || data.pq_sim_auth;
+
             // 2. Verify Keyed Anti-Tamper Footer (Layer 9)
             if (data.anti_tamper_footer && data.anti_tamper_footer.signature) {
                 console.log('🔒 التحقق من Anti-Tamper Footer (Keyed HMAC)...');
+
+                // Construct payload exactly as it was signed
+                // Note: The original signing code uses:
+                // pqSignatures.dilithium.signature + pqSignatures.falcon.signature
+
+                let pqPayload = '';
+                if (pqAuthData && pqAuthData.signatures) {
+                    pqPayload = pqAuthData.signatures.dilithium.signature +
+                        pqAuthData.signatures.falcon.signature;
+                }
+
                 const footerPayload = new TextEncoder().encode(
-                    data.ciphertext + data.tags.outer + data.auth_tag +
-                    data.pq_sim_auth.signatures.dilithium.signature +
-                    data.pq_sim_auth.signatures.falcon.signature
+                    data.ciphertext + data.tags.outer + data.auth_tag + pqPayload
                 );
+
                 const footerSig = this.base64ToArray(data.anti_tamper_footer.signature);
                 const isFooterValid = await this.crypto.verify('HMAC', keys.footerAuthKey, footerSig, footerPayload);
                 if (!isFooterValid) throw new Error('⛔ فشل التحقق من Footer! تم مسح البصمة الأمنية.');
@@ -367,11 +380,11 @@ class CryptoEngine {
             if (!isIntegrityValid) throw new Error('⛔ فشل التحقق من المصادقة! تم الكشف عن تلاعب دلالي.');
 
             // 4. Verify PQ-SIM Signatures
-            if (data.pq_sim_auth) {
+            if (pqAuthData) {
                 console.log('🛡️ التحقق من Mapping Post-Quantum (Simulated)...');
                 const pqValid = await this.verifyPostQuantum(
-                    data.pq_sim_auth.digest,
-                    data.pq_sim_auth.signatures,
+                    pqAuthData.digest,
+                    pqAuthData.signatures,
                     keys.pqSigningKey
                 );
                 if (!pqValid) throw new Error('⛔ فشل التحقق من التوقيعات PQ-SIM!');
