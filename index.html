@@ -1159,10 +1159,8 @@
     <!-- مكتبة Argon2id -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
 
-    <!-- تحميل crypto-engine.js أولاً (v9.2.5 Cache Buster) -->
-    <script src="assets/js/crypto-engine.js?v=925"></script>
-    <!-- ثم تحميل app.js -->
-    <script src="assets/js/app.js?v=925"></script>
+    <!-- Core Application Logic (as Module) -->
+    <script type="module" src="assets/js/app.js"></script>
 
     <script>
         // تهيئة التطبيق بعد تحميل الصفحة بالكامل

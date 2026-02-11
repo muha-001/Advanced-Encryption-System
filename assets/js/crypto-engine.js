@@ -3,7 +3,7 @@
 // 9-Layer Security Architecture
 // ============================================
 
-class CryptoEngine {
+export class CryptoEngine {
     constructor() {
         this.config = {
             ver: "10.0-SOVEREIGN",

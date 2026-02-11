@@ -3,6 +3,8 @@
 // الإصدار المحسّن للأجهزة المحمولة
 // ============================================
 
+import { CryptoEngine } from './crypto-engine.js';
+
 class EncryptionApp {
     constructor() {
         // إعدادات التطبيق
@@ -1332,6 +1334,10 @@ class EncryptionApp {
 
     // ===== أخرى =====
     bindEvents() {
+        // تهيئة النظام
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app.init();
+        });
         // تحديث حالة الاتصال
         window.addEventListener('online', () => {
             this.state.isOnline = true;
