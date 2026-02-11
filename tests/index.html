@@ -177,6 +177,24 @@
     <!-- Load Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4"></script>
 
+    <!-- Load XChaCha20 Cipher Library -->
+    <script type="module">
+        try {
+            const chachaModule = await import('https://esm.sh/@noble/ciphers@2.1.1/chacha');
+            if (chachaModule.xchacha20) {
+                window.xchacha20 = chachaModule.xchacha20;
+            }
+            if (chachaModule.xchacha20poly1305) {
+                window.xchacha20poly1305 = chachaModule.xchacha20poly1305;
+            }
+            window.xchachaLibraryLoaded = true;
+            console.log('✅ XChaCha20 Library Loaded for Tests');
+        } catch (e) {
+            window.xchachaLibraryError = e;
+            console.error('❌ Failed to load XChaCha20:', e);
+        }
+    </script>
+
     <!-- Load scripts as module -->
     <script type="module" src="./test-runner.js"></script>
 </body>
